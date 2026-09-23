@@ -1,9 +1,6 @@
 const SUPABASE_URL = "https://ubpteaqdkxcriqyaxrux.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
 
-// Mos ndrysho rreshtin më sipër.
-// Vendos aty publishable key që ke pasur në app.js të vjetër.
-
 const supabaseClient =
   supabase.createClient(
     SUPABASE_URL,
