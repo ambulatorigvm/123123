@@ -93,10 +93,12 @@ function populateTimeSlots(appointments) {
       option.value = time;
       option.textContent = time;
     }
-            timeSelect.appendChild(option);
+                  timeSelect.appendChild(option);
     }
   }
 }
+
+function updateDateTitle() {
 function updateDateTitle() {
 function updateDateTitle() {
   document.getElementById("currentDate").textContent =
