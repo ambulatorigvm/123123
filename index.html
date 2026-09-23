@@ -1,7 +1,8 @@
-```html
 <!DOCTYPE html>
 <html lang="sq">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -9,94 +10,76 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>AMBULATORI GVM</title>
+  <meta
+    name="description"
+    content="AMBULATORI GVM - Sistemi i menaxhimit të vizitave"
+  >
+
+  <title>
+    AMBULATORI GVM
+  </title>
+
+
+  <!-- ==================================================
+       CSS
+       ================================================== -->
 
   <link
     rel="stylesheet"
     href="style.css"
   >
+
+
 </head>
+
 
 <body>
 
-  <!-- HEADER KLINIKE -->
 
-  <header class="clinic-header">
+  <!-- ==================================================
+       APLIKACIONI
+       Përmbajtja krijohet nga app.js
+       ================================================== -->
 
-    <div class="clinic-header-inner">
 
-      <div class="clinic-brand">
+  <div id="app">
 
-        <div class="clinic-logo">
-          ✚
-        </div>
+    <div
+      style="
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-family:Arial,sans-serif;
+        color:#718096;
+      "
+    >
 
-        <div>
-          <div class="clinic-name">
-            AMBULATORI GVM
-          </div>
-
-          <div class="clinic-subtitle">
-            Sistemi i menaxhimit të vizitave
-          </div>
-        </div>
-
-      </div>
-
-      <div class="clinic-header-info">
-        <span>●</span>
-        Sistemi aktiv
-      </div>
+      Po ngarkohet...
 
     </div>
 
-  </header>
+  </div>
 
 
-  <!-- BANNER -->
-
-  <section class="clinic-banner">
-
-    <div class="clinic-banner-overlay">
-
-      <div class="clinic-banner-content">
-
-        <div class="clinic-banner-label">
-          AMBULATORI
-        </div>
-
-        <h1>
-          Mirë se vini në
-          <strong>AMBULATORI GVM</strong>
-        </h1>
-
-        <p>
-          Menaxhoni vizitat dhe oraret e pacientëve
-          në mënyrë të thjeshtë dhe të organizuar.
-        </p>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- APLIKACIONI -->
-
-  <main id="app">
-    Po ngarkohet...
-  </main>
-
-
-  <!-- SUPABASE -->
+  <!-- ==================================================
+       SUPABASE
+       ================================================== -->
 
   <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-  </script>
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
 
-  <script src="app.js"></script>
+
+  <!-- ==================================================
+       APP.JS
+       ================================================== -->
+
+  <script
+    src="app.js"
+  ></script>
+
 
 </body>
+
 </html>
-```
