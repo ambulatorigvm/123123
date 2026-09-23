@@ -1,6 +1,6 @@
 // ======================================================
 // AMBULATORI GVM
-// APP.JS - VERSION I KORRIGJUAR
+// APP.JS - VERSION STABIL
 // ======================================================
 
 const SUPABASE_URL =
@@ -82,7 +82,9 @@ let realtimeChannel = null;
 
 let applicationStarted = false;
 
-let isLoadingApplication = false;
+let applicationStarting = false;
+
+let loginInProgress = false;
 
 
 // ======================================================
@@ -205,6 +207,7 @@ async function checkSession() {
 function showLogin() {
 
   applicationStarted = false;
+  applicationStarting = false;
 
   document.getElementById(
     "app"
@@ -278,12 +281,11 @@ function showLogin() {
   `;
 
 
-  // ENTER për login
-
   const password =
     document.getElementById(
       "loginPassword"
     );
+
 
   if (password) {
 
@@ -310,6 +312,11 @@ function showLogin() {
 // ======================================================
 
 async function login() {
+
+  if (loginInProgress) {
+    return;
+  }
+
 
   const emailElement =
     document.getElementById(
@@ -365,6 +372,8 @@ async function login() {
   }
 
 
+  loginInProgress = true;
+
   button.disabled = true;
 
   button.textContent =
@@ -400,11 +409,6 @@ async function login() {
         </div>
       `;
 
-      button.disabled = false;
-
-      button.textContent =
-        "Hyr në sistem";
-
       return;
     }
 
@@ -415,8 +419,14 @@ async function login() {
     );
 
 
-    await startApplication();
+    if (
+      data &&
+      data.session
+    ) {
 
+      await startApplication();
+
+    }
 
   } catch (error) {
 
@@ -433,6 +443,8 @@ async function login() {
 
   } finally {
 
+    loginInProgress = false;
+
     button.disabled = false;
 
     button.textContent =
@@ -447,8 +459,7 @@ async function login() {
 
 async function startApplication() {
 
-  // Mos e hap aplikacionin dy herë
-
+  // Nëse është tashmë hapur
   if (applicationStarted) {
 
     console.log(
@@ -459,19 +470,18 @@ async function startApplication() {
   }
 
 
-  // Mos lejo dy startime njëkohësisht
-
-  if (isLoadingApplication) {
+  // Nëse po hapet aktualisht
+  if (applicationStarting) {
 
     console.log(
-      "Aplikacioni po hapet..."
+      "Aplikacioni po hapet aktualisht..."
     );
 
     return;
   }
 
 
-  isLoadingApplication = true;
+  applicationStarting = true;
 
 
   try {
@@ -481,11 +491,15 @@ async function startApplication() {
     );
 
 
+    await showApp();
+
+
     applicationStarted = true;
 
 
-    await showApp();
-
+    console.log(
+      "APLIKACIONI U HAP"
+    );
 
   } catch (error) {
 
@@ -498,7 +512,7 @@ async function startApplication() {
 
   } finally {
 
-    isLoadingApplication = false;
+    applicationStarting = false;
 
   }
 }
@@ -510,16 +524,26 @@ async function startApplication() {
 
 async function showApp() {
 
-  document.getElementById(
-    "app"
-  ).innerHTML = `
+  const app =
+    document.getElementById(
+      "app"
+    );
+
+
+  if (!app) {
+
+    throw new Error(
+      "Elementi #app nuk u gjet."
+    );
+  }
+
+
+  app.innerHTML = `
 
     <div class="app-shell">
 
 
-      <!-- =========================================
-           TOP BAR
-      ========================================== -->
+      <!-- TOP BAR -->
 
       <header class="topbar">
 
@@ -544,9 +568,7 @@ async function showApp() {
         </div>
 
 
-        <div
-          class="topbar-right"
-        >
+        <div class="topbar-right">
 
           <div class="topbar-status">
 
@@ -570,9 +592,7 @@ async function showApp() {
 
 
 
-      <!-- =========================================
-           PAGE
-      ========================================== -->
+      <!-- PAGE -->
 
       <main class="page">
 
@@ -604,9 +624,7 @@ async function showApp() {
 
 
 
-        <!-- =======================================
-             DATE
-        ======================================== -->
+        <!-- DATE -->
 
         <div class="date-panel">
 
@@ -659,16 +677,12 @@ async function showApp() {
 
 
 
-        <!-- =======================================
-             MAIN GRID
-        ======================================== -->
+        <!-- MAIN GRID -->
 
         <div class="main-grid">
 
 
-          <!-- =====================================
-               ADD APPOINTMENT
-          ====================================== -->
+          <!-- ADD APPOINTMENT -->
 
           <section class="card form-card">
 
@@ -792,9 +806,7 @@ async function showApp() {
 
 
 
-          <!-- =====================================
-               DAILY SCHEDULE
-          ====================================== -->
+          <!-- DAILY SCHEDULE -->
 
           <section class="card schedule-card">
 
@@ -883,19 +895,13 @@ async function showApp() {
   populateTimeSlots();
 
 
-  // Ngarko pacientët
-
+  // Ngarko të dhënat
   await loadAppointments();
 
 
-  // Aktivizo realtime vetëm një herë
-
+  // Aktivizo realtime vetëm pasi aplikacioni
+  // është ndërtuar dhe të dhënat janë ngarkuar
   startRealtime();
-
-
-  console.log(
-    "APLIKACIONI U HAP"
-  );
 }
 
 
@@ -907,12 +913,12 @@ async function logout() {
 
   try {
 
-    // Mbyll realtime
-
     await stopRealtime();
 
 
     applicationStarted = false;
+
+    applicationStarting = false;
 
 
     const {
@@ -962,10 +968,21 @@ async function stopRealtime() {
   );
 
 
+  const channel =
+    realtimeChannel;
+
+
+  realtimeChannel = null;
+
+
   try {
 
     await supabaseClient.removeChannel(
-      realtimeChannel
+      channel
+    );
+
+    console.log(
+      "Realtime u mbyll."
     );
 
   } catch (error) {
@@ -974,11 +991,7 @@ async function stopRealtime() {
       "REALTIME REMOVE ERROR:",
       error
     );
-
   }
-
-
-  realtimeChannel = null;
 }
 
 
@@ -1000,7 +1013,6 @@ function updateDateTitle() {
       displayDate(
         selectedDate
       );
-
   }
 }
 
@@ -1070,7 +1082,6 @@ function getTimeSlots() {
       ) {
 
         continue;
-
       }
 
 
@@ -1316,7 +1327,6 @@ function renderAppointments(
 
     countElement.textContent =
       activeAppointments.length;
-
   }
 
 
@@ -1328,7 +1338,9 @@ function renderAppointments(
     appointment => {
 
       appointmentMap.set(
-        appointment.appointment_time,
+        normalizeTime(
+          appointment.appointment_time
+        ),
         appointment
       );
 
@@ -1348,9 +1360,7 @@ function renderAppointments(
         );
 
 
-      // =========================================
       // EMPTY SLOT
-      // =========================================
 
       if (!appointment) {
 
@@ -1392,9 +1402,7 @@ function renderAppointments(
       }
 
 
-      // =========================================
       // STATUS
-      // =========================================
 
       let statusText =
         "Planifikuar";
@@ -1412,7 +1420,6 @@ function renderAppointments(
         statusText =
           "Ka ardhur";
 
-
         statusClass =
           "status-arrived";
       }
@@ -1425,7 +1432,6 @@ function renderAppointments(
 
         statusText =
           "Përfunduar";
-
 
         statusClass =
           "status-finished";
@@ -1440,15 +1446,12 @@ function renderAppointments(
         statusText =
           "Anuluar";
 
-
         statusClass =
           "status-cancelled";
       }
 
 
-      // =========================================
       // ACTIONS
-      // =========================================
 
       let actions = "";
 
@@ -1462,7 +1465,7 @@ function renderAppointments(
 
           <button
             class="action-btn arrived"
-            onclick="changeStatus('${appointment.id}', 'arrived')"
+            onclick="changeStatus('${escapeHtml(appointment.id)}', 'arrived')"
           >
             ✓ Erdhi
           </button>
@@ -1470,7 +1473,7 @@ function renderAppointments(
 
           <button
             class="action-btn cancel"
-            onclick="changeStatus('${appointment.id}', 'cancelled')"
+            onclick="changeStatus('${escapeHtml(appointment.id)}', 'cancelled')"
           >
             Anulo
           </button>
@@ -1478,7 +1481,7 @@ function renderAppointments(
 
           <button
             class="action-btn delete"
-            onclick="deleteAppointment('${appointment.id}')"
+            onclick="deleteAppointment('${escapeHtml(appointment.id)}')"
           >
             Fshi
           </button>
@@ -1494,7 +1497,7 @@ function renderAppointments(
 
           <button
             class="action-btn finished"
-            onclick="changeStatus('${appointment.id}', 'finished')"
+            onclick="changeStatus('${escapeHtml(appointment.id)}', 'finished')"
           >
             ✓ Përfundoi
           </button>
@@ -1502,7 +1505,7 @@ function renderAppointments(
 
           <button
             class="action-btn cancel"
-            onclick="changeStatus('${appointment.id}', 'cancelled')"
+            onclick="changeStatus('${escapeHtml(appointment.id)}', 'cancelled')"
           >
             Anulo
           </button>
@@ -1510,7 +1513,7 @@ function renderAppointments(
 
           <button
             class="action-btn delete"
-            onclick="deleteAppointment('${appointment.id}')"
+            onclick="deleteAppointment('${escapeHtml(appointment.id)}')"
           >
             Fshi
           </button>
@@ -1523,7 +1526,7 @@ function renderAppointments(
 
           <button
             class="action-btn delete"
-            onclick="deleteAppointment('${appointment.id}')"
+            onclick="deleteAppointment('${escapeHtml(appointment.id)}')"
           >
             Fshi
           </button>
@@ -1532,9 +1535,7 @@ function renderAppointments(
       }
 
 
-      // =========================================
       // APPOINTMENT ROW
-      // =========================================
 
       html += `
 
@@ -1606,6 +1607,40 @@ function renderAppointments(
 
 
 // ======================================================
+// NORMALIZE TIME
+// ======================================================
+
+function normalizeTime(value) {
+
+  if (!value) {
+    return "";
+  }
+
+
+  const text =
+    String(value);
+
+
+  // Nëse Supabase kthen HH:MM:SS
+  if (
+    /^\d{2}:\d{2}:\d{2}$/.test(text)
+  ) {
+
+    return text.substring(
+      0,
+      5
+    );
+  }
+
+
+  return text.substring(
+    0,
+    5
+  );
+}
+
+
+// ======================================================
 // SELECT TIME
 // ======================================================
 
@@ -1637,7 +1672,6 @@ function selectTimeSlot(
   if (firstName) {
 
     firstName.focus();
-
   }
 
 
@@ -1723,10 +1757,6 @@ async function addAppointment() {
     appointmentTimeElement.value;
 
 
-  // =========================================
-  // VALIDATION
-  // =========================================
-
   if (
     !firstName ||
     !lastName ||
@@ -1752,7 +1782,6 @@ async function addAppointment() {
   button.innerHTML =
     "Po ruhet...";
 
-
   message.innerHTML = "";
 
 
@@ -1771,9 +1800,7 @@ async function addAppointment() {
     );
 
 
-    // =========================================
     // CHECK EXISTING
-    // =========================================
 
     const {
       data: existing,
@@ -1795,7 +1822,6 @@ async function addAppointment() {
     if (checkError) {
 
       throw checkError;
-
     }
 
 
@@ -1829,9 +1855,7 @@ async function addAppointment() {
     }
 
 
-    // =========================================
-    // REUSE CANCELLED APPOINTMENT
-    // =========================================
+    // REUSE CANCELLED
 
     const cancelled =
       (existing || []).find(
@@ -1872,15 +1896,12 @@ async function addAppointment() {
       if (error) {
 
         throw error;
-
       }
 
 
     } else {
 
-      // =======================================
-      // INSERT NEW APPOINTMENT
-      // =======================================
+      // INSERT
 
       const {
         error
@@ -1942,10 +1963,6 @@ async function addAppointment() {
     }
 
 
-    // =========================================
-    // SUCCESS
-    // =========================================
-
     clearForm();
 
 
@@ -1983,7 +2000,6 @@ async function addAppointment() {
       </div>
 
     `;
-
 
   } finally {
 
@@ -2076,7 +2092,6 @@ async function changeStatus(
     if (error) {
 
       throw error;
-
     }
 
 
@@ -2135,7 +2150,6 @@ async function deleteAppointment(
     if (error) {
 
       throw error;
-
     }
 
 
@@ -2162,9 +2176,9 @@ async function deleteAppointment(
 // REALTIME
 // ======================================================
 
-function startRealtime() {
+async function startRealtime() {
 
-  // Nëse ekziston tashmë, mos krijo tjetër
+  // Nëse ka kanal aktiv, mos krijo tjetër
 
   if (realtimeChannel) {
 
@@ -2181,84 +2195,125 @@ function startRealtime() {
   );
 
 
-  realtimeChannel =
-    supabaseClient
-      .channel(
-        "appointments-realtime"
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "appointments"
-        },
-        payload => {
-
-          console.log(
-            "REALTIME:",
-            payload
-          );
+  // Kanal unik
+  const channelName =
+    "appointments-realtime-" +
+    Date.now();
 
 
-          // Nëse ndryshimi është në
-          // tabelën appointments,
-          // rifresko orarin
+  try {
 
-          loadAppointments();
-
-        }
-      )
-      .subscribe(
-        status => {
-
-          console.log(
-            "REALTIME STATUS:",
-            status
-          );
-
-
-          if (
-            status ===
-            "SUBSCRIBED"
-          ) {
+    const channel =
+      supabaseClient
+        .channel(
+          channelName
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "appointments"
+          },
+          payload => {
 
             console.log(
-              "Realtime u aktivizua me sukses."
+              "REALTIME:",
+              payload
             );
 
-          }
 
+            // Rifresko vetëm nëse aplikacioni
+            // është ende i hapur
 
-          if (
-            status ===
-            "CHANNEL_ERROR"
-          ) {
+            if (
+              applicationStarted ||
+              applicationStarting
+            ) {
 
-            console.error(
-              "Realtime CHANNEL ERROR"
-            );
+              loadAppointments();
 
-          }
-
-
-          if (
-            status ===
-            "TIMED_OUT"
-          ) {
-
-            console.error(
-              "Realtime TIMED OUT"
-            );
+            }
 
           }
+        );
+
+
+    // Shëno kanalin para subscribe
+    realtimeChannel =
+      channel;
+
+
+    channel.subscribe(
+      status => {
+
+        console.log(
+          "REALTIME STATUS:",
+          status
+        );
+
+
+        if (
+          status ===
+          "SUBSCRIBED"
+        ) {
+
+          console.log(
+            "Realtime u aktivizua me sukses."
+          );
         }
-      );
+
+
+        if (
+          status ===
+          "CHANNEL_ERROR"
+        ) {
+
+          console.error(
+            "Realtime CHANNEL ERROR"
+          );
+        }
+
+
+        if (
+          status ===
+          "TIMED_OUT"
+        ) {
+
+          console.error(
+            "Realtime TIMED OUT"
+          );
+        }
+
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "REALTIME START ERROR:",
+      error
+    );
+
+
+    realtimeChannel = null;
+  }
 }
 
 
 // ======================================================
 // AUTH STATE CHANGE
+// ======================================================
+//
+// SHUMË E RËNDËSISHME:
+//
+// Këtu NUK e hapim aplikacionin në SIGNED_IN.
+// checkSession() e hap aplikacionin vetëm një herë.
+//
+// Kjo eliminon problemin:
+// showApp() -> showApp() -> showApp()
+//
 // ======================================================
 
 supabaseClient.auth.onAuthStateChange(
@@ -2273,61 +2328,63 @@ supabaseClient.auth.onAuthStateChange(
     );
 
 
-    // =========================================
     // SIGNED OUT
-    // =========================================
 
     if (
       event ===
       "SIGNED_OUT"
     ) {
 
+      console.log(
+        "Përdoruesi doli nga sistemi."
+      );
+
+
       applicationStarted = false;
+
+      applicationStarting = false;
+
 
       await stopRealtime();
 
+
       showLogin();
+
 
       return;
     }
 
 
-    // =========================================
     // SIGNED IN
-    // =========================================
+    //
+    // MOS thirr startApplication këtu.
+    //
+    // checkSession() merret me hapjen.
+    //
 
     if (
       event ===
       "SIGNED_IN"
     ) {
 
-      // Mos e hap përsëri nëse
-      // checkSession() e ka hapur
-
-      if (
-        !applicationStarted &&
-        session
-      ) {
-
-        await startApplication();
-
-      }
+      console.log(
+        "SIGNED_IN u mor - aplikacioni nuk hapet përsëri."
+      );
 
       return;
     }
 
 
-    // =========================================
     // INITIAL SESSION
-    // =========================================
 
     if (
       event ===
       "INITIAL_SESSION"
     ) {
 
-      // Nuk bëjmë showApp këtu.
-      // checkSession() merret me të.
+      console.log(
+        "INITIAL_SESSION u mor."
+      );
 
       return;
     }
