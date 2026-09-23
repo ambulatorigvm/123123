@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://ubpteaqdkxcriqyaxrux.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -9,7 +9,11 @@ const supabaseClient = window.supabase.createClient(
 let selectedDate = new Date();
 
 function formatDate(date) {
-  return date.toISOString().split("T")[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function displayDate(date) {
@@ -46,7 +50,11 @@ document.getElementById("app").innerHTML = `
 
       <input id="lastName" type="text" placeholder="Mbiemri">
 
-      <input id="cardNumber" type="text" placeholder="Nr. kartelës (opsionale)">
+      <input
+        id="cardNumber"
+        type="text"
+        placeholder="Nr. kartelës (opsionale)"
+      >
 
       <select id="appointmentTime">
         <option value="">Zgjidh orën</option>
@@ -72,33 +80,38 @@ function populateTimeSlots(appointments) {
   `;
 
   const bookedTimes = new Set(
-    appointments.map(appointment =>
-      appointment.appointment_time.substring(0, 5)
-    )
+    appointments
+      .filter(appointment => appointment.status !== "cancelled")
+      .map(appointment =>
+        appointment.appointment_time.substring(0, 5)
+      )
   );
 
   for (let hour = 8; hour <= 18; hour++) {
 
     for (let minute = 0; minute < 60; minute += 15) {
 
-      if (hour === 18 && minute > 0) continue;
+      if (hour === 18 && minute > 0) {
+        continue;
+      }
 
       const time =
         `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
-      if (bookedTimes.has(time)) continue;
+      if (bookedTimes.has(time)) {
+        continue;
+      }
 
       const option = document.createElement("option");
 
       option.value = time;
       option.textContent = time;
-    }
-                  timeSelect.appendChild(option);
+
+      timeSelect.appendChild(option);
     }
   }
 }
-function updateDateTitle() {
-function updateDateTitle() {
+
 function updateDateTitle() {
   document.getElementById("currentDate").textContent =
     displayDate(selectedDate);
@@ -115,14 +128,17 @@ async function loadAppointments() {
     .order("appointment_time", { ascending: true });
 
   if (error) {
+
     console.error(error);
+
     document.getElementById("appointments").innerHTML =
       "<p>Gabim gjatë ngarkimit të vizitave.</p>";
+
     return;
   }
 
   renderAppointments(data);
-populateTimeSlots(data);
+  populateTimeSlots(data);
 }
 
 function renderAppointments(appointments) {
@@ -130,11 +146,13 @@ function renderAppointments(appointments) {
   const container = document.getElementById("appointments");
 
   if (!appointments.length) {
+
     container.innerHTML = `
       <div class="empty">
         Nuk ka vizita për këtë ditë.
       </div>
     `;
+
     return;
   }
 
@@ -162,6 +180,7 @@ function renderAppointments(appointments) {
         </div>
 
         <div class="appointment-info">
+
           <strong>
             ${escapeHtml(appointment.first_name)}
             ${escapeHtml(appointment.last_name)}
@@ -176,32 +195,45 @@ function renderAppointments(appointments) {
           <span class="status">
             ${statusText}
           </span>
+
         </div>
 
         <div class="appointment-actions">
 
           ${
             appointment.status === "planned"
-              ? `<button onclick="changeStatus('${appointment.id}', 'arrived')">
-                   Erdhi
-                 </button>`
+              ? `
+                <button
+                  onclick="changeStatus('${appointment.id}', 'arrived')"
+                >
+                  Erdhi
+                </button>
+              `
               : ""
           }
 
           ${
             appointment.status === "arrived"
-              ? `<button onclick="changeStatus('${appointment.id}', 'finished')">
-                   Përfundoi
-                 </button>`
+              ? `
+                <button
+                  onclick="changeStatus('${appointment.id}', 'finished')"
+                >
+                  Përfundoi
+                </button>
+              `
               : ""
           }
 
           ${
             appointment.status !== "cancelled" &&
             appointment.status !== "finished"
-              ? `<button onclick="changeStatus('${appointment.id}', 'cancelled')">
-                   Anullo
-                 </button>`
+              ? `
+                <button
+                  onclick="changeStatus('${appointment.id}', 'cancelled')"
+                >
+                  Anullo
+                </button>
+              `
               : ""
           }
 
@@ -221,8 +253,11 @@ async function changeStatus(id, status) {
     .eq("id", id);
 
   if (error) {
+
     console.error(error);
+
     alert("Nuk u ndryshua statusi.");
+
     return;
   }
 
@@ -231,16 +266,26 @@ async function changeStatus(id, status) {
 
 async function addAppointment() {
 
-  const firstName = document.getElementById("firstName").value.trim();
-  const lastName = document.getElementById("lastName").value.trim();
-  const cardNumber = document.getElementById("cardNumber").value.trim();
-  const appointmentTime = document.getElementById("appointmentTime").value;
+  const firstName =
+    document.getElementById("firstName").value.trim();
 
-  const message = document.getElementById("message");
+  const lastName =
+    document.getElementById("lastName").value.trim();
+
+  const cardNumber =
+    document.getElementById("cardNumber").value.trim();
+
+  const appointmentTime =
+    document.getElementById("appointmentTime").value;
+
+  const message =
+    document.getElementById("message");
 
   if (!firstName || !lastName || !appointmentTime) {
+
     message.textContent =
       "Plotëso emrin, mbiemrin dhe orën.";
+
     return;
   }
 
@@ -256,9 +301,12 @@ async function addAppointment() {
     });
 
   if (error) {
+
     console.error(error);
+
     message.textContent =
       "Gabim gjatë ruajtjes së vizitës.";
+
     return;
   }
 
@@ -267,33 +315,42 @@ async function addAppointment() {
   document.getElementById("cardNumber").value = "";
   document.getElementById("appointmentTime").value = "";
 
-  message.textContent = "Vizita u shtua me sukses.";
+  message.textContent =
+    "Vizita u shtua me sukses.";
 
   loadAppointments();
 }
 
-document.getElementById("addAppointment")
+document
+  .getElementById("addAppointment")
   .addEventListener("click", addAppointment);
 
-document.getElementById("prevDay")
+document
+  .getElementById("prevDay")
   .addEventListener("click", () => {
 
-    selectedDate.setDate(selectedDate.getDate() - 1);
+    selectedDate.setDate(
+      selectedDate.getDate() - 1
+    );
 
     updateDateTitle();
     loadAppointments();
   });
 
-document.getElementById("nextDay")
+document
+  .getElementById("nextDay")
   .addEventListener("click", () => {
 
-    selectedDate.setDate(selectedDate.getDate() + 1);
+    selectedDate.setDate(
+      selectedDate.getDate() + 1
+    );
 
     updateDateTitle();
     loadAppointments();
   });
 
-document.getElementById("todayBtn")
+document
+  .getElementById("todayBtn")
   .addEventListener("click", () => {
 
     selectedDate = new Date();
