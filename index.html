@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="sq">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>AMBULATORI GVM</title>
 
+
+  <!-- SUPABASE -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
   <style>
 
@@ -14,76 +24,133 @@
       box-sizing: border-box;
     }
 
+
     body {
+
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
       background: #f3f6f9;
+
       color: #263238;
+
     }
+
 
     /* =========================
        HEADER
     ========================= */
 
     .topbar {
-      height: 72px;
+
+      height: 70px;
+
       background: #ffffff;
-      border-bottom: 1px solid #dfe5ea;
+
+      border-bottom:
+        1px solid #dfe5ea;
+
       display: flex;
+
       align-items: center;
+
       justify-content: space-between;
-      padding: 0 30px;
-      position: sticky;
-      top: 0;
-      z-index: 20;
+
+      padding:
+        0 30px;
+
     }
+
 
     .brand {
+
       display: flex;
+
       align-items: center;
-      gap: 14px;
+
+      gap: 12px;
+
     }
+
 
     .brand-icon {
+
       width: 42px;
+
       height: 42px;
-      border-radius: 10px;
+
+      border-radius: 9px;
+
       background: #0b7fab;
+
       color: white;
+
       display: flex;
+
       align-items: center;
+
       justify-content: center;
+
       font-size: 25px;
+
       font-weight: bold;
+
     }
+
 
     .brand-text h1 {
+
       margin: 0;
-      font-size: 19px;
+
       color: #17324d;
-      letter-spacing: .3px;
+
+      font-size: 19px;
+
     }
+
 
     .brand-text span {
+
       display: block;
+
       margin-top: 3px;
-      color: #71808d;
+
+      color: #7b8993;
+
       font-size: 12px;
+
     }
+
 
     .top-status {
+
       display: flex;
+
       align-items: center;
-      gap: 9px;
+
+      gap: 8px;
+
+      color: #657783;
+
       font-size: 13px;
-      color: #60717e;
+
     }
 
+
     .online-dot {
+
       width: 9px;
+
       height: 9px;
+
       border-radius: 50%;
+
       background: #2eaf68;
+
     }
 
 
@@ -92,26 +159,37 @@
     ========================= */
 
     .page {
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 25px 28px 40px;
+
+      max-width: 1450px;
+
+      margin: auto;
+
+      padding:
+        25px 28px 40px;
+
     }
 
-    .page-title {
-      margin-bottom: 20px;
-    }
 
     .page-title h2 {
+
       margin: 0;
+
       color: #17324d;
+
       font-size: 25px;
-      font-weight: 700;
+
     }
 
+
     .page-title p {
-      margin: 6px 0 0;
-      color: #788792;
+
+      margin:
+        6px 0 20px;
+
+      color: #7c8b95;
+
       font-size: 13px;
+
     }
 
 
@@ -120,97 +198,166 @@
     ========================= */
 
     .date-panel {
+
       background: white;
-      border: 1px solid #dfe5ea;
+
+      border:
+        1px solid #dfe5ea;
+
       border-radius: 12px;
+
       padding: 15px 18px;
+
       display: flex;
+
       align-items: center;
+
       justify-content: space-between;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 8px rgba(25, 55, 75, .04);
+
+      margin-bottom: 20px;
+
     }
+
 
     .date-left {
+
       display: flex;
+
       align-items: center;
-      gap: 10px;
+
+      gap: 12px;
+
     }
+
 
     .date-icon {
+
       width: 40px;
+
       height: 40px;
+
       border-radius: 9px;
+
       background: #eaf5fa;
-      color: #087aa5;
+
       display: flex;
+
       align-items: center;
+
       justify-content: center;
+
       font-size: 19px;
+
     }
 
-    .date-info {
-      display: flex;
-      flex-direction: column;
-    }
 
     .date-label {
-      color: #82909b;
+
+      display: block;
+
+      color: #84919b;
+
       font-size: 11px;
+
       text-transform: uppercase;
-      letter-spacing: .6px;
+
     }
 
-    #selectedDate {
-      color: #17324d;
-      font-weight: 700;
-      font-size: 17px;
+
+    #currentDate {
+
+      display: block;
+
       margin-top: 3px;
+
+      color: #17324d;
+
+      font-size: 17px;
+
+      font-weight: bold;
+
     }
+
 
     .date-buttons {
+
       display: flex;
+
       gap: 8px;
+
     }
+
 
     .date-buttons button {
-      border: 1px solid #d5dfe6;
+
+      border:
+        1px solid #d5dfe6;
+
       background: white;
+
       color: #365266;
+
       border-radius: 8px;
-      padding: 9px 14px;
+
+      padding:
+        9px 13px;
+
       cursor: pointer;
-      font-size: 13px;
+
+      font-size: 12px;
+
       font-weight: 600;
+
     }
+
 
     .date-buttons button:hover {
-      background: #f4f8fa;
+
+      background: #f3f7f9;
+
     }
 
+
     .today-btn {
+
       background: #0b7fab !important;
-      border-color: #0b7fab !important;
+
       color: white !important;
+
+      border-color: #0b7fab !important;
+
     }
 
 
     /* =========================
-       MAIN
+       MAIN GRID
     ========================= */
 
     .main-grid {
+
       display: grid;
-      grid-template-columns: 340px minmax(0, 1fr);
+
+      grid-template-columns:
+        330px minmax(0, 1fr);
+
       gap: 20px;
+
       align-items: start;
+
     }
 
+
     .card {
+
       background: white;
-      border: 1px solid #dfe5ea;
+
+      border:
+        1px solid #dfe5ea;
+
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(25, 55, 75, .04);
+
+      overflow: hidden;
+
     }
 
 
@@ -219,80 +366,144 @@
     ========================= */
 
     .card-header {
-      padding: 19px 20px 15px;
-      border-bottom: 1px solid #edf1f4;
+
+      padding:
+        18px 20px;
+
+      border-bottom:
+        1px solid #edf1f4;
+
     }
+
 
     .card-header h3 {
+
       margin: 0;
+
       color: #17324d;
+
       font-size: 16px;
+
     }
+
 
     .card-header p {
-      margin: 5px 0 0;
-      color: #84919a;
+
+      margin:
+        5px 0 0;
+
+      color: #85929b;
+
       font-size: 12px;
+
     }
+
 
     .form-body {
+
       padding: 20px;
+
     }
+
 
     .form-group {
+
       margin-bottom: 15px;
+
     }
 
+
     .form-group label {
+
       display: block;
-      font-size: 12px;
-      font-weight: 700;
+
+      margin-bottom: 6px;
+
       color: #526674;
-      margin-bottom: 7px;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
     }
+
 
     .form-group input,
     .form-group select {
+
       width: 100%;
+
       height: 42px;
-      border: 1px solid #d5dfe6;
+
+      border:
+        1px solid #d5dfe6;
+
       border-radius: 8px;
-      padding: 0 12px;
-      font-size: 13px;
-      color: #263238;
+
+      padding:
+        0 12px;
+
       background: white;
+
       outline: none;
+
+      font-size: 13px;
+
     }
+
 
     .form-group input:focus,
     .form-group select:focus {
-      border-color: #0b8ab9;
-      box-shadow: 0 0 0 3px rgba(11, 138, 185, .08);
+
+      border-color: #0b7fab;
+
+      box-shadow:
+        0 0 0 3px
+        rgba(11,127,171,.08);
+
     }
+
 
     .add-btn {
+
       width: 100%;
+
       height: 44px;
+
       border: 0;
+
       border-radius: 8px;
+
       background: #0b7fab;
+
       color: white;
-      font-weight: 700;
+
       font-size: 13px;
+
+      font-weight: bold;
+
       cursor: pointer;
-      margin-top: 4px;
+
     }
+
 
     .add-btn:hover {
+
       background: #086d91;
+
     }
 
+
     #message {
+
       min-height: 20px;
-      margin-top: 13px;
-      font-size: 12px;
-      color: #2e8b57;
+
+      margin-top: 12px;
+
       text-align: center;
+
+      font-size: 12px;
+
     }
 
 
@@ -301,124 +512,206 @@
     ========================= */
 
     .schedule-card {
+
       min-width: 0;
-      overflow: hidden;
+
     }
+
 
     .schedule-header {
-      padding: 18px 20px;
-      border-bottom: 1px solid #edf1f4;
+
+      padding:
+        18px 20px;
+
+      border-bottom:
+        1px solid #edf1f4;
+
       display: flex;
-      justify-content: space-between;
+
       align-items: center;
+
+      justify-content: space-between;
+
     }
+
 
     .schedule-header h3 {
+
       margin: 0;
+
       color: #17324d;
+
       font-size: 16px;
+
     }
+
 
     .schedule-header span {
-      font-size: 12px;
+
       color: #83909a;
+
+      font-size: 12px;
+
     }
 
+
     #appointments {
-      width: 100%;
-      padding: 0 15px 15px;
+
+      padding:
+        0 15px 15px;
+
     }
 
 
     /* =========================
-       APPOINTMENT ROW
+       TIME SLOT
     ========================= */
 
-    .appointment-row {
+    .time-slot {
+
+      min-height: 65px;
+
       display: grid;
-      grid-template-columns: 82px minmax(0, 1fr);
-      min-height: 70px;
-      border-bottom: 1px solid #edf1f4;
+
+      grid-template-columns:
+        75px minmax(0,1fr) auto;
+
+      align-items: center;
+
+      border-bottom:
+        1px solid #edf1f4;
+
     }
 
-    .appointment-row:last-child {
+
+    .time-slot:last-child {
+
       border-bottom: 0;
+
     }
 
-    .appointment-time {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+    .slot-time {
+
       color: #607584;
+
       font-size: 13px;
-      font-weight: 700;
-      border-right: 1px solid #edf1f4;
+
+      font-weight: bold;
+
     }
 
-    .appointment-content {
-      padding: 11px 15px;
+
+    .slot-content {
+
       display: flex;
+
       align-items: center;
-      gap: 18px;
+
+      gap: 15px;
+
       min-width: 0;
+
     }
 
-    .patient-name {
-      min-width: 190px;
+
+    .slot-content strong {
+
       color: #1e394e;
+
       font-size: 14px;
-      font-weight: 700;
+
     }
 
-    .appointment-status {
-      padding: 5px 10px;
-      border-radius: 20px;
-      background: #eef5f8;
-      color: #477084;
+
+    .slot-content small {
+
+      color: #788994;
+
       font-size: 11px;
-      font-weight: 700;
-      white-space: nowrap;
+
     }
+
+
+    .status {
+
+      padding:
+        5px 10px;
+
+      border-radius: 20px;
+
+      background: #eef5f8;
+
+      color: #477084;
+
+      font-size: 11px;
+
+      font-weight: bold;
+
+      white-space: nowrap;
+
+    }
+
 
     .appointment-actions {
-      margin-left: auto;
+
       display: flex;
-      gap: 7px;
+
+      gap: 6px;
+
     }
+
 
     .appointment-actions button {
-      border-radius: 7px;
-      padding: 7px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-    }
 
-    .status-btn {
-      border: 1px solid #cbdce5;
+      border:
+        1px solid #d4e0e6;
+
       background: white;
-      color: #386276;
+
+      color: #426274;
+
+      border-radius: 6px;
+
+      padding:
+        6px 9px;
+
+      font-size: 11px;
+
+      cursor: pointer;
+
     }
 
-    .status-btn:hover {
-      background: #f2f8fa;
+
+    .appointment-actions button:hover {
+
+      background: #f2f7f9;
+
     }
 
-    .delete-btn {
-      border: 1px solid #efcaca;
-      background: #fff7f7;
-      color: #bd4b4b;
-    }
 
-    .delete-btn:hover {
-      background: #ffeded;
-    }
+    /* =========================
+       EMPTY SLOT
+    ========================= */
 
     .empty-slot {
-      color: #a4afb6;
-      font-size: 12px;
-      font-style: italic;
-      padding: 22px 10px;
+
+      color: #a0abb2;
+
+    }
+
+
+    .empty-slot .slot-content {
+
+      cursor: pointer;
+
+    }
+
+
+    .empty-slot:hover {
+
+      background: #fafcfd;
+
     }
 
 
@@ -427,13 +720,132 @@
     ========================= */
 
     .error-box {
+
       margin: 15px 0;
+
       padding: 15px;
-      border-radius: 8px;
-      background: #fff3f3;
-      border: 1px solid #efcccc;
+
+      border:
+        1px solid #efcccc;
+
+      background: #fff4f4;
+
       color: #a64242;
+
+      border-radius: 8px;
+
       font-size: 13px;
+
+    }
+
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    .login-page {
+
+      min-height: 100vh;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 20px;
+
+    }
+
+
+    .login-box {
+
+      width: 100%;
+
+      max-width: 400px;
+
+      background: white;
+
+      border:
+        1px solid #dfe5ea;
+
+      border-radius: 12px;
+
+      padding: 30px;
+
+    }
+
+
+    .login-box h2 {
+
+      margin-top: 0;
+
+      text-align: center;
+
+      color: #17324d;
+
+    }
+
+
+    .login-box p {
+
+      text-align: center;
+
+      color: #7c8b95;
+
+      font-size: 13px;
+
+    }
+
+
+    .login-box input {
+
+      width: 100%;
+
+      height: 44px;
+
+      margin-top: 10px;
+
+      padding:
+        0 12px;
+
+      border:
+        1px solid #d5dfe6;
+
+      border-radius: 8px;
+
+    }
+
+
+    .login-box button {
+
+      width: 100%;
+
+      height: 44px;
+
+      margin-top: 15px;
+
+      border: 0;
+
+      border-radius: 8px;
+
+      background: #0b7fab;
+
+      color: white;
+
+      cursor: pointer;
+
+      font-weight: bold;
+
+    }
+
+
+    #loginMessage {
+
+      margin-top: 12px;
+
+      text-align: center;
+
     }
 
 
@@ -441,335 +853,125 @@
        RESPONSIVE
     ========================= */
 
-    @media (max-width: 950px) {
+    @media (max-width: 900px) {
 
       .main-grid {
+
         grid-template-columns: 1fr;
+
       }
 
     }
 
 
-    @media (max-width: 700px) {
+    @media (max-width: 650px) {
 
       .topbar {
+
         padding: 0 15px;
+
       }
 
-      .page {
-        padding: 18px 12px 30px;
-      }
-
-      .date-panel {
-        display: block;
-      }
-
-      .date-buttons {
-        margin-top: 12px;
-        flex-wrap: wrap;
-      }
-
-      .appointment-row {
-        grid-template-columns: 65px minmax(0, 1fr);
-      }
-
-      .appointment-content {
-        display: block;
-      }
-
-      .patient-name {
-        min-width: auto;
-        margin-bottom: 8px;
-      }
-
-      .appointment-actions {
-        margin-top: 9px;
-        margin-left: 0;
-      }
 
       .top-status {
+
         display: none;
+
+      }
+
+
+      .page {
+
+        padding:
+          18px 12px 30px;
+
+      }
+
+
+      .date-panel {
+
+        display: block;
+
+      }
+
+
+      .date-buttons {
+
+        margin-top: 12px;
+
+        flex-wrap: wrap;
+
+      }
+
+
+      .time-slot {
+
+        grid-template-columns:
+          60px minmax(0,1fr);
+
+        padding:
+          10px 0;
+
+      }
+
+
+      .appointment-actions {
+
+        grid-column: 2;
+
+        margin-top: 8px;
+
+      }
+
+
+      .slot-content {
+
+        display: block;
+
+      }
+
+
+      .slot-content .status {
+
+        display: inline-block;
+
+        margin-top: 5px;
+
       }
 
     }
 
   </style>
+
 </head>
 
 
 <body>
 
 
-  <!-- =========================
-       HEADER
-  ========================== -->
+  <!--
+    APP
+    app.js do ta mbushë këtë pjesë
+  -->
 
-  <header class="topbar">
+  <div id="app">
 
-    <div class="brand">
-
-      <div class="brand-icon">
-        +
-      </div>
-
-      <div class="brand-text">
-
-        <h1>AMBULATORI GVM</h1>
-
-        <span>
-          Sistemi i menaxhimit të vizitave
-        </span>
-
-      </div>
-
+    <div style="
+      padding:50px;
+      text-align:center;
+      color:#71808d;
+    ">
+      Po ngarkohet...
     </div>
 
+  </div>
 
-    <div class="top-status">
 
-      <span class="online-dot"></span>
-
-      Sistemi aktiv
-
-    </div>
-
-  </header>
-
-
-  <!-- =========================
-       PAGE
-  ========================== -->
-
-  <main class="page">
-
-
-    <div class="page-title">
-
-      <h2>
-        Orari i vizitave
-      </h2>
-
-      <p>
-        Menaxhimi i termineve dhe pacientëve
-      </p>
-
-    </div>
-
-
-    <!-- =========================
-         DATE PANEL
-    ========================== -->
-
-    <div class="date-panel">
-
-      <div class="date-left">
-
-        <div class="date-icon">
-          📅
-        </div>
-
-        <div class="date-info">
-
-          <span class="date-label">
-            Data e punës
-          </span>
-
-          <span id="selectedDate">
-            Po ngarkohet...
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <div class="date-buttons">
-
-        <button
-          type="button"
-          onclick="changeDate(-1)"
-        >
-          ← Dita e kaluar
-        </button>
-
-
-        <button
-          type="button"
-          class="today-btn"
-          onclick="goToToday()"
-        >
-          Sot
-        </button>
-
-
-        <button
-          type="button"
-          onclick="changeDate(1)"
-        >
-          Dita tjetër →
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- =========================
-         MAIN GRID
-    ========================== -->
-
-    <div class="main-grid">
-
-
-      <!-- =====================
-           ADD APPOINTMENT
-      ====================== -->
-
-      <div class="card form-card">
-
-        <div class="card-header">
-
-          <h3>
-            Shto vizitë
-          </h3>
-
-          <p>
-            Regjistro një termin të ri
-          </p>
-
-        </div>
-
-
-        <div class="form-body">
-
-
-          <div class="form-group">
-
-            <label for="firstName">
-              Emri
-            </label>
-
-            <input
-              id="firstName"
-              type="text"
-              placeholder="Emri i pacientit"
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label for="lastName">
-              Mbiemri
-            </label>
-
-            <input
-              id="lastName"
-              type="text"
-              placeholder="Mbiemri i pacientit"
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label for="cardNumber">
-              Numri i kartelës
-            </label>
-
-            <input
-              id="cardNumber"
-              type="text"
-              placeholder="Opsionale"
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label for="appointmentTime">
-              Ora e vizitës
-            </label>
-
-            <select id="appointmentTime">
-
-              <option value="">
-                Zgjidh orën
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <button
-            type="button"
-            class="add-btn"
-            onclick="addAppointment()"
-          >
-            + Shto vizitën
-          </button>
-
-
-          <div id="message"></div>
-
-        </div>
-
-      </div>
-
-
-      <!-- =====================
-           DAILY SCHEDULE
-      ====================== -->
-
-      <div class="card schedule-card">
-
-        <div class="schedule-header">
-
-          <h3>
-            Orari ditor
-          </h3>
-
-          <span>
-            08:00 — 18:00
-          </span>
-
-        </div>
-
-
-        <!--
-          KY ELEMENT ËSHTË SHUMË I RËNDËSISHËM.
-          app.js e kërkon me document.getElementById("appointments")
-        -->
-
-        <div id="appointments">
-
-          <div class="empty-slot">
-            Po ngarkohet orari...
-          </div>
-
-        </div>
-
-      </div>
-
-
-    </div>
-
-  </main>
-
-
-  <!-- =========================
-       APP JAVASCRIPT
-  ========================== -->
+  <!-- JAVASCRIPT -->
 
   <script src="app.js"></script>
 
 
 </body>
+
 </html>
