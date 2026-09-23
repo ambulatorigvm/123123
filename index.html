@@ -53,7 +53,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 25px;
       font-weight: bold;
     }
 
@@ -86,8 +86,9 @@
       background: #2eaf68;
     }
 
+
     /* =========================
-       LAYOUT
+       PAGE
     ========================= */
 
     .page {
@@ -97,10 +98,7 @@
     }
 
     .page-title {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .page-title h2 {
@@ -116,8 +114,9 @@
       font-size: 13px;
     }
 
+
     /* =========================
-       DATE NAVIGATION
+       DATE
     ========================= */
 
     .date-panel {
@@ -195,20 +194,17 @@
       color: white !important;
     }
 
+
     /* =========================
-       MAIN GRID
+       MAIN
     ========================= */
 
     .main-grid {
       display: grid;
-      grid-template-columns: 340px 1fr;
+      grid-template-columns: 340px minmax(0, 1fr);
       gap: 20px;
       align-items: start;
     }
-
-    /* =========================
-       FORM CARD
-    ========================= */
 
     .card {
       background: white;
@@ -216,6 +212,11 @@
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(25, 55, 75, .04);
     }
+
+
+    /* =========================
+       FORM
+    ========================= */
 
     .card-header {
       padding: 19px 20px 15px;
@@ -294,12 +295,14 @@
       text-align: center;
     }
 
+
     /* =========================
        SCHEDULE
     ========================= */
 
     .schedule-card {
       min-width: 0;
+      overflow: hidden;
     }
 
     .schedule-header {
@@ -322,8 +325,10 @@
     }
 
     #appointments {
-      padding: 10px 15px 15px;
+      width: 100%;
+      padding: 0 15px 15px;
     }
+
 
     /* =========================
        APPOINTMENT ROW
@@ -331,7 +336,7 @@
 
     .appointment-row {
       display: grid;
-      grid-template-columns: 82px 1fr;
+      grid-template-columns: 82px minmax(0, 1fr);
       min-height: 70px;
       border-bottom: 1px solid #edf1f4;
     }
@@ -413,14 +418,16 @@
       color: #a4afb6;
       font-size: 12px;
       font-style: italic;
+      padding: 22px 10px;
     }
+
 
     /* =========================
        ERROR
     ========================= */
 
     .error-box {
-      margin: 15px;
+      margin: 15px 0;
       padding: 15px;
       border-radius: 8px;
       background: #fff3f3;
@@ -428,6 +435,7 @@
       color: #a64242;
       font-size: 13px;
     }
+
 
     /* =========================
        RESPONSIVE
@@ -439,15 +447,8 @@
         grid-template-columns: 1fr;
       }
 
-      .form-card {
-        order: 1;
-      }
-
-      .schedule-card {
-        order: 2;
-      }
-
     }
+
 
     @media (max-width: 700px) {
 
@@ -459,20 +460,17 @@
         padding: 18px 12px 30px;
       }
 
-      .page-title {
-        display: block;
-      }
-
       .date-panel {
         display: block;
       }
 
       .date-buttons {
         margin-top: 12px;
+        flex-wrap: wrap;
       }
 
       .appointment-row {
-        grid-template-columns: 65px 1fr;
+        grid-template-columns: 65px minmax(0, 1fr);
       }
 
       .appointment-content {
@@ -498,10 +496,12 @@
   </style>
 </head>
 
+
 <body>
 
+
   <!-- =========================
-       TOP BAR
+       HEADER
   ========================== -->
 
   <header class="topbar">
@@ -542,23 +542,22 @@
 
   <main class="page">
 
+
     <div class="page-title">
 
-      <div>
+      <h2>
+        Orari i vizitave
+      </h2>
 
-        <h2>Orari i vizitave</h2>
-
-        <p>
-          Menaxhimi i termineve dhe pacientëve
-        </p>
-
-      </div>
+      <p>
+        Menaxhimi i termineve dhe pacientëve
+      </p>
 
     </div>
 
 
     <!-- =========================
-         DATE
+         DATE PANEL
     ========================== -->
 
     <div class="date-panel">
@@ -587,19 +586,24 @@
       <div class="date-buttons">
 
         <button
+          type="button"
           onclick="changeDate(-1)"
         >
           ← Dita e kaluar
         </button>
 
+
         <button
+          type="button"
           class="today-btn"
           onclick="goToToday()"
         >
           Sot
         </button>
 
+
         <button
+          type="button"
           onclick="changeDate(1)"
         >
           Dita tjetër →
@@ -611,7 +615,7 @@
 
 
     <!-- =========================
-         MAIN
+         MAIN GRID
     ========================== -->
 
     <div class="main-grid">
@@ -637,6 +641,7 @@
 
 
         <div class="form-body">
+
 
           <div class="form-group">
 
@@ -704,6 +709,7 @@
 
 
           <button
+            type="button"
             class="add-btn"
             onclick="addAppointment()"
           >
@@ -719,7 +725,7 @@
 
 
       <!-- =====================
-           SCHEDULE
+           DAILY SCHEDULE
       ====================== -->
 
       <div class="card schedule-card">
@@ -736,6 +742,11 @@
 
         </div>
 
+
+        <!--
+          KY ELEMENT ËSHTË SHUMË I RËNDËSISHËM.
+          app.js e kërkon me document.getElementById("appointments")
+        -->
 
         <div id="appointments">
 
@@ -754,10 +765,11 @@
 
 
   <!-- =========================
-       APP JS
+       APP JAVASCRIPT
   ========================== -->
 
   <script src="app.js"></script>
+
 
 </body>
 </html>
