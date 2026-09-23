@@ -1,88 +1,86 @@
 // ======================================================
-// AMBULATORI GVM
-// SISTEMI I MENAXHIMIT TE VIZITAVE
+// AMBULATORI GVM - APP.JS
 // ======================================================
 
-
-// ======================================================
-// SUPABASE
-// ======================================================
-
-const SUPABASE_URL =
-  "https://ubpteaqdkxcriqyaxrux.supabase.co";
+const SUPABASE_URL = "https://ubpteaqdkxcriqyaxrux.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
 
-const supabaseClient =
-  window.supabase.createClient(
+console.log("APP.JS U NGARKUA");
+
+let supabaseClient;
+
+try {
+  supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
 
+  console.log("SUPABASE U KRIJUA");
+} catch (error) {
+  console.error("GABIM SUPABASE:", error);
 
-// ======================================================
-// VARIABLES
-// ======================================================
+  document.getElementById("app").innerHTML = `
+    <div style="
+      max-width:700px;
+      margin:80px auto;
+      background:white;
+      padding:30px;
+      border-radius:20px;
+      font-family:Arial;
+      box-shadow:0 10px 40px rgba(0,0,0,.15);
+    ">
+      <h2 style="color:#c62828;">Gabim në lidhjen me sistemin</h2>
+      <p>Supabase nuk u inicializua.</p>
+      <pre style="
+        background:#f5f5f5;
+        padding:15px;
+        border-radius:10px;
+        white-space:pre-wrap;
+      ">${escapeHtml(String(error))}</pre>
+    </div>
+  `;
+
+  throw error;
+}
 
 let selectedDate = new Date();
 
-let realtimeChannel = null;
-
 const START_HOUR = 8;
-
 const END_HOUR = 18;
 
 
 // ======================================================
-// DATE
+// HELPERS
 // ======================================================
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
 function formatDate(date) {
-
-  const year =
-    date.getFullYear();
-
-  const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
-
-  const day =
-    String(
-      date.getDate()
-    ).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
 
 
 function displayDate(date) {
-
-  return date.toLocaleDateString(
-    "sq-AL",
-    {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    }
-  );
-}
-
-
-// ======================================================
-// SECURITY
-// ======================================================
-
-function escapeHtml(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  return date.toLocaleDateString("sq-AL", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
 }
 
 
@@ -91,43 +89,29 @@ function escapeHtml(value) {
 // ======================================================
 
 async function checkSession() {
+  console.log("Po kontrollohet sesioni...");
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .auth
-      .getSession();
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
 
+    if (error) {
+      console.error("SESSION ERROR:", error);
+      showLogin();
+      return;
+    }
 
-  if (error) {
+    console.log("Session:", data);
 
-    console.error(
-      "Session error:",
-      error
-    );
+    if (data.session) {
+      await showApp();
+    } else {
+      showLogin();
+    }
 
+  } catch (error) {
+    console.error("CHECK SESSION ERROR:", error);
     showLogin();
-
-    return;
   }
-
-
-  if (!data.session) {
-
-    showLogin();
-
-    return;
-  }
-
-
-  console.log(
-    "User është i kyçur."
-  );
-
-
-  showApp();
 }
 
 
@@ -136,351 +120,263 @@ async function checkSession() {
 // ======================================================
 
 function showLogin() {
-
-  const app =
-    document.getElementById(
-      "app"
-    );
-
-
-  if (!app) {
-
-    return;
-  }
-
-
-  app.innerHTML = `
-
+  document.getElementById("app").innerHTML = `
     <div class="login-page">
 
-      <div class="login-box">
+      <div class="login-overlay"></div>
 
-        <div class="login-logo">
-          +
+      <div class="login-card">
+
+        <div class="login-icon">
+          🏥
         </div>
 
-        <h2>
-          AMBULATORI GVM
-        </h2>
+        <h1>AMBULATORI GVM</h1>
 
-        <p>
-          Sistemi i menaxhimit të vizitave
+        <p class="login-subtitle">
+          Sistemi i administrimit të vizitave
         </p>
 
+        <div class="form-group">
+          <label>Email</label>
 
-        <input
-          id="loginEmail"
-          type="email"
-          placeholder="Email"
-          autocomplete="username"
-        >
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="Email"
+            autocomplete="username"
+          >
+        </div>
 
+        <div class="form-group">
+          <label>Fjalëkalimi</label>
 
-        <input
-          id="loginPassword"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-        >
-
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Fjalëkalimi"
+            autocomplete="current-password"
+          >
+        </div>
 
         <button
+          class="login-btn"
           id="loginButton"
+          onclick="login()"
         >
           Hyr në sistem
         </button>
-
 
         <div id="loginMessage"></div>
 
       </div>
 
     </div>
-
   `;
-
-
-  document
-    .getElementById(
-      "loginButton"
-    )
-    .addEventListener(
-      "click",
-      login
-    );
-
-
-  document
-    .getElementById(
-      "loginPassword"
-    )
-    .addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          event.key ===
-          "Enter"
-        ) {
-
-          login();
-
-        }
-
-      }
-    );
 }
 
-
-// ======================================================
-// LOGIN FUNCTION
-// ======================================================
 
 async function login() {
 
-  const email =
-    document
-      .getElementById(
-        "loginEmail"
-      )
-      .value
-      .trim();
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
 
+  const message = document.getElementById("loginMessage");
+  const button = document.getElementById("loginButton");
 
-  const password =
-    document
-      .getElementById(
-        "loginPassword"
-      )
-      .value;
+  if (!email || !password) {
 
-
-  const message =
-    document.getElementById(
-      "loginMessage"
-    );
-
-
-  if (
-    !email ||
-    !password
-  ) {
-
-    message.textContent =
-      "Plotëso email-in dhe password-in.";
-
-    message.style.color =
-      "#bd4b4b";
+    message.innerHTML = `
+      <div class="error-message">
+        Plotëso emailin dhe fjalëkalimin.
+      </div>
+    `;
 
     return;
   }
 
+  button.disabled = true;
+  button.textContent = "Po kontrollohet...";
 
-  message.textContent =
-    "Duke u kyçur...";
+  message.innerHTML = "";
 
-  message.style.color =
-    "#526674";
+  try {
 
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .auth
-      .signInWithPassword({
-
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
         email,
-
         password
-
       });
 
+    if (error) {
+      console.error("LOGIN ERROR:", error);
 
-  if (error) {
+      message.innerHTML = `
+        <div class="error-message">
+          ${escapeHtml(error.message)}
+        </div>
+      `;
 
-    console.error(
-      "Login error:",
-      error
-    );
+      button.disabled = false;
+      button.textContent = "Hyr në sistem";
 
+      return;
+    }
 
-    message.textContent =
-      error.message;
+    console.log("LOGIN OK:", data);
 
-    message.style.color =
-      "#bd4b4b";
+    await showApp();
 
-    return;
+  } catch (error) {
+
+    console.error("LOGIN EXCEPTION:", error);
+
+    message.innerHTML = `
+      <div class="error-message">
+        Gabim gjatë hyrjes në sistem.
+      </div>
+    `;
+
+    button.disabled = false;
+    button.textContent = "Hyr në sistem";
   }
-
-
-  showApp();
 }
 
 
 // ======================================================
-// MAIN APPLICATION
+// MAIN APP
 // ======================================================
 
-function showApp() {
+async function showApp() {
 
-  const app =
-    document.getElementById(
-      "app"
-    );
+  console.log("Po hapet aplikacioni...");
 
+  document.getElementById("app").innerHTML = `
 
-  if (!app) {
+    <div class="app-shell">
 
-    return;
-  }
+      <header class="topbar">
 
+        <div class="brand">
 
-  app.innerHTML = `
+          <div class="brand-icon">
+            ✚
+          </div>
 
-    <header class="topbar">
+          <div>
+            <div class="brand-title">
+              AMBULATORI GVM
+            </div>
 
-      <div class="brand">
-
-        <div class="brand-icon">
-          +
-        </div>
-
-        <div class="brand-text">
-
-          <h1>
-            AMBULATORI GVM
-          </h1>
-
-          <span>
-            Sistemi i menaxhimit të vizitave
-          </span>
+            <div class="brand-subtitle">
+              Menaxhimi i vizitave
+            </div>
+          </div>
 
         </div>
-
-      </div>
-
-
-      <div class="top-status">
-
-        <span class="online-dot"></span>
-
-        Sistemi aktiv
 
         <button
-          id="logoutButton"
           class="logout-btn"
+          onclick="logout()"
         >
           Dil
         </button>
 
-      </div>
-
-    </header>
+      </header>
 
 
-    <main class="page">
+      <main class="page">
 
-
-      <div class="page-title">
-
-        <h2>
-          Orari i vizitave
-        </h2>
-
-        <p>
-          Menaxhimi i termineve dhe pacientëve
-        </p>
-
-      </div>
-
-
-      <!-- DATE -->
-
-      <div class="date-panel">
-
-        <div class="date-left">
-
-          <div class="date-icon">
-            📅
-          </div>
+        <div class="page-heading">
 
           <div>
+            <h1>Orari i vizitave</h1>
 
-            <span class="date-label">
-              Data e punës
-            </span>
+            <p>
+              Menaxho takimet dhe pacientët e ditës
+            </p>
+          </div>
 
-            <span id="currentDate">
-              Po ngarkohet...
-            </span>
-
+          <div class="status-online">
+            <span></span>
+            Sistemi aktiv
           </div>
 
         </div>
 
 
-        <div class="date-buttons">
-
-          <button id="prevDay">
-            ← Dita e kaluar
-          </button>
+        <div class="date-panel">
 
           <button
-            id="todayBtn"
+            class="date-nav"
+            onclick="previousDay()"
+          >
+            ‹
+          </button>
+
+          <div class="date-center">
+
+            <div class="date-label">
+              Data e zgjedhur
+            </div>
+
+            <div
+              class="date-title"
+              id="dateTitle"
+            >
+              ${displayDate(selectedDate)}
+            </div>
+
+          </div>
+
+          <button
             class="today-btn"
+            onclick="goToday()"
           >
             Sot
           </button>
 
-          <button id="nextDay">
-            Dita tjetër →
+          <button
+            class="date-nav"
+            onclick="nextDay()"
+          >
+            ›
           </button>
 
         </div>
 
-      </div>
+
+        <div class="main-grid">
 
 
-      <!-- MAIN -->
+          <!-- =========================================
+               ADD APPOINTMENT
+          ========================================== -->
 
-      <div class="main-grid">
+          <section class="card form-card">
 
+            <div class="card-header">
 
-        <!-- =========================================
-             ADD APPOINTMENT
-        ========================================== -->
+              <div class="card-icon">
+                ＋
+              </div>
 
-        <div class="card">
+              <div>
+                <h2>Shto vizitë</h2>
+                <p>Regjistro një pacient të ri</p>
+              </div>
 
-          <div class="card-header">
-
-            <h3>
-              Shto vizitë
-            </h3>
-
-            <p>
-              Regjistro një termin të ri për pacientin
-            </p>
-
-          </div>
-
-
-          <div class="form-body">
+            </div>
 
 
             <div class="form-group">
 
-              <label>
-                Emri
-              </label>
+              <label>Emri</label>
 
               <input
+                type="text"
                 id="firstName"
-                type="text"
                 placeholder="Emri i pacientit"
-                autocomplete="off"
               >
 
             </div>
@@ -488,15 +384,12 @@ function showApp() {
 
             <div class="form-group">
 
-              <label>
-                Mbiemri
-              </label>
+              <label>Mbiemri</label>
 
               <input
+                type="text"
                 id="lastName"
-                type="text"
                 placeholder="Mbiemri i pacientit"
-                autocomplete="off"
               >
 
             </div>
@@ -504,15 +397,12 @@ function showApp() {
 
             <div class="form-group">
 
-              <label>
-                Numri i kartelës
-              </label>
+              <label>Nr. i kartelës</label>
 
               <input
-                id="cardNumber"
                 type="text"
-                placeholder="Opsionale"
-                autocomplete="off"
+                id="cardNumber"
+                placeholder="Numri i kartelës"
               >
 
             </div>
@@ -520,210 +410,100 @@ function showApp() {
 
             <div class="form-group">
 
-              <label>
-                Ora e vizitës
-              </label>
+              <label>Ora e vizitës</label>
 
-              <select
-                id="appointmentTime"
-              >
-
+              <select id="appointmentTime">
                 <option value="">
                   Zgjidh orën
                 </option>
-
               </select>
 
             </div>
 
 
             <button
-              id="addAppointment"
               class="add-btn"
+              id="addAppointment"
+              onclick="addAppointment()"
             >
-              + Shto vizitën
+              <span>＋</span>
+              Shto vizitën
             </button>
 
 
             <div id="message"></div>
 
-          </div>
-
-        </div>
+          </section>
 
 
-        <!-- =========================================
-             DAILY SCHEDULE
-        ========================================== -->
 
-        <div class="card schedule-card">
+          <!-- =========================================
+               DAILY SCHEDULE
+          ========================================== -->
 
-          <div class="schedule-header">
+          <section class="card schedule-card">
 
-            <div class="schedule-header-left">
-
-              <div class="schedule-header-icon">
-                🏥
-              </div>
+            <div class="schedule-header">
 
               <div>
 
-                <h3>
-                  Orari ditor
-                </h3>
+                <div class="schedule-title-row">
 
-                <span>
-                  Menaxhimi i vizitave
-                </span>
+                  <div class="hospital-symbol">
+                    🏥
+                  </div>
 
+                  <div>
+
+                    <h2>Orari ditor</h2>
+
+                    <p>
+                      08:00 — 18:00 · çdo 15 minuta
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="appointment-count">
+                <span id="appointmentCount">0</span>
+                vizita
               </div>
 
             </div>
 
 
-            <span>
-              08:00 — 18:00
-            </span>
+            <div
+              id="appointments"
+              class="appointments"
+            >
 
-          </div>
+              <div class="loading">
+                Po ngarkohet orari...
+              </div>
 
-
-          <div id="appointments">
-
-            <div class="loading">
-              Po ngarkohet orari...
             </div>
 
-          </div>
+          </section>
 
         </div>
 
+      </main>
 
-      </div>
-
-    </main>
-
+    </div>
   `;
-
-
-  // ====================================================
-  // BUTTONS
-  // ====================================================
-
-  const logoutButton =
-    document.getElementById(
-      "logoutButton"
-    );
-
-
-  if (logoutButton) {
-
-    logoutButton.addEventListener(
-      "click",
-      logout
-    );
-
-  }
-
-
-  const addButton =
-    document.getElementById(
-      "addAppointment"
-    );
-
-
-  if (addButton) {
-
-    addButton.addEventListener(
-      "click",
-      addAppointment
-    );
-
-  }
-
-
-  const prevDay =
-    document.getElementById(
-      "prevDay"
-    );
-
-
-  if (prevDay) {
-
-    prevDay.addEventListener(
-      "click",
-      () => {
-
-        selectedDate.setDate(
-          selectedDate.getDate() - 1
-        );
-
-        updateDateTitle();
-
-        loadAppointments();
-
-      }
-    );
-
-  }
-
-
-  const nextDay =
-    document.getElementById(
-      "nextDay"
-    );
-
-
-  if (nextDay) {
-
-    nextDay.addEventListener(
-      "click",
-      () => {
-
-        selectedDate.setDate(
-          selectedDate.getDate() + 1
-        );
-
-        updateDateTitle();
-
-        loadAppointments();
-
-      }
-    );
-
-  }
-
-
-  const todayBtn =
-    document.getElementById(
-      "todayBtn"
-    );
-
-
-  if (todayBtn) {
-
-    todayBtn.addEventListener(
-      "click",
-      () => {
-
-        selectedDate =
-          new Date();
-
-        updateDateTitle();
-
-        loadAppointments();
-
-      }
-    );
-
-  }
-
 
   updateDateTitle();
 
-  loadAppointments();
+  populateTimeSlots();
+
+  await loadAppointments();
 
   startRealtime();
+
+  console.log("APLIKACIONI U HAP");
 }
 
 
@@ -735,83 +515,70 @@ async function logout() {
 
   try {
 
-    await supabaseClient
-      .auth
-      .signOut();
+    await supabaseClient.auth.signOut();
+
+    showLogin();
 
   } catch (error) {
 
-    console.error(
-      "Logout error:",
-      error
-    );
+    console.error("LOGOUT ERROR:", error);
 
   }
-
-
-  if (realtimeChannel) {
-
-    try {
-
-      await supabaseClient
-        .removeChannel(
-          realtimeChannel
-        );
-
-    } catch (error) {
-
-      console.error(
-        "Realtime remove error:",
-        error
-      );
-
-    }
-
-
-    realtimeChannel =
-      null;
-  }
-
-
-  showLogin();
 }
 
 
 // ======================================================
-// DATE TITLE
+// DATE NAVIGATION
 // ======================================================
 
 function updateDateTitle() {
 
-  const element =
-    document.getElementById(
-      "currentDate"
-    );
+  const element = document.getElementById("dateTitle");
 
-
-  if (!element) {
-
-    return;
+  if (element) {
+    element.textContent = displayDate(selectedDate);
   }
+}
 
 
-  element.textContent =
-    displayDate(
-      selectedDate
-    );
+function previousDay() {
+
+  selectedDate.setDate(
+    selectedDate.getDate() - 1
+  );
+
+  updateDateTitle();
+  loadAppointments();
+}
+
+
+function nextDay() {
+
+  selectedDate.setDate(
+    selectedDate.getDate() + 1
+  );
+
+  updateDateTitle();
+  loadAppointments();
+}
+
+
+function goToday() {
+
+  selectedDate = new Date();
+
+  updateDateTitle();
+  loadAppointments();
 }
 
 
 // ======================================================
 // TIME SLOTS
-// 08:00 - 18:00
-// EVERY 15 MINUTES
 // ======================================================
 
 function getTimeSlots() {
 
   const slots = [];
-
 
   for (
     let hour = START_HOUR;
@@ -829,21 +596,15 @@ function getTimeSlots() {
         hour === END_HOUR &&
         minute > 0
       ) {
-
         continue;
       }
 
+      const h = String(hour).padStart(2, "0");
+      const m = String(minute).padStart(2, "0");
 
-      const time =
-        `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-
-
-      slots.push(time);
-
+      slots.push(`${h}:${m}`);
     }
-
   }
-
 
   return slots;
 }
@@ -856,540 +617,376 @@ function getTimeSlots() {
 async function loadAppointments() {
 
   const container =
-    document.getElementById(
-      "appointments"
-    );
+    document.getElementById("appointments");
 
-
-  if (!container) {
-
-    return;
-  }
-
-
-  const date =
-    formatDate(
-      selectedDate
-    );
-
-
-  console.log(
-    "Duke ngarkuar vizitat për:",
-    date
-  );
-
+  if (!container) return;
 
   container.innerHTML = `
-
     <div class="loading">
+      <div class="spinner"></div>
       Po ngarkohet orari...
     </div>
-
   `;
 
+  const date = formatDate(selectedDate);
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("appointments")
-      .select("*")
-      .eq(
-        "appointment_date",
-        date
-      )
-      .order(
-        "appointment_time",
-        {
+  console.log("Po ngarkohen vizitat për:", date);
+
+  try {
+
+    const { data, error } =
+      await supabaseClient
+        .from("appointments")
+        .select("*")
+        .eq("appointment_date", date)
+        .order("appointment_time", {
           ascending: true
-        }
+        });
+
+    if (error) {
+
+      console.error(
+        "APPOINTMENTS ERROR:",
+        error
       );
 
+      container.innerHTML = `
+        <div class="error-box">
+          <strong>Nuk u ngarkuan vizitat.</strong>
+          <br><br>
+          ${escapeHtml(error.message)}
+        </div>
+      `;
 
-  if (error) {
+      return;
+    }
+
+    console.log(
+      "Vizitat e gjetura:",
+      data
+    );
+
+    renderAppointments(data || []);
+
+  } catch (error) {
 
     console.error(
-      "Load error:",
+      "LOAD APPOINTMENTS EXCEPTION:",
       error
     );
 
-
     container.innerHTML = `
-
       <div class="error-box">
-
-        Gabim gjatë ngarkimit të vizitave.
-
-        <br><br>
-
-        ${escapeHtml(
-          error.message
-        )}
-
+        Gabim gjatë ngarkimit të orarit.
       </div>
-
     `;
-
-
-    return;
   }
-
-
-  console.log(
-    "Vizitat e gjetura:",
-    data
-  );
-
-
-  renderAppointments(
-    data || []
-  );
-
-
-  populateTimeSlots(
-    data || []
-  );
 }
 
 
 // ======================================================
-// POPULATE TIME SELECT
+// TIME SELECT
 // ======================================================
 
-function populateTimeSlots(
-  appointments
-) {
+function populateTimeSlots() {
 
   const select =
-    document.getElementById(
-      "appointmentTime"
-    );
+    document.getElementById("appointmentTime");
 
-
-  if (!select) {
-
-    return;
-  }
-
+  if (!select) return;
 
   select.innerHTML = `
-
     <option value="">
       Zgjidh orën
     </option>
-
   `;
 
+  getTimeSlots().forEach(time => {
 
-  const bookedTimes =
-    new Set(
+    const option =
+      document.createElement("option");
 
-      appointments
+    option.value = time;
+    option.textContent = time;
 
-        .filter(
-          appointment =>
-            appointment.status !==
-            "cancelled"
-        )
-
-        .map(
-          appointment =>
-            String(
-              appointment.appointment_time
-            ).substring(0, 5)
-        )
-
-    );
-
-
-  getTimeSlots()
-    .forEach(
-      time => {
-
-        if (
-          bookedTimes.has(
-            time
-          )
-        ) {
-
-          return;
-        }
-
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-
-        option.value =
-          time;
-
-
-        option.textContent =
-          time;
-
-
-        select.appendChild(
-          option
-        );
-
-      }
-    );
+    select.appendChild(option);
+  });
 }
 
 
 // ======================================================
-// RENDER APPOINTMENTS
+// RENDER
 // ======================================================
 
-function renderAppointments(
-  appointments
-) {
+function renderAppointments(appointments) {
 
   const container =
-    document.getElementById(
-      "appointments"
+    document.getElementById("appointments");
+
+  if (!container) return;
+
+  const countElement =
+    document.getElementById("appointmentCount");
+
+  const activeAppointments =
+    appointments.filter(
+      a => a.status !== "cancelled"
     );
 
-
-  if (!container) {
-
-    return;
+  if (countElement) {
+    countElement.textContent =
+      activeAppointments.length;
   }
 
-
-  const byTime =
+  const appointmentMap =
     new Map();
 
+  appointments.forEach(appointment => {
 
-  appointments.forEach(
-    appointment => {
+    appointmentMap.set(
+      appointment.appointment_time,
+      appointment
+    );
 
-      const time =
-        String(
-          appointment.appointment_time
-        ).substring(0, 5);
-
-
-      byTime.set(
-        time,
-        appointment
-      );
-
-    }
-  );
+  });
 
 
-  const slots =
-    getTimeSlots();
+  let html = "";
 
+  getTimeSlots().forEach(time => {
 
-  container.innerHTML =
-    slots.map(
-      time => {
+    const appointment =
+      appointmentMap.get(time);
 
-        const appointment =
-          byTime.get(
-            time
-          );
+    if (!appointment) {
 
+      html += `
+        <div
+          class="time-slot empty-slot"
+          onclick="selectTimeSlot('${time}')"
+        >
 
-        // =========================================
-        // EMPTY SLOT
-        // =========================================
+          <div class="slot-time">
+            ${time}
+          </div>
 
-        if (!appointment) {
+          <div class="slot-content">
 
-          return `
-
-            <div
-              class="time-slot empty-slot"
-              onclick="selectTimeSlot('${time}')"
-              title="Kliko për të zgjedhur orën ${time}"
-            >
-
-              <div class="slot-time">
-                ${time}
-              </div>
-
-
-              <div class="slot-content">
-
-                <span>
-                  Orar i lirë — kliko për ta zgjedhur
-                </span>
-
-              </div>
-
+            <div class="empty-title">
+              Orar i lirë
             </div>
 
-          `;
-
-        }
-
-
-        // =========================================
-        // STATUS
-        // =========================================
-
-        let statusText =
-          "Planifikuar";
-
-
-        let statusClass =
-          "";
-
-
-        if (
-          appointment.status ===
-          "arrived"
-        ) {
-
-          statusText =
-            "Ka ardhur";
-
-          statusClass =
-            "status-arrived";
-        }
-
-
-        if (
-          appointment.status ===
-          "finished"
-        ) {
-
-          statusText =
-            "Përfunduar";
-
-          statusClass =
-            "status-finished";
-        }
-
-
-        if (
-          appointment.status ===
-          "cancelled"
-        ) {
-
-          statusText =
-            "Anuluar";
-
-          statusClass =
-            "status-cancelled";
-        }
-
-
-        // =========================================
-        // PATIENT
-        // =========================================
-
-        const fullName =
-          `${appointment.first_name || ""} ${appointment.last_name || ""}`
-            .trim();
-
-
-        const cardNumber =
-          appointment.card_number
-            ? escapeHtml(
-                appointment.card_number
-              )
-            : "Pa numër kartelë";
-
-
-        // =========================================
-        // ACTIONS
-        // =========================================
-
-        let actions = "";
-
-
-        if (
-          appointment.status ===
-          "planned"
-        ) {
-
-          actions += `
-
-            <button
-              class="arrived-btn"
-              onclick="
-                changeStatus(
-                  '${appointment.id}',
-                  'arrived'
-                )
-              "
-            >
-              ✓ Erdhi
-            </button>
-
-          `;
-        }
-
-
-        if (
-          appointment.status ===
-          "arrived"
-        ) {
-
-          actions += `
-
-            <button
-              class="finish-btn"
-              onclick="
-                changeStatus(
-                  '${appointment.id}',
-                  'finished'
-                )
-              "
-            >
-              ✓ Përfundoi
-            </button>
-
-          `;
-        }
-
-
-        if (
-          appointment.status !==
-            "cancelled" &&
-          appointment.status !==
-            "finished"
-        ) {
-
-          actions += `
-
-            <button
-              class="cancel-btn"
-              onclick="
-                changeStatus(
-                  '${appointment.id}',
-                  'cancelled'
-                )
-              "
-            >
-              Anulo
-            </button>
-
-          `;
-        }
-
-
-        actions += `
-
-          <button
-            class="delete-btn"
-            onclick="
-              deleteAppointment(
-                '${appointment.id}'
-              )
-            "
-          >
-            Fshi
-          </button>
-
-        `;
-
-
-        // =========================================
-        // APPOINTMENT ROW
-        // =========================================
-
-        return `
-
-          <div class="time-slot">
-
-            <div class="slot-time">
-              ${time}
-            </div>
-
-
-            <div class="slot-content">
-
-              <div class="patient-info">
-
-                <span class="patient-name">
-
-                  ${escapeHtml(
-                    fullName
-                  )}
-
-                </span>
-
-
-                <span class="patient-card">
-
-                  Kartela:
-                  ${cardNumber}
-
-                </span>
-
-              </div>
-
-
-              <span
-                class="status ${statusClass}"
-              >
-
-                ${statusText}
-
-              </span>
-
-            </div>
-
-
-            <div class="appointment-actions">
-
-              ${actions}
-
+            <div class="empty-subtitle">
+              Kliko për ta zgjedhur
             </div>
 
           </div>
 
-        `;
+          <div class="empty-plus">
+            ＋
+          </div>
 
-      }
-    )
-    .join("");
+        </div>
+      `;
+
+      return;
+    }
+
+
+    let statusText =
+      "Planifikuar";
+
+    let statusClass =
+      "status-planned";
+
+
+    if (appointment.status === "arrived") {
+
+      statusText =
+        "Ka ardhur";
+
+      statusClass =
+        "status-arrived";
+
+    }
+
+    if (appointment.status === "finished") {
+
+      statusText =
+        "Përfunduar";
+
+      statusClass =
+        "status-finished";
+
+    }
+
+    if (appointment.status === "cancelled") {
+
+      statusText =
+        "Anuluar";
+
+      statusClass =
+        "status-cancelled";
+
+    }
+
+
+    let actions = "";
+
+
+    if (
+      appointment.status ===
+      "planned"
+    ) {
+
+      actions = `
+
+        <button
+          class="action-btn arrived"
+          onclick="changeStatus('${appointment.id}', 'arrived')"
+        >
+          ✓ Erdhi
+        </button>
+
+        <button
+          class="action-btn cancel"
+          onclick="changeStatus('${appointment.id}', 'cancelled')"
+        >
+          Anulo
+        </button>
+
+        <button
+          class="action-btn delete"
+          onclick="deleteAppointment('${appointment.id}')"
+        >
+          Fshi
+        </button>
+
+      `;
+
+    } else if (
+      appointment.status ===
+      "arrived"
+    ) {
+
+      actions = `
+
+        <button
+          class="action-btn finished"
+          onclick="changeStatus('${appointment.id}', 'finished')"
+        >
+          ✓ Përfundoi
+        </button>
+
+        <button
+          class="action-btn cancel"
+          onclick="changeStatus('${appointment.id}', 'cancelled')"
+        >
+          Anulo
+        </button>
+
+        <button
+          class="action-btn delete"
+          onclick="deleteAppointment('${appointment.id}')"
+        >
+          Fshi
+        </button>
+
+      `;
+
+    } else {
+
+      actions = `
+
+        <button
+          class="action-btn delete"
+          onclick="deleteAppointment('${appointment.id}')"
+        >
+          Fshi
+        </button>
+
+      `;
+    }
+
+
+    html += `
+
+      <div class="time-slot appointment-slot">
+
+        <div class="slot-time">
+          ${time}
+        </div>
+
+        <div class="slot-content">
+
+          <div class="patient-name">
+            ${escapeHtml(
+              appointment.first_name
+            )}
+            ${escapeHtml(
+              appointment.last_name
+            )}
+          </div>
+
+          <div class="patient-meta">
+
+            <span>
+              Kartela:
+              ${escapeHtml(
+                appointment.card_number || "-"
+              )}
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="slot-status">
+
+          <span class="status ${statusClass}">
+            ${statusText}
+          </span>
+
+        </div>
+
+        <div class="appointment-actions">
+          ${actions}
+        </div>
+
+      </div>
+
+    `;
+  });
+
+
+  container.innerHTML = html;
 }
 
 
 // ======================================================
-// SELECT TIME SLOT
+// SELECT TIME
 // ======================================================
 
-function selectTimeSlot(
-  time
-) {
+function selectTimeSlot(time) {
 
   const select =
-    document.getElementById(
-      "appointmentTime"
-    );
+    document.getElementById("appointmentTime");
 
+  if (!select) return;
 
-  if (!select) {
-
-    return;
-  }
-
-
-  select.value =
-    time;
-
+  select.value = time;
 
   const firstName =
-    document.getElementById(
-      "firstName"
-    );
-
+    document.getElementById("firstName");
 
   if (firstName) {
-
     firstName.focus();
-
   }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 
@@ -1401,43 +998,32 @@ async function addAppointment() {
 
   const firstName =
     document
-      .getElementById(
-        "firstName"
-      )
+      .getElementById("firstName")
       .value
       .trim();
-
 
   const lastName =
     document
-      .getElementById(
-        "lastName"
-      )
+      .getElementById("lastName")
       .value
       .trim();
-
 
   const cardNumber =
     document
-      .getElementById(
-        "cardNumber"
-      )
+      .getElementById("cardNumber")
       .value
       .trim();
 
-
   const appointmentTime =
     document
-      .getElementById(
-        "appointmentTime"
-      )
+      .getElementById("appointmentTime")
       .value;
 
-
   const message =
-    document.getElementById(
-      "message"
-    );
+    document.getElementById("message");
+
+  const button =
+    document.getElementById("addAppointment");
 
 
   if (
@@ -1446,372 +1032,206 @@ async function addAppointment() {
     !appointmentTime
   ) {
 
-    message.textContent =
-      "Plotëso emrin, mbiemrin dhe orën.";
-
-    message.style.color =
-      "#bd4b4b";
-
-    return;
-  }
-
-
-  const appointmentDate =
-    formatDate(
-      selectedDate
-    );
-
-
-  message.textContent =
-    "Duke kontrolluar orarin...";
-
-  message.style.color =
-    "#526674";
-
-
-  // ====================================================
-  // CHECK EXISTING SLOT
-  // ====================================================
-
-  const {
-    data: existing,
-    error: checkError
-  } =
-    await supabaseClient
-      .from("appointments")
-      .select(
-        "id, status, appointment_date, appointment_time"
-      )
-      .eq(
-        "appointment_date",
-        appointmentDate
-      )
-      .eq(
-        "appointment_time",
-        appointmentTime
-      );
-
-
-  if (checkError) {
-
-    console.error(
-      "Slot check error:",
-      checkError
-    );
-
-
-    message.textContent =
-      "Gabim gjatë kontrollit të orarit.";
-
-    message.style.color =
-      "#bd4b4b";
-
-
-    alert(
-
-      "NUK MUND TË KONTROLLOHET ORARI\n\n" +
-
-      "CODE: " +
-      (
-        checkError.code ||
-        "N/A"
-      ) +
-
-      "\n\nMESSAGE: " +
-      (
-        checkError.message ||
-        "N/A"
-      )
-
-    );
-
+    message.innerHTML = `
+      <div class="error-message">
+        Plotëso emrin, mbiemrin dhe orën.
+      </div>
+    `;
 
     return;
   }
 
 
-  const rows =
-    existing || [];
+  button.disabled = true;
+  button.textContent = "Po ruhet...";
+
+  message.innerHTML = "";
 
 
-  const activeAppointment =
-    rows.find(
-      appointment =>
-        appointment.status !==
-        "cancelled"
+  const date =
+    formatDate(selectedDate);
+
+
+  try {
+
+    console.log(
+      "Po kontrollohet ora:",
+      date,
+      appointmentTime
     );
 
 
-  if (activeAppointment) {
-
-    message.textContent =
-      "Ky orar është tashmë i zënë.";
-
-    message.style.color =
-      "#bd4b4b";
-
-
-    alert(
-
-      "KJO ORË ËSHTË E ZËNË\n\n" +
-
-      "Ora " +
-      appointmentTime +
-      " është tashmë e rezervuar.\n\n" +
-
-      "Zgjidh një orar tjetër."
-
-    );
-
-
-    return;
-  }
-
-
-  // ====================================================
-  // REUSE CANCELLED APPOINTMENT
-  // ====================================================
-
-  const cancelledAppointment =
-    rows.find(
-      appointment =>
-        appointment.status ===
-        "cancelled"
-    );
-
-
-  if (cancelledAppointment) {
-
-    message.textContent =
-      "Po ripërdorim orarin...";
-
-
-    const {
-      error: updateError
-    } =
+    const { data: existing, error: checkError } =
       await supabaseClient
         .from("appointments")
-        .update({
-
-          first_name:
-            firstName,
-
-          last_name:
-            lastName,
-
-          card_number:
-            cardNumber ||
-            null,
-
-          status:
-            "planned"
-
-        })
-        .eq(
-          "id",
-          cancelledAppointment.id
-        );
+        .select("*")
+        .eq("appointment_date", date)
+        .eq("appointment_time", appointmentTime);
 
 
-    if (updateError) {
+    if (checkError) {
 
       console.error(
-        "Update error:",
-        updateError
+        "CHECK ERROR:",
+        checkError
+      );
+
+      throw checkError;
+    }
+
+
+    const active =
+      (existing || []).find(
+        item =>
+          item.status !==
+          "cancelled"
       );
 
 
-      message.textContent =
-        "Vizita nuk u ruajt.";
+    if (active) {
 
-      message.style.color =
-        "#bd4b4b";
+      message.innerHTML = `
+        <div class="error-message">
+          Ora ${appointmentTime} është e zënë.
+        </div>
+      `;
 
-
-      alert(
-
-        "VIZITA NUK U RUAJT\n\n" +
-
-        "CODE: " +
-        (
-          updateError.code ||
-          "N/A"
-        ) +
-
-        "\n\nMESSAGE: " +
-        (
-          updateError.message ||
-          "N/A"
-        )
-
-      );
-
+      button.disabled = false;
+      button.innerHTML =
+        "<span>＋</span> Shto vizitën";
 
       return;
+    }
+
+
+    const cancelled =
+      (existing || []).find(
+        item =>
+          item.status ===
+          "cancelled"
+      );
+
+
+    if (cancelled) {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("appointments")
+          .update({
+            first_name:
+              firstName,
+
+            last_name:
+              lastName,
+
+            card_number:
+              cardNumber,
+
+            status:
+              "planned"
+          })
+          .eq("id", cancelled.id);
+
+
+      if (error) {
+        throw error;
+      }
+
+    } else {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("appointments")
+          .insert([{
+
+            first_name:
+              firstName,
+
+            last_name:
+              lastName,
+
+            card_number:
+              cardNumber,
+
+            appointment_date:
+              date,
+
+            appointment_time:
+              appointmentTime,
+
+            status:
+              "planned"
+
+          }]);
+
+
+      if (error) {
+
+        console.error(
+          "INSERT ERROR:",
+          error
+        );
+
+        if (
+          error.code ===
+          "23505"
+        ) {
+
+          message.innerHTML = `
+            <div class="error-message">
+              Kjo orë është tashmë e zënë.
+            </div>
+          `;
+
+          button.disabled = false;
+          button.innerHTML =
+            "<span>＋</span> Shto vizitën";
+
+          return;
+        }
+
+        throw error;
+      }
     }
 
 
     clearForm();
 
-
-    message.textContent =
-      "Vizita u shtua me sukses.";
-
-    message.style.color =
-      "#2e8b57";
-
+    message.innerHTML = `
+      <div class="success-message">
+        ✓ Vizita u shtua me sukses.
+      </div>
+    `;
 
     await loadAppointments();
 
-
-    return;
-  }
-
-
-  // ====================================================
-  // NEW APPOINTMENT
-  // ====================================================
-
-  const appointmentData = {
-
-    first_name:
-      firstName,
-
-    last_name:
-      lastName,
-
-    card_number:
-      cardNumber ||
-      null,
-
-    appointment_date:
-      appointmentDate,
-
-    appointment_time:
-      appointmentTime,
-
-    status:
-      "planned"
-
-  };
-
-
-  console.log(
-    "PO SHTOJME VIZITEN:",
-    appointmentData
-  );
-
-
-  message.textContent =
-    "Duke ruajtur vizitën...";
-
-  message.style.color =
-    "#526674";
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("appointments")
-      .insert(
-        appointmentData
-      );
-
-
-  if (error) {
+  } catch (error) {
 
     console.error(
-      "SUPABASE INSERT ERROR:",
+      "ADD APPOINTMENT ERROR:",
       error
     );
 
+    message.innerHTML = `
+      <div class="error-message">
+        ${escapeHtml(
+          error.message ||
+          "Gabim gjatë ruajtjes."
+        )}
+      </div>
+    `;
 
-    if (
-      error.code ===
-      "23505"
-    ) {
+  } finally {
 
-      message.textContent =
-        "Ky orar është tashmë i zënë.";
+    button.disabled = false;
 
-      message.style.color =
-        "#bd4b4b";
-
-
-      alert(
-
-        "KJO ORË ËSHTË E ZËNË\n\n" +
-
-        "Zgjidh një orar tjetër."
-
-      );
-
-
-      await loadAppointments();
-
-      return;
-    }
-
-
-    message.textContent =
-      "Vizita nuk u shtua.";
-
-    message.style.color =
-      "#bd4b4b";
-
-
-    alert(
-
-      "VIZITA NUK U SHTUA\n\n" +
-
-      "CODE:\n" +
-      (
-        error.code ||
-        "N/A"
-      ) +
-
-      "\n\nMESSAGE:\n" +
-      (
-        error.message ||
-        "N/A"
-      ) +
-
-      "\n\nDETAILS:\n" +
-      (
-        error.details ||
-        "N/A"
-      ) +
-
-      "\n\nHINT:\n" +
-      (
-        error.hint ||
-        "N/A"
-      )
-
-    );
-
-
-    return;
+    button.innerHTML =
+      "<span>＋</span> Shto vizitën";
   }
-
-
-  console.log(
-    "VIZITA U SHTUA ME SUKSES!"
-  );
-
-
-  clearForm();
-
-
-  message.textContent =
-    "Vizita u shtua me sukses.";
-
-  message.style.color =
-    "#2e8b57";
-
-
-  await loadAppointments();
 }
 
 
@@ -1821,60 +1241,21 @@ async function addAppointment() {
 
 function clearForm() {
 
-  const firstName =
-    document.getElementById(
-      "firstName"
-    );
+  document.getElementById(
+    "firstName"
+  ).value = "";
 
+  document.getElementById(
+    "lastName"
+  ).value = "";
 
-  const lastName =
-    document.getElementById(
-      "lastName"
-    );
+  document.getElementById(
+    "cardNumber"
+  ).value = "";
 
-
-  const cardNumber =
-    document.getElementById(
-      "cardNumber"
-    );
-
-
-  const appointmentTime =
-    document.getElementById(
-      "appointmentTime"
-    );
-
-
-  if (firstName) {
-
-    firstName.value =
-      "";
-
-  }
-
-
-  if (lastName) {
-
-    lastName.value =
-      "";
-
-  }
-
-
-  if (cardNumber) {
-
-    cardNumber.value =
-      "";
-
-  }
-
-
-  if (appointmentTime) {
-
-    appointmentTime.value =
-      "";
-
-  }
+  document.getElementById(
+    "appointmentTime"
+  ).value = "";
 }
 
 
@@ -1887,102 +1268,83 @@ async function changeStatus(
   status
 ) {
 
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("appointments")
-      .update({
+  try {
 
-        status:
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("appointments")
+        .update({
           status
+        })
+        .eq("id", id);
 
-      })
-      .eq(
-        "id",
-        id
-      );
+    if (error) {
+      throw error;
+    }
 
+    await loadAppointments();
 
-  if (error) {
+  } catch (error) {
 
     console.error(
-      "Status error:",
+      "STATUS ERROR:",
       error
     );
 
-
     alert(
-
-      "Statusi nuk u ndryshua.\n\n" +
-
+      "Gabim: " +
       error.message
-
     );
-
-
-    return;
   }
-
-
-  await loadAppointments();
 }
 
 
 // ======================================================
-// DELETE APPOINTMENT
+// DELETE
 // ======================================================
 
-async function deleteAppointment(
-  id
-) {
+async function deleteAppointment(id) {
 
   const confirmed =
     confirm(
       "A dëshiron ta fshish këtë vizitë?"
     );
 
-
   if (!confirmed) {
-
     return;
   }
 
 
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("appointments")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
+  try {
 
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("appointments")
+        .delete()
+        .eq("id", id);
 
-  if (error) {
+    if (error) {
+      throw error;
+    }
+
+    await loadAppointments();
+
+  } catch (error) {
 
     console.error(
-      "Delete error:",
+      "DELETE ERROR:",
       error
     );
 
-
     alert(
-
-      "Vizita nuk u fshi.\n\n" +
-
+      "Gabim gjatë fshirjes: " +
       error.message
-
     );
-
-
-    return;
   }
-
-
-  await loadAppointments();
 }
 
 
@@ -1992,67 +1354,37 @@ async function deleteAppointment(
 
 function startRealtime() {
 
-  if (realtimeChannel) {
-
-    supabaseClient
-      .removeChannel(
-        realtimeChannel
-      );
-
-  }
-
-
   console.log(
-    "Duke aktivizuar realtime..."
+    "Po aktivizohet realtime..."
   );
 
+  supabaseClient
+    .channel("appointments-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "appointments"
+      },
+      payload => {
 
-  realtimeChannel =
-    supabaseClient
-      .channel(
-        "appointments-realtime"
-      )
+        console.log(
+          "REALTIME:",
+          payload
+        );
 
+        loadAppointments();
+      }
+    )
+    .subscribe(status => {
 
-      .on(
-
-        "postgres_changes",
-
-        {
-
-          event: "*",
-
-          schema: "public",
-
-          table: "appointments"
-
-        },
-
-        payload => {
-
-          console.log(
-            "Realtime update:",
-            payload
-          );
-
-
-          loadAppointments();
-
-        }
-
-      )
-
-
-      .subscribe(
-        status => {
-
-          console.log(
-            "Realtime status:",
-            status
-          );
-
-        }
+      console.log(
+        "REALTIME STATUS:",
+        status
       );
+
+    });
 }
 
 
@@ -2060,41 +1392,37 @@ function startRealtime() {
 // AUTH EVENTS
 // ======================================================
 
-supabaseClient
-  .auth
-  .onAuthStateChange(
-    (
-      event,
-      session
-    ) => {
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
 
-      console.log(
-        "Auth event:",
-        event
-      );
+    console.log(
+      "Auth event:",
+      event
+    );
 
+    if (
+      event ===
+      "SIGNED_IN"
+    ) {
 
-      console.log(
-        "Session:",
-        session
-      );
-
-
-      if (
-        event ===
-        "SIGNED_OUT"
-      ) {
-
-        showLogin();
-
-      }
+      await showApp();
 
     }
-  );
+
+    if (
+      event ===
+      "SIGNED_OUT"
+    ) {
+
+      showLogin();
+
+    }
+  }
+);
 
 
 // ======================================================
-// START APPLICATION
+// START
 // ======================================================
 
 window.addEventListener(
@@ -2102,21 +1430,8 @@ window.addEventListener(
   () => {
 
     console.log(
-      "================================="
+      "WINDOW LOADED"
     );
-
-    console.log(
-      "AMBULATORI GVM"
-    );
-
-    console.log(
-      "App po inicializohet..."
-    );
-
-    console.log(
-      "================================="
-    );
-
 
     checkSession();
 
