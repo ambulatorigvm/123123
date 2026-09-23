@@ -4,74 +4,56 @@
 }
 
 :root {
-  --medical-blue: #1261a0;
-  --medical-dark: #0b3d66;
-  --medical-light: #eaf5fc;
-  --medical-turquoise: #16a6a0;
+  --blue: #0875b9;
+  --dark-blue: #07527f;
+  --cyan: #12a8c4;
+  --light-blue: #eaf7fc;
+  --very-light-blue: #f4fbfe;
 
-  --text: #243447;
-  --muted: #718096;
+  --green: #27a66f;
+  --green-bg: #eaf8f1;
 
-  --border: #dbe5ed;
-  --background: #f3f7fa;
+  --yellow: #d99d20;
+  --yellow-bg: #fff8e5;
 
-  --green: #2e9b61;
-  --green-light: #eaf8f0;
+  --gray: #7d8b97;
+  --gray-bg: #f0f3f5;
 
-  --yellow: #d89b18;
-  --yellow-light: #fff8df;
-
-  --gray: #7b8794;
-  --gray-light: #edf0f2;
+  --text: #243746;
+  --muted: #71818d;
+  --border: #dbe6ec;
 }
-
-/* =====================================
-   PAGE
-===================================== */
 
 body {
   margin: 0;
-  padding: 0;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
-  background: var(--background);
+  background: #eef5f8;
   color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* =====================================
+/* ==============================
    HEADER
-===================================== */
+============================== */
 
 .clinic-header {
-  background:
-    linear-gradient(
-      135deg,
-      #0b4777,
-      #1261a0 55%,
-      #138b99
-    );
+  background: linear-gradient(
+    135deg,
+    #064b78,
+    #0875b9 55%,
+    #12a8c4
+  );
 
   color: white;
-
-  box-shadow:
-    0 3px 12px rgba(11, 61, 102, 0.20);
+  box-shadow: 0 4px 15px rgba(0, 65, 100, 0.20);
 }
 
 .clinic-header-inner {
-  width: min(1180px, calc(100% - 32px));
-
+  width: min(1180px, calc(100% - 30px));
+  min-height: 78px;
   margin: auto;
 
-  min-height: 76px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 }
 
@@ -82,19 +64,8 @@ body {
 }
 
 .clinic-logo {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
 
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 12px;
-
-  background: rgba(255, 255, 255, 0.18);
-
-  border: 1px solid rgba(255, 255, 255, 0.3);
-
-  font-si
+  displ
 ```
