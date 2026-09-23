@@ -1071,3 +1071,193 @@ button:active {
     font-size: 11px;
   }
 }
+/* ================================
+   TABELA E ORAREVE - GVM
+================================ */
+
+.schedule-table {
+  width: 100%;
+  margin-top: 25px;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #d9e2ec;
+  box-shadow: 0 4px 15px rgba(15, 76, 129, 0.08);
+}
+
+.schedule-header,
+.schedule-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 160px 320px;
+  align-items: center;
+}
+
+.schedule-header {
+  min-height: 52px;
+  background: #0f4c81;
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.schedule-header > div,
+.schedule-row > div {
+  padding: 14px 16px;
+}
+
+.schedule-row {
+  min-height: 65px;
+  border-top: 1px solid #e6edf3;
+  background: white;
+}
+
+.schedule-row:hover {
+  background: #f7fbff;
+}
+
+.schedule-time {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f4c81;
+}
+
+.schedule-patient {
+  color: #344054;
+  font-size: 15px;
+}
+
+.schedule-patient strong {
+  font-weight: 600;
+}
+
+.schedule-status {
+  text-align: left;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-free {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.status-planned {
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.status-arrived {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-finished {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.status-cancelled {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.schedule-actions button {
+  border: none;
+  border-radius: 7px;
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.schedule-edit-button {
+  background: #0f6fb5;
+  color: white;
+}
+
+.schedule-edit-button:hover {
+  background: #0b5d98;
+}
+
+.schedule-arrived-button {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.schedule-finished-button {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.schedule-cancel-button {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.schedule-book-button {
+  background: #eef6ff;
+  color: #0f6fb5;
+}
+
+.schedule-row-free {
+  cursor: pointer;
+}
+
+.schedule-row-booked {
+  cursor: default;
+}
+
+.free-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #12b76a;
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 900px) {
+
+  .schedule-header {
+    display: none;
+  }
+
+  .schedule-row {
+    display: block;
+    padding: 14px;
+    position: relative;
+  }
+
+  .schedule-row > div {
+    padding: 5px 0;
+  }
+
+  .schedule-time {
+    font-size: 18px;
+  }
+
+  .schedule-actions {
+    margin-top: 8px;
+  }
+
+}
