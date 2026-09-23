@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="sq">
 
@@ -53,10 +54,6 @@
     }
 
 
-    /* =====================================================
-       GLOBAL
-    ===================================================== */
-
     button,
     input,
     select {
@@ -74,7 +71,7 @@
 
     .topbar {
 
-      height: 78px;
+      min-height: 78px;
 
       background:
         rgba(255,255,255,0.97);
@@ -92,7 +89,7 @@
       justify-content: space-between;
 
       padding:
-        0 34px;
+        12px 34px;
 
       position: sticky;
 
@@ -136,26 +133,24 @@
 
       font-size: 29px;
 
-      font-weight: 300;
-
       box-shadow:
         0 5px 15px rgba(8,127,168,0.25);
     }
 
 
-    .brand-text h1 {
-
-      margin: 0;
+    .brand-title {
 
       color: #17344b;
 
       font-size: 19px;
 
+      font-weight: 800;
+
       letter-spacing: 0.2px;
     }
 
 
-    .brand-text span {
+    .brand-subtitle {
 
       display: block;
 
@@ -167,7 +162,15 @@
     }
 
 
-    .top-status {
+    .topbar-right {
+
+      display: flex;
+
+      align-items: center;
+    }
+
+
+    .topbar-status {
 
       display: flex;
 
@@ -181,7 +184,8 @@
     }
 
 
-    .online-dot {
+    .topbar-status span,
+    .status-online span {
 
       width: 9px;
       height: 9px;
@@ -197,7 +201,7 @@
 
     .logout-btn {
 
-      margin-left: 10px;
+      margin-left: 15px;
 
       border: 1px solid #d7e2e8;
 
@@ -212,8 +216,6 @@
       font-size: 12px;
 
       font-weight: 600;
-
-      transition: 0.2s;
     }
 
 
@@ -242,17 +244,23 @@
     }
 
 
-    .page-title {
+    .page-heading {
 
-      color: white;
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
 
       margin-bottom: 20px;
     }
 
 
-    .page-title h2 {
+    .page-heading h1 {
 
       margin: 0;
+
+      color: white;
 
       font-size: 29px;
 
@@ -263,7 +271,7 @@
     }
 
 
-    .page-title p {
+    .page-heading p {
 
       margin:
         7px 0 0;
@@ -275,1216 +283,27 @@
     }
 
 
-    /* =====================================================
-       DATE PANEL
-    ===================================================== */
-
-    .date-panel {
-
-      background:
-        rgba(255,255,255,0.97);
-
-      border:
-        1px solid rgba(255,255,255,0.8);
-
-      border-radius: 16px;
-
-      padding:
-        17px 20px;
+    .status-online {
 
       display: flex;
 
       align-items: center;
 
-      justify-content: space-between;
+      gap: 9px;
 
-      margin-bottom: 20px;
-
-      box-shadow:
-        0 12px 35px rgba(0,0,0,0.13);
-
-      backdrop-filter:
-        blur(10px);
-    }
-
-
-    .date-left {
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 13px;
-    }
-
-
-    .date-icon {
-
-      width: 45px;
-      height: 45px;
-
-      border-radius: 12px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #e5f7fb,
-          #d8f0f5
-        );
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      font-size: 21px;
-    }
-
-
-    .date-label {
-
-      display: block;
-
-      color: #8a9aa4;
-
-      font-size: 10px;
-
-      text-transform: uppercase;
-
-      letter-spacing: 0.8px;
-
-      font-weight: 700;
-    }
-
-
-    #currentDate {
-
-      display: block;
-
-      margin-top: 4px;
-
-      color: #18384f;
-
-      font-size: 17px;
-
-      font-weight: 700;
-    }
-
-
-    .date-buttons {
-
-      display: flex;
-
-      gap: 8px;
-    }
-
-
-    .date-buttons button {
-
-      border:
-        1px solid #d8e3e8;
-
-      background: white;
-
-      color: #36586a;
-
-      border-radius: 9px;
-
-      padding:
-        9px 14px;
+      color: white;
 
       font-size: 12px;
 
       font-weight: 600;
 
-      transition: 0.2s;
-    }
-
-
-    .date-buttons button:hover {
-
-      background: #eef8fa;
-
-      border-color: #bcdbe2;
-    }
-
-
-    .today-btn {
-
       background:
-        linear-gradient(
-          135deg,
-          #087fa8,
-          #12a1b1
-        ) !important;
-
-      color: white !important;
-
-      border-color: transparent !important;
-
-      box-shadow:
-        0 5px 12px rgba(8,127,168,0.2);
-    }
-
-
-    /* =====================================================
-       MAIN GRID
-    ===================================================== */
-
-    .main-grid {
-
-      display: grid;
-
-      grid-template-columns:
-        330px minmax(0, 1fr);
-
-      gap: 20px;
-
-      align-items: start;
-    }
-
-
-    /* =====================================================
-       CARD
-    ===================================================== */
-
-    .card {
-
-      background:
-        rgba(255,255,255,0.98);
-
-      border:
-        1px solid rgba(255,255,255,0.8);
-
-      border-radius: 16px;
-
-      overflow: hidden;
-
-      box-shadow:
-        0 12px 35px rgba(0,0,0,0.13);
-
-      backdrop-filter:
-        blur(10px);
-    }
-
-
-    /* =====================================================
-       FORM HEADER
-    ===================================================== */
-
-    .card-header {
+        rgba(255,255,255,0.15);
 
       padding:
-        19px 21px;
+        9px 13px;
 
-      border-bottom:
-        1px solid #edf2f4;
+      border-radius: 20px;
 
-      background:
-        linear-gradient(
-          180deg,
-          #ffffff,
-          #fbfdfe
-        );
-    }
-
-
-    .card-header h3 {
-
-      margin: 0;
-
-      color: #17384f;
-
-      font-size: 16px;
-    }
-
-
-    .card-header p {
-
-      margin:
-        5px 0 0;
-
-      color: #84939d;
-
-      font-size: 11px;
-    }
-
-
-    /* =====================================================
-       FORM
-    ===================================================== */
-
-    .form-body {
-
-      padding: 21px;
-    }
-
-
-    .form-group {
-
-      margin-bottom: 15px;
-    }
-
-
-    .form-group label {
-
-      display: block;
-
-      margin-bottom: 6px;
-
-      color: #526c7b;
-
-      font-size: 11px;
-
-      font-weight: 700;
-    }
-
-
-    .form-group input,
-    .form-group select {
-
-      width: 100%;
-
-      height: 43px;
-
-      border:
-        1px solid #d7e2e7;
-
-      border-radius: 9px;
-
-      padding:
-        0 12px;
-
-      background: #ffffff;
-
-      color: #29485b;
-
-      outline: none;
-
-      font-size: 13px;
-
-      transition:
-        border-color .2s,
-        box-shadow .2s;
-    }
-
-
-    .form-group input::placeholder {
-
-      color: #a3afb6;
-    }
-
-
-    .form-group input:focus,
-    .form-group select:focus {
-
-      border-color: #11a0b3;
-
-      box-shadow:
-        0 0 0 3px
-        rgba(17,160,179,0.10);
-    }
-
-
-    .add-btn {
-
-      width: 100%;
-
-      height: 45px;
-
-      border: 0;
-
-      border-radius: 9px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087fa8,
-          #12a1b1
-        );
-
-      color: white;
-
-      font-size: 13px;
-
-      font-weight: 700;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 6px 15px rgba(8,127,168,0.20);
-
-      transition:
-        transform .15s,
-        box-shadow .15s;
-    }
-
-
-    .add-btn:hover {
-
-      transform:
-        translateY(-1px);
-
-      box-shadow:
-        0 8px 18px rgba(8,127,168,0.27);
-    }
-
-
-    #message {
-
-      min-height: 20px;
-
-      margin-top: 12px;
-
-      text-align: center;
-
-      font-size: 12px;
-
-      line-height: 1.4;
-    }
-
-
-    /* =====================================================
-       SCHEDULE
-    ===================================================== */
-
-    .schedule-card {
-
-      min-width: 0;
-    }
-
-
-    .schedule-header {
-
-      padding:
-        18px 21px;
-
-      border-bottom:
-        1px solid #edf2f4;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      background:
-        linear-gradient(
-          180deg,
-          #ffffff,
-          #fbfdfe
-        );
-    }
-
-
-    .schedule-header-left {
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 10px;
-    }
-
-
-    .schedule-header-icon {
-
-      width: 34px;
-      height: 34px;
-
-      border-radius: 9px;
-
-      background: #e8f7fa;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      font-size: 16px;
-    }
-
-
-    .schedule-header h3 {
-
-      margin: 0;
-
-      color: #17384f;
-
-      font-size: 16px;
-    }
-
-
-    .schedule-header span {
-
-      color: #83939d;
-
-      font-size: 11px;
-    }
-
-
-    #appointments {
-
-      padding:
-        0 15px 15px;
-    }
-
-
-    /* =====================================================
-       TIME SLOT
-    ===================================================== */
-
-    .time-slot {
-
-      min-height: 69px;
-
-      display: grid;
-
-      grid-template-columns:
-        72px minmax(0,1fr) auto;
-
-      align-items: center;
-
-      gap: 10px;
-
-      border-bottom:
-        1px solid #edf2f4;
-
-      padding:
-        6px 5px;
-
-      transition:
-        background .15s;
-    }
-
-
-    .time-slot:last-child {
-
-      border-bottom: 0;
-    }
-
-
-    .time-slot:hover {
-
-      background:
-        rgba(243,249,251,0.8);
-    }
-
-
-    .slot-time {
-
-      color: #3c6073;
-
-      font-size: 13px;
-
-      font-weight: 800;
-
-      padding-left: 3px;
-    }
-
-
-    .slot-content {
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 17px;
-
-      min-width: 0;
-    }
-
-
-    .patient-info {
-
-      min-width: 0;
-
-      display: flex;
-
-      flex-direction: column;
-
-      gap: 4px;
-    }
-
-
-    .patient-name {
-
-      color: #18394e;
-
-      font-size: 14px;
-
-      font-weight: 700;
-
-      overflow: hidden;
-
-      text-overflow: ellipsis;
-
-      white-space: nowrap;
-    }
-
-
-    .patient-card {
-
-      color: #82939e;
-
-      font-size: 10px;
-    }
-
-
-    .status {
-
-      display: inline-flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      padding:
-        5px 10px;
-
-      border-radius: 30px;
-
-      background: #edf4f7;
-
-      color: #477084;
-
-      font-size: 10px;
-
-      font-weight: 800;
-
-      white-space: nowrap;
-    }
-
-
-    .status-arrived {
-
-      background: #fff5dc;
-
-      color: #a86d00;
-    }
-
-
-    .status-finished {
-
-      background: #e7f7ee;
-
-      color: #24804f;
-    }
-
-
-    .status-cancelled {
-
-      background: #fbeaea;
-
-      color: #a84c4c;
-    }
-
-
-    /* =====================================================
-       ACTIONS
-    ===================================================== */
-
-    .appointment-actions {
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: flex-end;
-
-      gap: 5px;
-
-      flex-wrap: wrap;
-    }
-
-
-    .appointment-actions button {
-
-      border:
-        1px solid #d7e2e7;
-
-      background: white;
-
-      color: #486575;
-
-      border-radius: 7px;
-
-      padding:
-        6px 9px;
-
-      font-size: 10px;
-
-      font-weight: 700;
-
-      cursor: pointer;
-
-      transition: 0.15s;
-    }
-
-
-    .appointment-actions button:hover {
-
-      background: #f0f7f9;
-
-      transform:
-        translateY(-1px);
-    }
-
-
-    .appointment-actions .arrived-btn {
-
-      color: #8a6400;
-
-      border-color: #ead9a7;
-
-      background: #fffaf0;
-    }
-
-
-    .appointment-actions .finish-btn {
-
-      color: #237448;
-
-      border-color: #c8e4d3;
-
-      background: #f4fbf7;
-    }
-
-
-    .appointment-actions .cancel-btn {
-
-      color: #9b4a4a;
-
-      border-color: #ead0d0;
-
-      background: #fff7f7;
-    }
-
-
-    .appointment-actions .delete-btn {
-
-      color: #9c5555;
-
-      border-color: #e8d4d4;
-    }
-
-
-    /* =====================================================
-       EMPTY SLOT
-    ===================================================== */
-
-    .empty-slot {
-
-      color: #a2afb6;
-
-      border-radius: 8px;
-    }
-
-
-    .empty-slot .slot-content {
-
-      cursor: pointer;
-
-      min-height: 52px;
-
-      display: flex;
-
-      align-items: center;
-    }
-
-
-    .empty-slot .slot-content span {
-
-      font-size: 11px;
-
-      color: #a2afb6;
-    }
-
-
-    .empty-slot:hover {
-
-      background:
-        #f5fafb;
-    }
-
-
-    .empty-slot:hover .slot-content span {
-
-      color: #468295;
-    }
-
-
-    /* =====================================================
-       LOADING
-    ===================================================== */
-
-    .loading {
-
-      padding: 45px 20px;
-
-      text-align: center;
-
-      color: #83949e;
-
-      font-size: 12px;
-    }
-
-
-    /* =====================================================
-       ERROR
-    ===================================================== */
-
-    .error-box {
-
-      margin: 15px 0;
-
-      padding: 15px;
-
-      border:
-        1px solid #efcccc;
-
-      background: #fff4f4;
-
-      color: #a64242;
-
-      border-radius: 9px;
-
-      font-size: 12px;
-
-      line-height: 1.5;
-    }
-
-
-    /* =====================================================
-       LOGIN
-    ===================================================== */
-
-    .login-page {
-
-      min-height: 100vh;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      padding: 25px;
-
-      background:
-        linear-gradient(
-          135deg,
-          rgba(7,72,102,0.88),
-          rgba(10,143,158,0.78)
-        ),
-        url("https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=2200&q=85");
-
-      background-size: cover;
-
-      background-position: center;
-    }
-
-
-    .login-box {
-
-      width: 100%;
-
-      max-width: 410px;
-
-      background:
-        rgba(255,255,255,0.97);
-
-      border:
-        1px solid rgba(255,255,255,0.8);
-
-      border-radius: 18px;
-
-      padding: 32px;
-
-      box-shadow:
-        0 20px 55px rgba(0,0,0,0.22);
-
-      backdrop-filter:
-        blur(12px);
-    }
-
-
-    .login-logo {
-
-      width: 62px;
-      height: 62px;
-
-      margin: 0 auto 15px;
-
-      border-radius: 17px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087fa8,
-          #12a1b1
-        );
-
-      color: white;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      font-size: 36px;
-
-      box-shadow:
-        0 8px 20px rgba(8,127,168,0.23);
-    }
-
-
-    .login-box h2 {
-
-      margin:
-        0;
-
-      text-align: center;
-
-      color: #17384f;
-
-      font-size: 21px;
-    }
-
-
-    .login-box p {
-
-      text-align: center;
-
-      color: #81929c;
-
-      font-size: 12px;
-
-      margin:
-        7px 0 22px;
-    }
-
-
-    .login-box input {
-
-      width: 100%;
-
-      height: 45px;
-
-      margin-top: 10px;
-
-      padding:
-        0 13px;
-
-      border:
-        1px solid #d5e0e5;
-
-      border-radius: 9px;
-
-      outline: none;
-
-      font-size: 13px;
-    }
-
-
-    .login-box input:focus {
-
-      border-color: #11a0b3;
-
-      box-shadow:
-        0 0 0 3px
-        rgba(17,160,179,0.10);
-    }
-
-
-    .login-box button {
-
-      width: 100%;
-
-      height: 45px;
-
-      margin-top: 16px;
-
-      border: 0;
-
-      border-radius: 9px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087fa8,
-          #12a1b1
-        );
-
-      color: white;
-
-      cursor: pointer;
-
-      font-weight: 700;
-
-      box-shadow:
-        0 7px 17px rgba(8,127,168,0.2);
-    }
-
-
-    #loginMessage {
-
-      margin-top: 12px;
-
-      text-align: center;
-
-      font-size: 12px;
-
-      line-height: 1.4;
-    }
-
-
-    /* =====================================================
-       MOBILE
-    ===================================================== */
-
-    @media (max-width: 1050px) {
-
-      .main-grid {
-
-        grid-template-columns:
-          290px minmax(0,1fr);
-      }
-
-
-      .appointment-actions button {
-
-        padding:
-          5px 7px;
-
-        font-size: 9px;
-      }
-
-    }
-
-
-    @media (max-width: 850px) {
-
-      .main-grid {
-
-        grid-template-columns: 1fr;
-      }
-
-
-      .form-body {
-
-        display: grid;
-
-        grid-template-columns:
-          repeat(2, minmax(0,1fr));
-
-        gap: 0 15px;
-      }
-
-
-      .form-group {
-
-        margin-bottom: 14px;
-      }
-
-
-      .add-btn,
-      #message {
-
-        grid-column:
-          1 / -1;
-      }
-
-    }
-
-
-    @media (max-width: 650px) {
-
-      body {
-
-        background-attachment:
-          scroll;
-      }
-
-
-      .topbar {
-
-        height: 68px;
-
-        padding:
-          0 15px;
-      }
-
-
-      .brand-icon {
-
-        width: 39px;
-        height: 39px;
-
-        font-size: 24px;
-      }
-
-
-      .brand-text h1 {
-
-        font-size: 15px;
-      }
-
-
-      .brand-text span {
-
-        font-size: 9px;
-      }
-
-
-      .top-status {
-
-        display: none;
-      }
-
-
-      .page {
-
-        padding:
-          18px 12px 30px;
-      }
-
-
-      .page-title h2 {
-
-        font-size: 23px;
-      }
-
-
-      .date-panel {
-
-        display: block;
-
-        padding: 15px;
-      }
-
-
-      .date-buttons {
-
-        margin-top: 13px;
-
-        flex-wrap: wrap;
-      }
-
-
-      .date-buttons button {
-
-        flex: 1;
-
-        min-width: 90px;
-      }
-
-
-      .form-body {
-
-        display: block;
-      }
-
-
-      .time-slot {
-
-        grid-template-columns:
-          58px minmax(0,1fr);
-
-        padding:
-          10px 3px;
-      }
-
-
-      .slot-content {
-
-        display: block;
-      }
-
-
-      .slot-content .status {
-
-        display: inline-flex;
-
-        margin-top: 5px;
-      }
-
-
-      .appointment-actions {
-
-        grid-column:
-          2;
-
-        justify-content: flex-start;
-
-        margin-top: 5px;
-      }
-
-
-      .schedule-header {
-
-        padding:
-          15px;
-      }
-
-
-      #appointments {
-
-        padding:
-          0 9px 9px;
-      }
-
-    }
-
-
-    /* =====================================================
-       SCROLLBAR
-    ===================================================== */
-
-    ::-webkit-scrollbar {
-
-      width: 9px;
-    }
-
-
-    ::-webkit-scrollbar-track {
-
-      background: rgba(255,255,255,0.25);
-    }
-
-
-    ::-webkit-scrollbar-thumb {
-
-      background: rgba(19,92,113,0.45);
-
-      border-radius: 10px;
-    }
-
-
-  </style>
-
-</head>
-
-
-<body>
-
-
-  <div id="app">
-
-    <div class="loading">
-
-      Po ngarkohet sistemi...
-
-    </div>
-
-  </div>
-
-
-  <script src="app.js"></script>
-
-</body>
-
-</html>
+      backdrop-f
+```
