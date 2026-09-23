@@ -802,3 +802,272 @@ button:active {
     justify-content: flex-start;
   }
 }
+/* =========================================================
+   TABELA SPITALORE E ORAREVE
+   ========================================================= */
+
+.schedule-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  background: #ffffff;
+
+  border: 1px solid #d8e3e9;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 18px rgba(30, 70, 90, 0.07);
+}
+
+/* HEADER */
+
+.schedule-table thead th {
+  background:
+    linear-gradient(
+      135deg,
+      #075985,
+      #087ea8
+    );
+
+  color: white;
+
+  padding: 15px 18px;
+
+  text-align: left;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.7px;
+
+  text-transform: uppercase;
+}
+
+.schedule-table thead th:first-child {
+  width: 130px;
+
+  text-align: center;
+}
+
+/* RRESHTAT */
+
+.schedule-table tbody tr {
+  background: white;
+
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.schedule-table tbody tr:hover {
+  background: #f4fafc;
+}
+
+/* QELIZAT */
+
+.schedule-table td {
+  padding: 11px 18px;
+
+  border-bottom: 1px solid #e7eef2;
+
+  font-size: 14px;
+}
+
+/* ORA */
+
+.schedule-table .schedule-time {
+  width: 130px;
+
+  text-align: center;
+
+  color: #064568;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  border-right: 1px solid #e1eaee;
+}
+
+/* GJENDJA */
+
+.schedule-status {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+/* PIKA E STATUSIT */
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+
+  display: inline-block;
+
+  border-radius: 50%;
+
+  margin-right: 8px;
+
+  background: #16a36f;
+}
+
+/* ORAR I LIRË */
+
+.schedule-free {
+  color: #16845d;
+
+  font-weight: 600;
+}
+
+.schedule-free .status-dot {
+  background: #19a974;
+
+  box-shadow:
+    0 0 0 4px rgba(25, 169, 116, 0.10);
+}
+
+/* ORAR I ZËNË */
+
+.schedule-busy {
+  color: #b44b48;
+
+  font-weight: 600;
+}
+
+.schedule-busy .status-dot {
+  background: #d9534f;
+
+  box-shadow:
+    0 0 0 4px rgba(217, 83, 79, 0.10);
+}
+
+/* BUTONI ZGJIDH */
+
+.schedule-select {
+  padding: 7px 15px;
+
+  border-radius: 6px;
+
+  background: #075985;
+
+  color: white;
+
+  border: none;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.schedule-select:hover {
+  background: #064568;
+
+  transform: none;
+}
+
+/* RRESHTI I LIRË */
+
+.schedule-row-free:hover {
+  box-shadow:
+    inset 4px 0 0 #19a974;
+}
+
+/* RRESHTI I ZËNË */
+
+.schedule-row-busy {
+  background: #fff8f7 !important;
+}
+
+.schedule-row-busy:hover {
+  background: #fff3f2 !important;
+
+  box-shadow:
+    inset 4px 0 0 #d9534f;
+}
+
+/* FUND I TABELËS */
+
+.schedule-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   TITULLI I KALEND ARIT
+   ========================================================= */
+
+.schedule-container {
+  margin-top: 20px;
+}
+
+.schedule-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+}
+
+.schedule-title {
+  margin: 0;
+
+  color: #064568;
+
+  font-size: 20px;
+
+  font-weight: 700;
+}
+
+.schedule-date {
+  color: #71808c;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .schedule-table thead th {
+    padding: 12px 10px;
+
+    font-size: 10px;
+  }
+
+  .schedule-table td {
+    padding: 10px;
+  }
+
+  .schedule-table .schedule-time {
+    width: 85px;
+
+    font-size: 14px;
+  }
+
+  .schedule-status {
+    gap: 8px;
+  }
+
+  .schedule-select {
+    padding: 6px 10px;
+
+    font-size: 11px;
+  }
+}
