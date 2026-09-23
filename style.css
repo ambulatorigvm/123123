@@ -1261,3 +1261,408 @@ button:active {
   }
 
 }
+/* =========================================
+   GVM - TABELA PROFESIONALE E ORAREVE
+========================================= */
+
+.schedule-table {
+  width: 100%;
+  margin: 28px 0 40px;
+  background: #fff;
+  border: 1px solid #dce7ef;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(16, 67, 100, 0.08);
+}
+
+/* KOKA E TABELËS */
+
+.schedule-header {
+  display: grid;
+  grid-template-columns: 110px minmax(220px, 1fr) 180px 340px;
+  align-items: center;
+  min-height: 58px;
+  background: linear-gradient(
+    135deg,
+    #075985,
+    #0875b9
+  );
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+
+.schedule-header > div {
+  padding: 0 20px;
+}
+
+
+/* RRESHTI */
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 110px minmax(220px, 1fr) 180px 340px;
+  align-items: center;
+  min-height: 72px;
+  border-top: 1px solid #edf2f6;
+  background: #ffffff;
+  transition:
+    background .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+.schedule-row:hover {
+  background: #f8fcff;
+  box-shadow: inset 4px 0 0 #0b8dcc;
+}
+
+.schedule-row > div {
+  padding: 12px 20px;
+}
+
+
+/* ORA */
+
+.schedule-time {
+  font-size: 18px;
+  font-weight: 700;
+  color: #075985;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* PACIENTI */
+
+.schedule-patient {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  color: #243746;
+  font-size: 15px;
+}
+
+.schedule-patient strong {
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ORAR I LIRË */
+
+.schedule-row-free {
+  cursor: pointer;
+  background: #fbfdff;
+}
+
+.schedule-row-free .schedule-patient {
+  color: #8a9aa6;
+  font-size: 14px;
+}
+
+.free-dot {
+  width: 9px;
+  height: 9px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: #2fbf71;
+  box-shadow: 0 0 0 4px #e9f8f0;
+}
+
+
+/* STATUS */
+
+.schedule-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 105px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-free {
+  background: #edf9f2;
+  color: #16834b;
+}
+
+.status-planned {
+  background: #edf6ff;
+  color: #1769aa;
+}
+
+.status-arrived {
+  background: #fff5e8;
+  color: #b86b08;
+}
+
+.status-finished {
+  background: #edf9f2;
+  color: #16834b;
+}
+
+.status-cancelled {
+  background: #fff0f0;
+  color: #c43232;
+}
+
+
+/* VEPRIMET */
+
+.schedule-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.schedule-actions button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+
+/* NDRYSHO */
+
+.schedule-edit-button {
+  background: #0875b9;
+  color: white;
+  box-shadow: 0 2px 5px rgba(8,117,185,.15);
+}
+
+.schedule-edit-button:hover {
+  background: #075985;
+  transform: translateY(-1px);
+}
+
+
+/* KA ARDHUR */
+
+.schedule-arrived-button {
+  background: #fff8ed;
+  color: #a95e00;
+  border-color: #f4d8a5 !important;
+}
+
+.schedule-arrived-button:hover {
+  background: #fff0d6;
+}
+
+
+/* PËRFUNDO */
+
+.schedule-finished-button {
+  background: #edf9f2;
+  color: #16834b;
+  border-color: #bce8ce !important;
+}
+
+.schedule-finished-button:hover {
+  background: #ddf5e7;
+}
+
+
+/* ANULO */
+
+.schedule-cancel-button {
+  background: white;
+  color: #c43232;
+  border-color: #efcaca !important;
+}
+
+.schedule-cancel-button:hover {
+  background: #fff0f0;
+}
+
+
+/* REZERVO */
+
+.schedule-book-button {
+  background: white;
+  color: #0875b9;
+  border: 1px solid #b9d9ea !important;
+}
+
+.schedule-book-button:hover {
+  background: #edf8fd;
+  border-color: #0875b9 !important;
+}
+
+
+/* NGJYRË E LEHTË PËR STATUSIN */
+
+.schedule-row.planned {
+  box-shadow: inset 3px 0 0 #0875b9;
+}
+
+.schedule-row.arrived {
+  box-shadow: inset 3px 0 0 #e59a20;
+}
+
+.schedule-row.finished {
+  box-shadow: inset 3px 0 0 #2fbf71;
+}
+
+.schedule-row.cancelled {
+  opacity: .72;
+  box-shadow: inset 3px 0 0 #d95353;
+}
+
+
+/* =========================================
+   FORMULARI
+========================================= */
+
+.appointment-form {
+  background: white;
+  border: 1px solid #dce7ef;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 25px;
+  box-shadow: 0 6px 24px rgba(16,67,100,.06);
+}
+
+.appointment-form h3 {
+  margin: 0 0 18px;
+  color: #075985;
+  font-size: 18px;
+}
+
+.appointment-form input,
+.appointment-form select {
+  height: 44px;
+  border: 1px solid #d3e0e8;
+  border-radius: 9px;
+  padding: 0 13px;
+  background: #fbfdff;
+  color: #243746;
+  font-family: inherit;
+  outline: none;
+}
+
+.appointment-form input:focus,
+.appointment-form select:focus {
+  border-color: #0875b9;
+  box-shadow: 0 0 0 3px rgba(8,117,185,.10);
+}
+
+.appointment-form button {
+  height: 44px;
+  border: none;
+  border-radius: 9px;
+  background: #0875b9;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.appointment-form button:hover {
+  background: #075985;
+}
+
+
+/* =========================================
+   EDIT MODAL
+========================================= */
+
+#editModal > div {
+  border: 1px solid #dce7ef;
+}
+
+#editModal h3 {
+  font-size: 20px;
+  border-bottom: 1px solid #edf2f6;
+  padding-bottom: 15px;
+}
+
+#editModal input,
+#editModal select {
+  height: 45px;
+  background: #fbfdff;
+}
+
+#editModal input:focus,
+#editModal select:focus {
+  outline: none;
+  border-color: #0875b9 !important;
+  box-shadow: 0 0 0 3px rgba(8,117,185,.10);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .schedule-header {
+    display: none;
+  }
+
+  .schedule-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0;
+    padding: 10px 14px;
+  }
+
+  .schedule-row > div {
+    padding: 7px 8px;
+  }
+
+  .schedule-status {
+    grid-column: 2;
+  }
+
+  .schedule-actions {
+    grid-column: 2;
+  }
+
+  .schedule-time {
+    grid-row: 1 / span 3;
+    align-self: start;
+    padding-top: 13px !important;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .schedule-row {
+    grid-template-columns: 65px 1fr;
+  }
+
+  .schedule-time {
+    font-size: 16px;
+  }
+
+  .schedule-patient {
+    font-size: 14px;
+  }
+
+  .schedule-actions button {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+
+}
