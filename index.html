@@ -10,36 +10,1147 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <meta
-    name="description"
-    content="AMBULATORI GVM - Sistemi i menaxhimit të vizitave"
-  >
+  <title>AMBULATORI GVM</title>
 
-  <title>
-    AMBULATORI GVM
-  </title>
+  <style>
+
+    /* =====================================================
+       RESET
+       ===================================================== */
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      background: #f3f7fa;
+      color: #172b3a;
+    }
 
 
-  <!-- ==================================================
-       CSS
-       ================================================== -->
+    /* =====================================================
+       LOGIN
+       ===================================================== */
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+    .login-page {
+      min-height: 100vh;
 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #e9f5f8 0%,
+          #f7fafc 48%,
+          #e9f2f7 100%
+        );
+    }
+
+
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+
+      padding: 42px;
+
+      background: #ffffff;
+
+      border: 1px solid #e0e9ef;
+
+      border-radius: 20px;
+
+      box-shadow:
+        0 25px 70px rgba(24, 61, 82, 0.13);
+    }
+
+
+    .login-logo {
+      display: flex;
+      justify-content: center;
+
+      margin-bottom: 22px;
+    }
+
+
+    .login-logo-icon {
+      width: 70px;
+      height: 70px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 18px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #087c9c,
+          #075c78
+        );
+
+      color: white;
+
+      font-size: 32px;
+      font-weight: 800;
+
+      box-shadow:
+        0 12px 30px rgba(7, 108, 137, 0.25);
+    }
+
+
+    .login-card h1 {
+      text-align: center;
+
+      color: #183447;
+
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+
+    .login-subtitle {
+      margin-top: 7px;
+      margin-bottom: 30px;
+
+      text-align: center;
+
+      color: #7c8c99;
+
+      font-size: 14px;
+    }
+
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+
+      gap: 7px;
+    }
+
+
+    .login-card .form-group {
+      margin-bottom: 17px;
+    }
+
+
+    .form-group label {
+      color: #3c5060;
+
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      height: 45px;
+
+      padding: 0 13px;
+
+      border: 1px solid #d7e2e9;
+
+      border-radius: 9px;
+
+      background: #ffffff;
+
+      color: #1c3445;
+
+      font-size: 14px;
+
+      outline: none;
+
+      transition: 0.2s;
+    }
+
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #0980a2;
+
+      box-shadow:
+        0 0 0 3px rgba(9, 128, 162, 0.10);
+    }
+
+
+    .form-group input::placeholder {
+      color: #a3afb8;
+    }
+
+
+    .login-button {
+      width: 100%;
+      height: 47px;
+
+      margin-top: 5px;
+
+      border: none;
+      border-radius: 9px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #087c9c,
+          #075d79
+        );
+
+      color: white;
+
+      font-size: 14px;
+      font-weight: 750;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 8px 20px rgba(7, 108, 137, 0.20);
+
+      transition: 0.2s;
+    }
+
+
+    .login-button:hover {
+      transform: translateY(-1px);
+
+      box-shadow:
+        0 11px 25px rgba(7, 108, 137, 0.25);
+    }
+
+
+    .login-message {
+      min-height: 20px;
+
+      margin-top: 14px;
+
+      text-align: center;
+
+      color: #748592;
+
+      font-size: 13px;
+    }
+
+
+    .login-message.error {
+      color: #c03939;
+    }
+
+
+    /* =====================================================
+       APPLICATION
+       ===================================================== */
+
+    .app {
+      min-height: 100vh;
+
+      background: #f3f7fa;
+    }
+
+
+    /* =====================================================
+       HEADER
+       ===================================================== */
+
+    .top-header {
+      min-height: 76px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 34px;
+
+      background: #ffffff;
+
+      border-bottom: 1px solid #e3ebf0;
+
+      box-shadow:
+        0 2px 10px rgba(20, 50, 70, 0.04);
+    }
+
+
+    .brand {
+      display: flex;
+      align-items: center;
+
+      gap: 13px;
+    }
+
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #087c9c,
+          #075d79
+        );
+
+      color: #ffffff;
+
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+
+    .brand-title {
+      color: #193446;
+
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+
+    .brand-subtitle {
+      margin-top: 2px;
+
+      color: #8797a3;
+
+      font-size: 12px;
+    }
+
+
+    .header-right {
+      display: flex;
+      align-items: center;
+
+      gap: 20px;
+    }
+
+
+    .system-status {
+      display: flex;
+      align-items: center;
+
+      gap: 7px;
+
+      color: #738593;
+
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: #2eae72;
+
+      box-shadow:
+        0 0 0 4px rgba(46, 174, 114, 0.10);
+    }
+
+
+    .logout-button {
+      height: 38px;
+
+      padding: 0 17px;
+
+      border: 1px solid #d6e0e7;
+
+      border-radius: 8px;
+
+      background: white;
+
+      color: #506473;
+
+      font-size: 13px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+
+    .logout-button:hover {
+      background: #f3f7f9;
+    }
+
+
+    /* =====================================================
+       MAIN
+       ===================================================== */
+
+    .main-container {
+      width: 100%;
+      max-width: 1450px;
+
+      margin: auto;
+
+      padding: 30px 34px 50px;
+    }
+
+
+    /* =====================================================
+       DATE
+       ===================================================== */
+
+    .date-navigation {
+      min-height: 60px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 20px;
+    }
+
+
+    .date-center {
+      display: flex;
+      align-items: center;
+
+      gap: 14px;
+    }
+
+
+    .selected-date {
+      color: #253b4c;
+
+      font-size: 18px;
+      font-weight: 750;
+
+      text-transform: capitalize;
+    }
+
+
+    .date-arrow {
+      width: 42px;
+      height: 42px;
+
+      border: 1px solid #d6e1e8;
+
+      border-radius: 9px;
+
+      background: #ffffff;
+
+      color: #3f5667;
+
+      font-size: 27px;
+
+      cursor: pointer;
+    }
+
+
+    .date-arrow:hover {
+      background: #edf7fa;
+
+      color: #087593;
+
+      border-color: #b8d4df;
+    }
+
+
+    .today-button {
+      height: 32px;
+
+      padding: 0 13px;
+
+      border: 1px solid #b9d6df;
+
+      border-radius: 7px;
+
+      background: #edf7fa;
+
+      color: #087593;
+
+      font-size: 12px;
+      font-weight: 750;
+
+      cursor: pointer;
+    }
+
+
+    /* =====================================================
+       NEW APPOINTMENT
+       ===================================================== */
+
+    .new-appointment-card {
+      margin-bottom: 24px;
+
+      padding: 24px;
+
+      background: #ffffff;
+
+      border: 1px solid #e0e8ee;
+
+      border-radius: 15px;
+
+      box-shadow:
+        0 6px 20px rgba(30, 60, 80, 0.05);
+    }
+
+
+    .section-heading {
+      margin-bottom: 20px;
+    }
+
+
+    .section-heading h2,
+    .schedule-header h2 {
+      color: #203747;
+
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+
+    .section-heading p,
+    .schedule-header p {
+      margin-top: 3px;
+
+      color: #8998a4;
+
+      font-size: 12px;
+    }
+
+
+    .appointment-form {
+      display: grid;
+
+      grid-template-columns:
+        1fr
+        1fr
+        1fr
+        180px
+        auto;
+
+      gap: 15px;
+
+      align-items: end;
+    }
+
+
+    .primary-button {
+      height: 45px;
+
+      padding: 0 20px;
+
+      border: none;
+
+      border-radius: 9px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #087c9c,
+          #075d79
+        );
+
+      color: white;
+
+      font-size: 13px;
+      font-weight: 750;
+
+      cursor: pointer;
+    }
+
+
+    .primary-button:hover {
+      opacity: 0.94;
+    }
+
+
+    .secondary-button {
+      height: 44px;
+
+      padding: 0 20px;
+
+      border: 1px solid #d4dfe6;
+
+      border-radius: 9px;
+
+      background: white;
+
+      color: #506473;
+
+      font-size: 13px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+
+    .form-message {
+      min-height: 20px;
+
+      margin-top: 12px;
+
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+
+    .form-message.success {
+      color: #27855d;
+    }
+
+
+    .form-message.error {
+      color: #c23f3f;
+    }
+
+
+    /* =====================================================
+       SCHEDULE
+       ===================================================== */
+
+    .schedule-card {
+      overflow: hidden;
+
+      background: #ffffff;
+
+      border: 1px solid #e0e8ee;
+
+      border-radius: 15px;
+
+      box-shadow:
+        0 6px 20px rgba(30, 60, 80, 0.05);
+    }
+
+
+    .schedule-header {
+      min-height: 78px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 24px;
+
+      border-bottom: 1px solid #e7edf1;
+    }
+
+
+    .appointment-count {
+      padding: 7px 13px;
+
+      border-radius: 20px;
+
+      background: #edf7fa;
+
+      color: #087593;
+
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+
+    .schedule-table-wrapper {
+      width: 100%;
+
+      overflow-x: auto;
+    }
+
+
+    .schedule-table {
+      width: 100%;
+      min-width: 900px;
+
+      border-collapse: collapse;
+
+      table-layout: fixed;
+    }
+
+
+    .schedule-table thead th {
+      height: 45px;
+
+      padding: 0 18px;
+
+      background: #f7f9fa;
+
+      border-bottom: 1px solid #dde6ec;
+
+      color: #748491;
+
+      font-size: 10px;
+      font-weight: 800;
+
+      letter-spacing: 0.7px;
+
+      text-align: left;
+    }
+
+
+    .time-column,
+    .time-cell {
+      width: 105px;
+    }
+
+
+    .status-column,
+    .status-cell {
+      width: 145px;
+    }
+
+
+    .actions-column,
+    .actions-cell {
+      width: 350px;
+    }
+
+
+    .schedule-row {
+      height: 64px;
+
+      border-bottom: 1px solid #edf1f4;
+    }
+
+
+    .schedule-row:hover {
+      background: #fbfdfe;
+    }
+
+
+    .schedule-table td {
+      padding: 9px 18px;
+
+      vertical-align: middle;
+    }
+
+
+    .time-cell {
+      border-right: 1px solid #edf1f4;
+    }
+
+
+    .time-value {
+      color: #294154;
+
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+
+    .patient-wrapper {
+      display: flex;
+      align-items: center;
+
+      gap: 12px;
+    }
+
+
+    .patient-avatar {
+      width: 36px;
+      height: 36px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      flex-shrink: 0;
+
+      border-radius: 10px;
+
+      background: #e8f3f6;
+
+      color: #087593;
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+
+    .patient-name {
+      color: #293e4e;
+
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+
+    .patient-label {
+      margin-top: 1px;
+
+      color: #9aa6b0;
+
+      font-size: 10px;
+    }
+
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 90px;
+      height: 27px;
+
+      padding: 0 10px;
+
+      border-radius: 20px;
+
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+
+    .status-planned {
+      background: #fff5d9;
+      color: #a36b00;
+    }
+
+
+    .status-arrived {
+      background: #e6f3fb;
+      color: #16709f;
+    }
+
+
+    .status-finished {
+      background: #e5f6ed;
+      color: #218458;
+    }
+
+
+    .status-cancelled {
+      background: #fbe9e9;
+      color: #b94343;
+    }
+
+
+    .status-badge.free {
+      background: #f0f3f5;
+      color: #8a98a2;
+    }
+
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 6px;
+    }
+
+
+    .action-button {
+      height: 29px;
+
+      padding: 0 9px;
+
+      border-radius: 6px;
+
+      font-size: 10px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+
+    .action-button.edit {
+      border: 1px solid #c8dce5;
+
+      background: #f3fafc;
+
+      color: #087593;
+    }
+
+
+    .action-button.arrived {
+      border: 1px solid #c9dfee;
+
+      background: #f3f9fd;
+
+      color: #16709f;
+    }
+
+
+    .action-button.finished {
+      border: 1px solid #c7e1d3;
+
+      background: #f3fbf7;
+
+      color: #218458;
+    }
+
+
+    .action-button.cancel {
+      border: 1px solid #ead1d1;
+
+      background: #fff8f8;
+
+      color: #b94343;
+    }
+
+
+    .action-button.delete {
+      border: 1px solid #e8c8c8;
+
+      background: #fff7f7;
+
+      color: #c03939;
+    }
+
+
+    .empty-slot {
+      display: flex;
+      align-items: center;
+
+      gap: 9px;
+
+      color: #9aa7b1;
+
+      font-size: 12px;
+    }
+
+
+    .empty-dot {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: #cbd4da;
+    }
+
+
+    .no-action {
+      color: #c2cbd1;
+    }
+
+
+    .loading-cell,
+    .error-cell {
+      height: 100px;
+
+      text-align: center !important;
+
+      color: #82929e;
+    }
+
+
+    .error-cell {
+      color: #c03939;
+    }
+
+
+    /* =====================================================
+       MODAL
+       ===================================================== */
+
+    .modal-overlay {
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 1000;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      background: rgba(17, 35, 48, 0.48);
+
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+
+      transition: 0.2s;
+    }
+
+
+    .modal-overlay.show {
+      opacity: 1;
+
+      visibility: visible;
+
+      pointer-events: auto;
+    }
+
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+
+      background: white;
+
+      border-radius: 16px;
+
+      box-shadow:
+        0 25px 70px rgba(10, 35, 50, 0.22);
+
+      overflow: hidden;
+    }
+
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+
+      padding: 22px 24px;
+
+      border-bottom: 1px solid #e8edf1;
+    }
+
+
+    .modal-header h2 {
+      color: #203747;
+
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+
+    .modal-header p {
+      margin-top: 3px;
+
+      color: #8998a4;
+
+      font-size: 12px;
+    }
+
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+
+      border: none;
+
+      border-radius: 7px;
+
+      background: #f1f4f6;
+
+      color: #687985;
+
+      font-size: 22px;
+
+      cursor: pointer;
+    }
+
+
+    .modal-body {
+      display: grid;
+
+      gap: 16px;
+
+      padding: 23px 24px;
+    }
+
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+
+      gap: 9px;
+
+      padding: 16px 24px 21px;
+
+      border-top: 1px solid #edf1f4;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+       ===================================================== */
+
+    @media (max-width: 1100px) {
+
+      .appointment-form {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .appointment-form .primary-button {
+        width: 100%;
+      }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+      .top-header {
+        padding: 0 16px;
+      }
+
+      .brand-subtitle,
+      .system-status {
+        display: none;
+      }
+
+      .main-container {
+        padding: 20px 14px 40px;
+      }
+
+      .appointment-form {
+        grid-template-columns: 1fr;
+      }
+
+      .date-center {
+        gap: 7px;
+      }
+
+      .selected-date {
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .schedule-table {
+        min-width: 900px;
+      }
+
+    }
+
+
+    @media (max-width: 480px) {
+
+      .login-page {
+        padding: 15px;
+      }
+
+      .login-card {
+        padding: 30px 20px;
+      }
+
+      .login-card h1 {
+        font-size: 23px;
+      }
+
+      .header-right {
+        gap: 8px;
+      }
+
+      .logout-button {
+        padding: 0 12px;
+      }
+
+    }
+
+  </style>
 
 </head>
 
 
 <body>
-
-
-  <!-- ==================================================
-       APLIKACIONI
-       Përmbajtja krijohet nga app.js
-       ================================================== -->
 
 
   <div id="app">
@@ -54,30 +1165,22 @@
         color:#718096;
       "
     >
-
       Po ngarkohet...
-
     </div>
 
   </div>
 
 
-  <!-- ==================================================
-       SUPABASE
-       ================================================== -->
+  <!-- SUPABASE -->
 
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
 
-  <!-- ==================================================
-       APP.JS
-       ================================================== -->
+  <!-- APLIKACIONI -->
 
-  <script
-    src="app.js"
-  ></script>
+  <script src="app.js"></script>
 
 
 </body>
