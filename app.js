@@ -92,7 +92,7 @@ function populateTimeSlots(appointments) {
 
       option.value = time;
       option.textContent = time;
-
+    }
       timeSelect.appendChild(option);
     }
   }
