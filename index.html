@@ -1,26 +1,102 @@
+```html
 <!DOCTYPE html>
 <html lang="sq">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>AMBULATORI GVM</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 </head>
 
 <body>
 
-  <h1>AMBULATORI GVM</h1>
+  <!-- HEADER KLINIKE -->
 
-  <div id="app">
+  <header class="clinic-header">
+
+    <div class="clinic-header-inner">
+
+      <div class="clinic-brand">
+
+        <div class="clinic-logo">
+          ✚
+        </div>
+
+        <div>
+          <div class="clinic-name">
+            AMBULATORI GVM
+          </div>
+
+          <div class="clinic-subtitle">
+            Sistemi i menaxhimit të vizitave
+          </div>
+        </div>
+
+      </div>
+
+      <div class="clinic-header-info">
+        <span>●</span>
+        Sistemi aktiv
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- BANNER -->
+
+  <section class="clinic-banner">
+
+    <div class="clinic-banner-overlay">
+
+      <div class="clinic-banner-content">
+
+        <div class="clinic-banner-label">
+          AMBULATORI
+        </div>
+
+        <h1>
+          Mirë se vini në
+          <strong>AMBULATORI GVM</strong>
+        </h1>
+
+        <p>
+          Menaxhoni vizitat dhe oraret e pacientëve
+          në mënyrë të thjeshtë dhe të organizuar.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- APLIKACIONI -->
+
+  <main id="app">
     Po ngarkohet...
-  </div>
+  </main>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Programi ynë -->
+  <!-- SUPABASE -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+  </script>
+
   <script src="app.js"></script>
 
 </body>
 </html>
+```
