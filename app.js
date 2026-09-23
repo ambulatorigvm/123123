@@ -97,7 +97,6 @@ function populateTimeSlots(appointments) {
     }
   }
 }
-
 function updateDateTitle() {
 function updateDateTitle() {
 function updateDateTitle() {
