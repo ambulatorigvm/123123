@@ -1,1188 +1,763 @@
 <!DOCTYPE html>
 <html lang="sq">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>AMBULATORI GVM</title>
 
-  <style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    /* =====================================================
-       RESET
-       ===================================================== */
+  <style>
 
     * {
       box-sizing: border-box;
+    }
+
+    body {
       margin: 0;
-      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6f9;
+      color: #263238;
     }
 
-    html,
-    body {
-      width: 100%;
-      min-height: 100%;
-    }
-
-    body {
-      font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
-        sans-serif;
-
-      background: #f3f7fa;
-      color: #172b3a;
-    }
-
-
-    /* =====================================================
-       LOGIN
-       ===================================================== */
-
-    .login-page {
-      min-height: 100vh;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 30px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #e9f5f8 0%,
-          #f7fafc 48%,
-          #e9f2f7 100%
-        );
-    }
-
-
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-
-      padding: 42px;
-
-      background: #ffffff;
-
-      border: 1px solid #e0e9ef;
-
-      border-radius: 20px;
-
-      box-shadow:
-        0 25px 70px rgba(24, 61, 82, 0.13);
-    }
-
-
-    .login-logo {
-      display: flex;
-      justify-content: center;
-
-      margin-bottom: 22px;
-    }
-
-
-    .login-logo-icon {
-      width: 70px;
-      height: 70px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 18px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087c9c,
-          #075c78
-        );
-
-      color: white;
-
-      font-size: 32px;
-      font-weight: 800;
-
-      box-shadow:
-        0 12px 30px rgba(7, 108, 137, 0.25);
-    }
-
-
-    .login-card h1 {
-      text-align: center;
-
-      color: #183447;
-
-      font-size: 26px;
-      font-weight: 800;
-    }
-
-
-    .login-subtitle {
-      margin-top: 7px;
-      margin-bottom: 30px;
-
-      text-align: center;
-
-      color: #7c8c99;
-
-      font-size: 14px;
-    }
-
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-
-      gap: 7px;
-    }
-
-
-    .login-card .form-group {
-      margin-bottom: 17px;
-    }
-
-
-    .form-group label {
-      color: #3c5060;
-
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      height: 45px;
-
-      padding: 0 13px;
-
-      border: 1px solid #d7e2e9;
-
-      border-radius: 9px;
-
-      background: #ffffff;
-
-      color: #1c3445;
-
-      font-size: 14px;
-
-      outline: none;
-
-      transition: 0.2s;
-    }
-
-
-    .form-group input:focus,
-    .form-group select:focus {
-      border-color: #0980a2;
-
-      box-shadow:
-        0 0 0 3px rgba(9, 128, 162, 0.10);
-    }
-
-
-    .form-group input::placeholder {
-      color: #a3afb8;
-    }
-
-
-    .login-button {
-      width: 100%;
-      height: 47px;
-
-      margin-top: 5px;
-
-      border: none;
-      border-radius: 9px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087c9c,
-          #075d79
-        );
-
-      color: white;
-
-      font-size: 14px;
-      font-weight: 750;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 8px 20px rgba(7, 108, 137, 0.20);
-
-      transition: 0.2s;
-    }
-
-
-    .login-button:hover {
-      transform: translateY(-1px);
-
-      box-shadow:
-        0 11px 25px rgba(7, 108, 137, 0.25);
-    }
-
-
-    .login-message {
-      min-height: 20px;
-
-      margin-top: 14px;
-
-      text-align: center;
-
-      color: #748592;
-
-      font-size: 13px;
-    }
-
-
-    .login-message.error {
-      color: #c03939;
-    }
-
-
-    /* =====================================================
-       APPLICATION
-       ===================================================== */
-
-    .app {
-      min-height: 100vh;
-
-      background: #f3f7fa;
-    }
-
-
-    /* =====================================================
+    /* =========================
        HEADER
-       ===================================================== */
+    ========================= */
 
-    .top-header {
-      min-height: 76px;
-
+    .topbar {
+      height: 72px;
+      background: #ffffff;
+      border-bottom: 1px solid #dfe5ea;
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      padding: 0 34px;
-
-      background: #ffffff;
-
-      border-bottom: 1px solid #e3ebf0;
-
-      box-shadow:
-        0 2px 10px rgba(20, 50, 70, 0.04);
+      padding: 0 30px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
-
 
     .brand {
       display: flex;
       align-items: center;
-
-      gap: 13px;
-    }
-
-
-    .brand-icon {
-      width: 44px;
-      height: 44px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 12px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087c9c,
-          #075d79
-        );
-
-      color: #ffffff;
-
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-
-    .brand-title {
-      color: #193446;
-
-      font-size: 17px;
-      font-weight: 800;
-    }
-
-
-    .brand-subtitle {
-      margin-top: 2px;
-
-      color: #8797a3;
-
-      font-size: 12px;
-    }
-
-
-    .header-right {
-      display: flex;
-      align-items: center;
-
-      gap: 20px;
-    }
-
-
-    .system-status {
-      display: flex;
-      align-items: center;
-
-      gap: 7px;
-
-      color: #738593;
-
-      font-size: 12px;
-      font-weight: 650;
-    }
-
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-
-      border-radius: 50%;
-
-      background: #2eae72;
-
-      box-shadow:
-        0 0 0 4px rgba(46, 174, 114, 0.10);
-    }
-
-
-    .logout-button {
-      height: 38px;
-
-      padding: 0 17px;
-
-      border: 1px solid #d6e0e7;
-
-      border-radius: 8px;
-
-      background: white;
-
-      color: #506473;
-
-      font-size: 13px;
-      font-weight: 700;
-
-      cursor: pointer;
-    }
-
-
-    .logout-button:hover {
-      background: #f3f7f9;
-    }
-
-
-    /* =====================================================
-       MAIN
-       ===================================================== */
-
-    .main-container {
-      width: 100%;
-      max-width: 1450px;
-
-      margin: auto;
-
-      padding: 30px 34px 50px;
-    }
-
-
-    /* =====================================================
-       DATE
-       ===================================================== */
-
-    .date-navigation {
-      min-height: 60px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      margin-bottom: 20px;
-    }
-
-
-    .date-center {
-      display: flex;
-      align-items: center;
-
       gap: 14px;
     }
 
-
-    .selected-date {
-      color: #253b4c;
-
-      font-size: 18px;
-      font-weight: 750;
-
-      text-transform: capitalize;
-    }
-
-
-    .date-arrow {
+    .brand-icon {
       width: 42px;
       height: 42px;
-
-      border: 1px solid #d6e1e8;
-
-      border-radius: 9px;
-
-      background: #ffffff;
-
-      color: #3f5667;
-
-      font-size: 27px;
-
-      cursor: pointer;
-    }
-
-
-    .date-arrow:hover {
-      background: #edf7fa;
-
-      color: #087593;
-
-      border-color: #b8d4df;
-    }
-
-
-    .today-button {
-      height: 32px;
-
-      padding: 0 13px;
-
-      border: 1px solid #b9d6df;
-
-      border-radius: 7px;
-
-      background: #edf7fa;
-
-      color: #087593;
-
-      font-size: 12px;
-      font-weight: 750;
-
-      cursor: pointer;
-    }
-
-
-    /* =====================================================
-       NEW APPOINTMENT
-       ===================================================== */
-
-    .new-appointment-card {
-      margin-bottom: 24px;
-
-      padding: 24px;
-
-      background: #ffffff;
-
-      border: 1px solid #e0e8ee;
-
-      border-radius: 15px;
-
-      box-shadow:
-        0 6px 20px rgba(30, 60, 80, 0.05);
-    }
-
-
-    .section-heading {
-      margin-bottom: 20px;
-    }
-
-
-    .section-heading h2,
-    .schedule-header h2 {
-      color: #203747;
-
-      font-size: 17px;
-      font-weight: 800;
-    }
-
-
-    .section-heading p,
-    .schedule-header p {
-      margin-top: 3px;
-
-      color: #8998a4;
-
-      font-size: 12px;
-    }
-
-
-    .appointment-form {
-      display: grid;
-
-      grid-template-columns:
-        1fr
-        1fr
-        1fr
-        180px
-        auto;
-
-      gap: 15px;
-
-      align-items: end;
-    }
-
-
-    .primary-button {
-      height: 45px;
-
-      padding: 0 20px;
-
-      border: none;
-
-      border-radius: 9px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #087c9c,
-          #075d79
-        );
-
+      border-radius: 10px;
+      background: #0b7fab;
       color: white;
-
-      font-size: 13px;
-      font-weight: 750;
-
-      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
     }
 
-
-    .primary-button:hover {
-      opacity: 0.94;
+    .brand-text h1 {
+      margin: 0;
+      font-size: 19px;
+      color: #17324d;
+      letter-spacing: .3px;
     }
 
+    .brand-text span {
+      display: block;
+      margin-top: 3px;
+      color: #71808d;
+      font-size: 12px;
+    }
 
-    .secondary-button {
-      height: 44px;
-
-      padding: 0 20px;
-
-      border: 1px solid #d4dfe6;
-
-      border-radius: 9px;
-
-      background: white;
-
-      color: #506473;
-
+    .top-status {
+      display: flex;
+      align-items: center;
+      gap: 9px;
       font-size: 13px;
+      color: #60717e;
+    }
+
+    .online-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #2eaf68;
+    }
+
+    /* =========================
+       LAYOUT
+    ========================= */
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 25px 28px 40px;
+    }
+
+    .page-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .page-title h2 {
+      margin: 0;
+      color: #17324d;
+      font-size: 25px;
       font-weight: 700;
-
-      cursor: pointer;
     }
 
-
-    .form-message {
-      min-height: 20px;
-
-      margin-top: 12px;
-
+    .page-title p {
+      margin: 6px 0 0;
+      color: #788792;
       font-size: 13px;
-      font-weight: 650;
     }
 
+    /* =========================
+       DATE NAVIGATION
+    ========================= */
 
-    .form-message.success {
-      color: #27855d;
-    }
-
-
-    .form-message.error {
-      color: #c23f3f;
-    }
-
-
-    /* =====================================================
-       SCHEDULE
-       ===================================================== */
-
-    .schedule-card {
-      overflow: hidden;
-
-      background: #ffffff;
-
-      border: 1px solid #e0e8ee;
-
-      border-radius: 15px;
-
-      box-shadow:
-        0 6px 20px rgba(30, 60, 80, 0.05);
-    }
-
-
-    .schedule-header {
-      min-height: 78px;
-
+    .date-panel {
+      background: white;
+      border: 1px solid #dfe5ea;
+      border-radius: 12px;
+      padding: 15px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      padding: 0 24px;
-
-      border-bottom: 1px solid #e7edf1;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(25, 55, 75, .04);
     }
 
-
-    .appointment-count {
-      padding: 7px 13px;
-
-      border-radius: 20px;
-
-      background: #edf7fa;
-
-      color: #087593;
-
-      font-size: 12px;
-      font-weight: 750;
+    .date-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-
-    .schedule-table-wrapper {
-      width: 100%;
-
-      overflow-x: auto;
+    .date-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      background: #eaf5fa;
+      color: #087aa5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
     }
 
-
-    .schedule-table {
-      width: 100%;
-      min-width: 900px;
-
-      border-collapse: collapse;
-
-      table-layout: fixed;
+    .date-info {
+      display: flex;
+      flex-direction: column;
     }
 
-
-    .schedule-table thead th {
-      height: 45px;
-
-      padding: 0 18px;
-
-      background: #f7f9fa;
-
-      border-bottom: 1px solid #dde6ec;
-
-      color: #748491;
-
-      font-size: 10px;
-      font-weight: 800;
-
-      letter-spacing: 0.7px;
-
-      text-align: left;
+    .date-label {
+      color: #82909b;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
     }
 
-
-    .time-column,
-    .time-cell {
-      width: 105px;
+    #selectedDate {
+      color: #17324d;
+      font-weight: 700;
+      font-size: 17px;
+      margin-top: 3px;
     }
 
-
-    .status-column,
-    .status-cell {
-      width: 145px;
+    .date-buttons {
+      display: flex;
+      gap: 8px;
     }
 
-
-    .actions-column,
-    .actions-cell {
-      width: 350px;
+    .date-buttons button {
+      border: 1px solid #d5dfe6;
+      background: white;
+      color: #365266;
+      border-radius: 8px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
     }
 
+    .date-buttons button:hover {
+      background: #f4f8fa;
+    }
 
-    .schedule-row {
-      height: 64px;
+    .today-btn {
+      background: #0b7fab !important;
+      border-color: #0b7fab !important;
+      color: white !important;
+    }
 
+    /* =========================
+       MAIN GRID
+    ========================= */
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* =========================
+       FORM CARD
+    ========================= */
+
+    .card {
+      background: white;
+      border: 1px solid #dfe5ea;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(25, 55, 75, .04);
+    }
+
+    .card-header {
+      padding: 19px 20px 15px;
       border-bottom: 1px solid #edf1f4;
     }
 
-
-    .schedule-row:hover {
-      background: #fbfdfe;
+    .card-header h3 {
+      margin: 0;
+      color: #17324d;
+      font-size: 16px;
     }
 
-
-    .schedule-table td {
-      padding: 9px 18px;
-
-      vertical-align: middle;
+    .card-header p {
+      margin: 5px 0 0;
+      color: #84919a;
+      font-size: 12px;
     }
 
+    .form-body {
+      padding: 20px;
+    }
 
-    .time-cell {
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #526674;
+      margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #d5dfe6;
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 13px;
+      color: #263238;
+      background: white;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #0b8ab9;
+      box-shadow: 0 0 0 3px rgba(11, 138, 185, .08);
+    }
+
+    .add-btn {
+      width: 100%;
+      height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: #0b7fab;
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .add-btn:hover {
+      background: #086d91;
+    }
+
+    #message {
+      min-height: 20px;
+      margin-top: 13px;
+      font-size: 12px;
+      color: #2e8b57;
+      text-align: center;
+    }
+
+    /* =========================
+       SCHEDULE
+    ========================= */
+
+    .schedule-card {
+      min-width: 0;
+    }
+
+    .schedule-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #edf1f4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .schedule-header h3 {
+      margin: 0;
+      color: #17324d;
+      font-size: 16px;
+    }
+
+    .schedule-header span {
+      font-size: 12px;
+      color: #83909a;
+    }
+
+    #appointments {
+      padding: 10px 15px 15px;
+    }
+
+    /* =========================
+       APPOINTMENT ROW
+    ========================= */
+
+    .appointment-row {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      min-height: 70px;
+      border-bottom: 1px solid #edf1f4;
+    }
+
+    .appointment-row:last-child {
+      border-bottom: 0;
+    }
+
+    .appointment-time {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #607584;
+      font-size: 13px;
+      font-weight: 700;
       border-right: 1px solid #edf1f4;
     }
 
-
-    .time-value {
-      color: #294154;
-
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-
-    .patient-wrapper {
+    .appointment-content {
+      padding: 11px 15px;
       display: flex;
       align-items: center;
-
-      gap: 12px;
+      gap: 18px;
+      min-width: 0;
     }
-
-
-    .patient-avatar {
-      width: 36px;
-      height: 36px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      flex-shrink: 0;
-
-      border-radius: 10px;
-
-      background: #e8f3f6;
-
-      color: #087593;
-
-      font-size: 12px;
-      font-weight: 800;
-    }
-
 
     .patient-name {
-      color: #293e4e;
-
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-
-    .patient-label {
-      margin-top: 1px;
-
-      color: #9aa6b0;
-
-      font-size: 10px;
-    }
-
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      min-width: 90px;
-      height: 27px;
-
-      padding: 0 10px;
-
-      border-radius: 20px;
-
-      font-size: 11px;
-      font-weight: 750;
-    }
-
-
-    .status-planned {
-      background: #fff5d9;
-      color: #a36b00;
-    }
-
-
-    .status-arrived {
-      background: #e6f3fb;
-      color: #16709f;
-    }
-
-
-    .status-finished {
-      background: #e5f6ed;
-      color: #218458;
-    }
-
-
-    .status-cancelled {
-      background: #fbe9e9;
-      color: #b94343;
-    }
-
-
-    .status-badge.free {
-      background: #f0f3f5;
-      color: #8a98a2;
-    }
-
-
-    .action-buttons {
-      display: flex;
-      flex-wrap: wrap;
-
-      gap: 6px;
-    }
-
-
-    .action-button {
-      height: 29px;
-
-      padding: 0 9px;
-
-      border-radius: 6px;
-
-      font-size: 10px;
+      min-width: 190px;
+      color: #1e394e;
+      font-size: 14px;
       font-weight: 700;
+    }
 
+    .appointment-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #eef5f8;
+      color: #477084;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .appointment-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 7px;
+    }
+
+    .appointment-actions button {
+      border-radius: 7px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
     }
 
-
-    .action-button.edit {
-      border: 1px solid #c8dce5;
-
-      background: #f3fafc;
-
-      color: #087593;
+    .status-btn {
+      border: 1px solid #cbdce5;
+      background: white;
+      color: #386276;
     }
 
-
-    .action-button.arrived {
-      border: 1px solid #c9dfee;
-
-      background: #f3f9fd;
-
-      color: #16709f;
+    .status-btn:hover {
+      background: #f2f8fa;
     }
 
-
-    .action-button.finished {
-      border: 1px solid #c7e1d3;
-
-      background: #f3fbf7;
-
-      color: #218458;
-    }
-
-
-    .action-button.cancel {
-      border: 1px solid #ead1d1;
-
-      background: #fff8f8;
-
-      color: #b94343;
-    }
-
-
-    .action-button.delete {
-      border: 1px solid #e8c8c8;
-
+    .delete-btn {
+      border: 1px solid #efcaca;
       background: #fff7f7;
-
-      color: #c03939;
+      color: #bd4b4b;
     }
 
+    .delete-btn:hover {
+      background: #ffeded;
+    }
 
     .empty-slot {
-      display: flex;
-      align-items: center;
-
-      gap: 9px;
-
-      color: #9aa7b1;
-
+      color: #a4afb6;
       font-size: 12px;
+      font-style: italic;
     }
 
+    /* =========================
+       ERROR
+    ========================= */
 
-    .empty-dot {
-      width: 7px;
-      height: 7px;
-
-      border-radius: 50%;
-
-      background: #cbd4da;
+    .error-box {
+      margin: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #fff3f3;
+      border: 1px solid #efcccc;
+      color: #a64242;
+      font-size: 13px;
     }
 
-
-    .no-action {
-      color: #c2cbd1;
-    }
-
-
-    .loading-cell,
-    .error-cell {
-      height: 100px;
-
-      text-align: center !important;
-
-      color: #82929e;
-    }
-
-
-    .error-cell {
-      color: #c03939;
-    }
-
-
-    /* =====================================================
-       MODAL
-       ===================================================== */
-
-    .modal-overlay {
-      position: fixed;
-
-      inset: 0;
-
-      z-index: 1000;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 20px;
-
-      background: rgba(17, 35, 48, 0.48);
-
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-
-      transition: 0.2s;
-    }
-
-
-    .modal-overlay.show {
-      opacity: 1;
-
-      visibility: visible;
-
-      pointer-events: auto;
-    }
-
-
-    .modal {
-      width: 100%;
-      max-width: 480px;
-
-      background: white;
-
-      border-radius: 16px;
-
-      box-shadow:
-        0 25px 70px rgba(10, 35, 50, 0.22);
-
-      overflow: hidden;
-    }
-
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-
-      padding: 22px 24px;
-
-      border-bottom: 1px solid #e8edf1;
-    }
-
-
-    .modal-header h2 {
-      color: #203747;
-
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-
-    .modal-header p {
-      margin-top: 3px;
-
-      color: #8998a4;
-
-      font-size: 12px;
-    }
-
-
-    .modal-close {
-      width: 32px;
-      height: 32px;
-
-      border: none;
-
-      border-radius: 7px;
-
-      background: #f1f4f6;
-
-      color: #687985;
-
-      font-size: 22px;
-
-      cursor: pointer;
-    }
-
-
-    .modal-body {
-      display: grid;
-
-      gap: 16px;
-
-      padding: 23px 24px;
-    }
-
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-
-      gap: 9px;
-
-      padding: 16px 24px 21px;
-
-      border-top: 1px solid #edf1f4;
-    }
-
-
-    /* =====================================================
+    /* =========================
        RESPONSIVE
-       ===================================================== */
+    ========================= */
 
-    @media (max-width: 1100px) {
+    @media (max-width: 950px) {
 
-      .appointment-form {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .appointment-form .primary-button {
-        width: 100%;
-      }
-
-    }
-
-
-    @media (max-width: 700px) {
-
-      .top-header {
-        padding: 0 16px;
-      }
-
-      .brand-subtitle,
-      .system-status {
-        display: none;
-      }
-
-      .main-container {
-        padding: 20px 14px 40px;
-      }
-
-      .appointment-form {
+      .main-grid {
         grid-template-columns: 1fr;
       }
 
-      .date-center {
-        gap: 7px;
+      .form-card {
+        order: 1;
       }
 
-      .selected-date {
-        font-size: 14px;
-        text-align: center;
-      }
-
-      .schedule-table {
-        min-width: 900px;
+      .schedule-card {
+        order: 2;
       }
 
     }
 
+    @media (max-width: 700px) {
 
-    @media (max-width: 480px) {
-
-      .login-page {
-        padding: 15px;
+      .topbar {
+        padding: 0 15px;
       }
 
-      .login-card {
-        padding: 30px 20px;
+      .page {
+        padding: 18px 12px 30px;
       }
 
-      .login-card h1 {
-        font-size: 23px;
+      .page-title {
+        display: block;
       }
 
-      .header-right {
-        gap: 8px;
+      .date-panel {
+        display: block;
       }
 
-      .logout-button {
-        padding: 0 12px;
+      .date-buttons {
+        margin-top: 12px;
+      }
+
+      .appointment-row {
+        grid-template-columns: 65px 1fr;
+      }
+
+      .appointment-content {
+        display: block;
+      }
+
+      .patient-name {
+        min-width: auto;
+        margin-bottom: 8px;
+      }
+
+      .appointment-actions {
+        margin-top: 9px;
+        margin-left: 0;
+      }
+
+      .top-status {
+        display: none;
       }
 
     }
 
   </style>
-
 </head>
-
 
 <body>
 
+  <!-- =========================
+       TOP BAR
+  ========================== -->
 
-  <div id="app">
+  <header class="topbar">
 
-    <div
-      style="
-        min-height:100vh;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-family:Arial,sans-serif;
-        color:#718096;
-      "
-    >
-      Po ngarkohet...
+    <div class="brand">
+
+      <div class="brand-icon">
+        +
+      </div>
+
+      <div class="brand-text">
+
+        <h1>AMBULATORI GVM</h1>
+
+        <span>
+          Sistemi i menaxhimit të vizitave
+        </span>
+
+      </div>
+
     </div>
 
-  </div>
+
+    <div class="top-status">
+
+      <span class="online-dot"></span>
+
+      Sistemi aktiv
+
+    </div>
+
+  </header>
 
 
-  <!-- SUPABASE -->
+  <!-- =========================
+       PAGE
+  ========================== -->
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-  ></script>
+  <main class="page">
+
+    <div class="page-title">
+
+      <div>
+
+        <h2>Orari i vizitave</h2>
+
+        <p>
+          Menaxhimi i termineve dhe pacientëve
+        </p>
+
+      </div>
+
+    </div>
 
 
-  <!-- APLIKACIONI -->
+    <!-- =========================
+         DATE
+    ========================== -->
+
+    <div class="date-panel">
+
+      <div class="date-left">
+
+        <div class="date-icon">
+          📅
+        </div>
+
+        <div class="date-info">
+
+          <span class="date-label">
+            Data e punës
+          </span>
+
+          <span id="selectedDate">
+            Po ngarkohet...
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="date-buttons">
+
+        <button
+          onclick="changeDate(-1)"
+        >
+          ← Dita e kaluar
+        </button>
+
+        <button
+          class="today-btn"
+          onclick="goToToday()"
+        >
+          Sot
+        </button>
+
+        <button
+          onclick="changeDate(1)"
+        >
+          Dita tjetër →
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <div class="main-grid">
+
+
+      <!-- =====================
+           ADD APPOINTMENT
+      ====================== -->
+
+      <div class="card form-card">
+
+        <div class="card-header">
+
+          <h3>
+            Shto vizitë
+          </h3>
+
+          <p>
+            Regjistro një termin të ri
+          </p>
+
+        </div>
+
+
+        <div class="form-body">
+
+          <div class="form-group">
+
+            <label for="firstName">
+              Emri
+            </label>
+
+            <input
+              id="firstName"
+              type="text"
+              placeholder="Emri i pacientit"
+              autocomplete="off"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="lastName">
+              Mbiemri
+            </label>
+
+            <input
+              id="lastName"
+              type="text"
+              placeholder="Mbiemri i pacientit"
+              autocomplete="off"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="cardNumber">
+              Numri i kartelës
+            </label>
+
+            <input
+              id="cardNumber"
+              type="text"
+              placeholder="Opsionale"
+              autocomplete="off"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="appointmentTime">
+              Ora e vizitës
+            </label>
+
+            <select id="appointmentTime">
+
+              <option value="">
+                Zgjidh orën
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <button
+            class="add-btn"
+            onclick="addAppointment()"
+          >
+            + Shto vizitën
+          </button>
+
+
+          <div id="message"></div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================
+           SCHEDULE
+      ====================== -->
+
+      <div class="card schedule-card">
+
+        <div class="schedule-header">
+
+          <h3>
+            Orari ditor
+          </h3>
+
+          <span>
+            08:00 — 18:00
+          </span>
+
+        </div>
+
+
+        <div id="appointments">
+
+          <div class="empty-slot">
+            Po ngarkohet orari...
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       APP JS
+  ========================== -->
 
   <script src="app.js"></script>
 
-
 </body>
-
 </html>
