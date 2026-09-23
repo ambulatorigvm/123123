@@ -145,8 +145,10 @@ async function login() {
 
   if (error) {
     console.error(error);
+
     message.textContent =
       "Email ose password i gabuar.";
+
     return;
   }
 
@@ -370,6 +372,34 @@ function populateTimeSlots(appointments) {
   });
 }
 
+function selectTimeSlot(time) {
+  const select =
+    document.getElementById("appointmentTime");
+
+  if (!select) {
+    return;
+  }
+
+  select.value = time;
+
+  const form =
+    document.querySelector(".appointment-form");
+
+  if (form) {
+    form.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+
+  const firstName =
+    document.getElementById("firstName");
+
+  if (firstName) {
+    firstName.focus();
+  }
+}
+
 async function loadAppointments() {
   const date = formatDate(selectedDate);
 
@@ -410,6 +440,7 @@ function renderAppointments(appointments) {
   const appointmentsByTime = new Map();
 
   appointments.forEach(appointment => {
+
     appointmentsByTime.set(
       appointment.appointment_time.substring(0, 5),
       appointment
@@ -426,7 +457,12 @@ function renderAppointments(appointments) {
     if (!appointment) {
 
       return `
-        <div class="time-slot empty-slot">
+        <div
+          class="time-slot empty-slot"
+          onclick="selectTimeSlot('${time}')"
+          title="Kliko për të zgjedhur këtë orar"
+          style="cursor:pointer;"
+        >
 
           <div class="slot-time">
             ${time}
@@ -434,7 +470,7 @@ function renderAppointments(appointments) {
 
           <div class="slot-content">
             <span>
-              Orar i lirë
+              Orar i lirë — kliko për ta zgjedhur
             </span>
           </div>
 
