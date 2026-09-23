@@ -551,4 +551,6 @@ supabaseClient.auth.onAuthStateChange(
   }
 );
 
-checkSession();
+window.addEventListener("load", () => {
+  checkSession();
+});
