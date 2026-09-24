@@ -1,5 +1,5 @@
 ```javascript
-const APP_VERSION = "GVM-20260924-03";
+const APP_VERSION = "GVM-20260924-04";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -22,7 +22,6 @@ const supabaseClient =
 document.addEventListener(
     "DOMContentLoaded",
     function () {
-
         console.log(
             "AMBULATORI GVM",
             APP_VERSION
@@ -72,12 +71,9 @@ async function startApplication() {
                 );
 
                 if (session) {
-
                     currentUser =
                         session.user;
-
                 } else {
-
                     currentUser = null;
                 }
             }
@@ -95,9 +91,7 @@ async function startApplication() {
 }
 
 
-/* =========================
-   LOGIN
-========================= */
+/* LOGIN */
 
 function showLogin() {
 
@@ -106,9 +100,7 @@ function showLogin() {
             '<div class="login-card">' +
 
                 '<div class="login-logo">' +
-                    '<div class="login-logo-icon">' +
-                        'G' +
-                    '</div>' +
+                    '<div class="login-logo-icon">G</div>' +
                 '</div>' +
 
                 '<h1 class="login-title">' +
@@ -122,10 +114,7 @@ function showLogin() {
                 '<form id="loginForm" class="login-form">' +
 
                     '<div>' +
-                        '<label for="email">' +
-                            'Email' +
-                        '</label>' +
-
+                        '<label for="email">Email</label>' +
                         '<input ' +
                             'id="email" ' +
                             'type="email" ' +
@@ -135,10 +124,7 @@ function showLogin() {
                     '</div>' +
 
                     '<div>' +
-                        '<label for="password">' +
-                            'Fjalëkalimi' +
-                        '</label>' +
-
+                        '<label for="password">Fjalëkalimi</label>' +
                         '<input ' +
                             'id="password" ' +
                             'type="password" ' +
@@ -147,10 +133,7 @@ function showLogin() {
                         '>' +
                     '</div>' +
 
-                    '<div ' +
-                        'id="loginError" ' +
-                        'class="login-error">' +
-                    '</div>' +
+                    '<div id="loginError" class="login-error"></div>' +
 
                     '<button ' +
                         'type="submit" ' +
@@ -163,16 +146,17 @@ function showLogin() {
             '</div>' +
         '</div>';
 
-
     const form =
         document.getElementById(
             "loginForm"
         );
 
-    form.addEventListener(
-        "submit",
-        login
-    );
+    if (form) {
+        form.addEventListener(
+            "submit",
+            login
+        );
+    }
 }
 
 
@@ -195,8 +179,7 @@ async function login(event) {
             "loginError"
         );
 
-    errorBox.style.display =
-        "none";
+    errorBox.style.display = "none";
 
     try {
 
@@ -236,9 +219,7 @@ async function login(event) {
 }
 
 
-/* =========================
-   LOGOUT
-========================= */
+/* LOGOUT */
 
 async function logout() {
 
@@ -267,9 +248,7 @@ async function logout() {
 }
 
 
-/* =========================
-   APP
-========================= */
+/* APP */
 
 function showApp() {
 
@@ -280,9 +259,7 @@ function showApp() {
 
                 '<div class="brand">' +
 
-                    '<div class="brand-icon">' +
-                        'G' +
-                    '</div>' +
+                    '<div class="brand-icon">G</div>' +
 
                     '<div>' +
 
@@ -314,7 +291,6 @@ function showApp() {
                 '</div>' +
 
             '</header>' +
-
 
             '<main class="main-container">' +
 
@@ -348,7 +324,6 @@ function showApp() {
 
                 '</div>' +
 
-
                 '<section class="new-appointment-card">' +
 
                     '<h2 class="new-appointment-title">' +
@@ -360,7 +335,6 @@ function showApp() {
                         'class="appointment-form">' +
 
                         '<div>' +
-
                             '<label for="appointmentTime">' +
                                 'Ora' +
                             '</label>' +
@@ -369,12 +343,9 @@ function showApp() {
                                 'id="appointmentTime" ' +
                                 'required>' +
                             '</select>' +
-
                         '</div>' +
 
-
                         '<div>' +
-
                             '<label for="patientName">' +
                                 'Emri i pacientit' +
                             '</label>' +
@@ -384,12 +355,9 @@ function showApp() {
                                 'type="text" ' +
                                 'placeholder="Emri dhe mbiemri" ' +
                                 'required>' +
-
                         '</div>' +
 
-
                         '<div>' +
-
                             '<label for="patientPhone">' +
                                 'Telefoni' +
                             '</label>' +
@@ -398,33 +366,24 @@ function showApp() {
                                 'id="patientPhone" ' +
                                 'type="text" ' +
                                 'placeholder="Numri i telefonit">' +
-
                         '</div>' +
 
-
                         '<div>' +
-
                             '<button ' +
                                 'class="primary-button" ' +
                                 'type="submit">' +
                                 'Shto vizitë' +
                             '</button>' +
-
                         '</div>' +
 
                     '</form>' +
 
                 '</section>' +
 
-
                 '<section class="schedule-card">' +
 
                     '<div class="schedule-header">' +
-
-                        '<h2>' +
-                            'Orari ditor' +
-                        '</h2>' +
-
+                        '<h2>Orari ditor</h2>' +
                     '</div>' +
 
                     '<div ' +
@@ -492,8 +451,7 @@ function showApp() {
             "click",
             function () {
 
-                currentDate =
-                    new Date();
+                currentDate = new Date();
 
                 updateDateDisplay();
 
@@ -518,9 +476,7 @@ function showApp() {
 }
 
 
-/* =========================
-   DATE
-========================= */
+/* DATE */
 
 function dateKey(date) {
 
@@ -585,9 +541,7 @@ function updateDateDisplay() {
 }
 
 
-/* =========================
-   TIMES
-========================= */
+/* TIMES */
 
 function generateTimes() {
 
@@ -624,10 +578,7 @@ function populateTimeSelect() {
 
     select.innerHTML = "";
 
-    const times =
-        generateTimes();
-
-    times.forEach(
+    generateTimes().forEach(
         function (time) {
 
             const option =
@@ -649,9 +600,7 @@ function populateTimeSelect() {
 }
 
 
-/* =========================
-   LOAD
-========================= */
+/* LOAD APPOINTMENTS */
 
 async function loadAppointments() {
 
@@ -669,13 +618,7 @@ async function loadAppointments() {
             'Po ngarkohet orari...' +
         '</div>';
 
-
     try {
-
-        const date =
-            dateKey(
-                currentDate
-            );
 
         const result =
             await supabaseClient
@@ -683,7 +626,7 @@ async function loadAppointments() {
                 .select("*")
                 .eq(
                     "appointment_date",
-                    date
+                    dateKey(currentDate)
                 )
                 .order(
                     "appointment_time",
@@ -692,11 +635,9 @@ async function loadAppointments() {
                     }
                 );
 
-
         if (result.error) {
             throw result.error;
         }
-
 
         appointments =
             result.data || [];
@@ -721,9 +662,7 @@ async function loadAppointments() {
 }
 
 
-/* =========================
-   RENDER
-========================= */
+/* RENDER */
 
 function renderAppointments() {
 
@@ -740,7 +679,6 @@ function renderAppointments() {
         generateTimes();
 
     const byTime = {};
-
 
     appointments.forEach(
         function (appointment) {
@@ -766,7 +704,6 @@ function renderAppointments() {
 
             const appointment =
                 byTime[time];
-
 
             if (appointment) {
 
@@ -805,15 +742,12 @@ function renderAppointments() {
             '</tbody>' +
         '</table>';
 
-
     container.innerHTML =
         html;
 }
 
 
-/* =========================
-   PATIENT
-========================= */
+/* PATIENT */
 
 function renderPatient(
     appointment,
@@ -824,20 +758,17 @@ function renderPatient(
         appointment.status ||
         "planned";
 
-
     const safeName =
         escapeHtml(
             appointment.patient_name ||
             "Pa emër"
         );
 
-
     const safePhone =
         escapeHtml(
             appointment.patient_phone ||
             ""
         );
-
 
     const initials =
         getInitials(
@@ -846,8 +777,7 @@ function renderPatient(
         );
 
 
-    let actionButtons =
-        "";
+    let actionButtons = "";
 
 
     if (status === "planned") {
@@ -948,7 +878,6 @@ function renderPatient(
 
                     '</div>' +
 
-
                     '<div class="status-cell">' +
 
                         '<span class="status ' +
@@ -960,7 +889,6 @@ function renderPatient(
                         '</span>' +
 
                     '</div>' +
-
 
                     '<div class="actions-cell">' +
 
@@ -979,9 +907,7 @@ function renderPatient(
 }
 
 
-/* =========================
-   STATUS
-========================= */
+/* STATUS */
 
 function statusText(status) {
 
@@ -1019,26 +945,21 @@ function statusClass(status) {
 }
 
 
-/* =========================
-   ADD
-========================= */
+/* ADD APPOINTMENT */
 
 async function addAppointment(event) {
 
     event.preventDefault();
-
 
     const time =
         document.getElementById(
             "appointmentTime"
         ).value;
 
-
     const patientName =
         document.getElementById(
             "patientName"
         ).value.trim();
-
 
     const patientPhone =
         document.getElementById(
@@ -1121,7 +1042,6 @@ async function addAppointment(event) {
             "patientName"
         ).value = "";
 
-
         document.getElementById(
             "patientPhone"
         ).value = "";
@@ -1144,9 +1064,7 @@ async function addAppointment(event) {
 }
 
 
-/* =========================
-   CHANGE STATUS
-========================= */
+/* CHANGE STATUS */
 
 async function changeStatus(
     id,
@@ -1189,17 +1107,16 @@ async function changeStatus(
 }
 
 
-/* =========================
-   DELETE
-========================= */
+/* DELETE */
 
 async function deleteAppointment(id) {
 
-    if (
-        !confirm(
+    const confirmed =
+        confirm(
             "A dëshironi ta fshini këtë vizitë?"
-        )
-    ) {
+        );
+
+    if (!confirmed) {
         return;
     }
 
@@ -1238,9 +1155,7 @@ async function deleteAppointment(id) {
 }
 
 
-/* =========================
-   REALTIME
-========================= */
+/* REALTIME */
 
 function setupRealtime() {
 
@@ -1262,13 +1177,11 @@ function setupRealtime() {
                     table: "appointments"
                 },
                 function () {
-
                     loadAppointments();
                 }
             )
             .subscribe(
                 function (status) {
-
                     console.log(
                         "Realtime:",
                         status
@@ -1278,9 +1191,7 @@ function setupRealtime() {
 }
 
 
-/* =========================
-   HELPERS
-========================= */
+/* HELPERS */
 
 function normalizeTime(value) {
 
@@ -1289,10 +1200,7 @@ function normalizeTime(value) {
     }
 
     return String(value)
-        .substring(
-            0,
-            5
-        );
+        .substring(0, 5);
 }
 
 
@@ -1317,10 +1225,7 @@ function getInitials(name) {
     if (parts.length === 1) {
 
         return parts[0]
-            .substring(
-                0,
-                2
-            )
+            .substring(0, 2)
             .toUpperCase();
     }
 
