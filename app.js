@@ -1,4 +1,5 @@
-const APP_VERSION = "GVM-20260924-05";
+```javascript
+const APP_VERSION = "GVM-20260924-06";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -18,6 +19,10 @@ let appointments = [];
 let realtimeChannel = null;
 
 
+/* =========================================================
+   START
+========================================================= */
+
 document.addEventListener(
     "DOMContentLoaded",
     async function () {
@@ -31,6 +36,10 @@ document.addEventListener(
     }
 );
 
+
+/* =========================================================
+   SESSION
+========================================================= */
 
 async function checkSession() {
 
@@ -101,6 +110,10 @@ async function checkSession() {
     }
 }
 
+
+/* =========================================================
+   LOGIN
+========================================================= */
 
 function showLogin() {
 
@@ -260,6 +273,10 @@ async function login(event) {
 }
 
 
+/* =========================================================
+   LOGOUT
+========================================================= */
+
 async function logout() {
 
     try {
@@ -288,6 +305,10 @@ async function logout() {
     }
 }
 
+
+/* =========================================================
+   MAIN APP
+========================================================= */
 
 function showApp() {
 
@@ -507,6 +528,10 @@ function showApp() {
 }
 
 
+/* =========================================================
+   DATE
+========================================================= */
+
 function dateKey(date) {
 
     const year =
@@ -570,22 +595,46 @@ function updateDateDisplay() {
 }
 
 
+/* =========================================================
+   ORARI - ÇDO 15 MINUTA
+========================================================= */
+
 function generateTimes() {
 
     const times = [];
 
+    /*
+        Fillon 08:00
+        Mbaron 18:00
+        Intervali 15 minuta
+    */
+
     for (
-        let hour = 8;
-        hour <= 18;
-        hour++
+        let minutes = 8 * 60;
+        minutes <= 18 * 60;
+        minutes += 15
     ) {
 
-        times.push(
+        const hour =
+            Math.floor(
+                minutes / 60
+            );
+
+        const minute =
+            minutes % 60;
+
+        const time =
             String(hour).padStart(
                 2,
                 "0"
-            ) + ":00"
-        );
+            ) +
+            ":" +
+            String(minute).padStart(
+                2,
+                "0"
+            );
+
+        times.push(time);
     }
 
     return times;
@@ -626,6 +675,10 @@ function populateTimeSelect() {
     );
 }
 
+
+/* =========================================================
+   LOAD APPOINTMENTS
+========================================================= */
 
 async function loadAppointments() {
 
@@ -668,6 +721,11 @@ async function loadAppointments() {
         appointments =
             result.data || [];
 
+        console.log(
+            "APPOINTMENTS:",
+            appointments
+        );
+
         renderAppointments();
 
     } catch (error) {
@@ -688,6 +746,10 @@ async function loadAppointments() {
     }
 }
 
+
+/* =========================================================
+   RENDER APPOINTMENTS
+========================================================= */
 
 function renderAppointments() {
 
@@ -767,6 +829,10 @@ function renderAppointments() {
 }
 
 
+/* =========================================================
+   RENDER PATIENT
+========================================================= */
+
 function renderPatient(
     appointment,
     time
@@ -776,9 +842,18 @@ function renderPatient(
         appointment.status ||
         "planned";
 
+    /*
+        Emri merret nga patient_name.
+        Nëse është bosh, shfaqet "Pa emër".
+    */
+
+    const patientName =
+        appointment.patient_name ||
+        "";
+
     const safeName =
         escapeHtml(
-            appointment.patient_name ||
+            patientName.trim() ||
             "Pa emër"
         );
 
@@ -790,7 +865,7 @@ function renderPatient(
 
     const initials =
         getInitials(
-            appointment.patient_name ||
+            patientName ||
             "P"
         );
 
@@ -907,6 +982,10 @@ function renderPatient(
 }
 
 
+/* =========================================================
+   STATUS
+========================================================= */
+
 function statusText(status) {
 
     switch (status) {
@@ -947,6 +1026,10 @@ function statusClass(status) {
 }
 
 
+/* =========================================================
+   ADD APPOINTMENT
+========================================================= */
+
 async function addAppointment(event) {
 
     event.preventDefault();
@@ -975,7 +1058,20 @@ async function addAppointment(event) {
         return;
     }
 
+    if (!time) {
+
+        alert(
+            "Zgjidhni orarin."
+        );
+
+        return;
+    }
+
     try {
+
+        /*
+            Kontrollojmë nëse orari është i zënë.
+        */
 
         const existingResult =
             await supabaseClient
@@ -1005,8 +1101,14 @@ async function addAppointment(event) {
                 "Ky orar është tashmë i zënë."
             );
 
+            await loadAppointments();
+
             return;
         }
+
+        /*
+            Shtojmë vizitën.
+        */
 
         const insertResult =
             await supabaseClient
@@ -1036,6 +1138,10 @@ async function addAppointment(event) {
             throw insertResult.error;
         }
 
+        /*
+            Pastrojmë formularin.
+        */
+
         document.getElementById(
             "patientName"
         ).value = "";
@@ -1043,6 +1149,10 @@ async function addAppointment(event) {
         document.getElementById(
             "patientPhone"
         ).value = "";
+
+        /*
+            Rifreskojmë orarin.
+        */
 
         await loadAppointments();
 
@@ -1060,6 +1170,10 @@ async function addAppointment(event) {
     }
 }
 
+
+/* =========================================================
+   CHANGE STATUS
+========================================================= */
 
 async function changeStatus(
     id,
@@ -1100,6 +1214,10 @@ async function changeStatus(
     }
 }
 
+
+/* =========================================================
+   DELETE
+========================================================= */
 
 async function deleteAppointment(id) {
 
@@ -1145,6 +1263,10 @@ async function deleteAppointment(id) {
 }
 
 
+/* =========================================================
+   REALTIME
+========================================================= */
+
 function setupRealtime() {
 
     if (realtimeChannel) {
@@ -1185,6 +1307,10 @@ function setupRealtime() {
 }
 
 
+/* =========================================================
+   TIME
+========================================================= */
+
 function normalizeTime(value) {
 
     if (!value) {
@@ -1197,6 +1323,10 @@ function normalizeTime(value) {
     );
 }
 
+
+/* =========================================================
+   INITIALS
+========================================================= */
 
 function getInitials(name) {
 
@@ -1231,12 +1361,32 @@ function getInitials(name) {
 }
 
 
+/* =========================================================
+   SECURITY / HTML
+========================================================= */
+
 function escapeHtml(value) {
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
+```
