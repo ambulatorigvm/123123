@@ -7,82 +7,122 @@
 
     <title>AMBULATORI GVM</title>
 
-    <!-- Nuk kërkon favicon.ico -->
     <link rel="icon" href="data:,">
 
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f7fb;
-            color: #1f2937;
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background: #f4f8fb;
+            color: #183b56;
+            min-height: 100vh;
         }
 
         button,
         input,
-        select {
-            font-family: inherit;
+        select,
+        textarea {
+            font: inherit;
         }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================
+           LOADING
+        ========================= */
 
         .loading {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            color: #2563eb;
+            flex-direction: column;
+            gap: 15px;
+            color: #1976a8;
+            font-size: 18px;
             font-weight: 600;
         }
 
-        /* LOGIN */
+        .loading::before {
+            content: "✚";
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e3f4fb;
+            color: #1685b5;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           LOGIN
+        ========================= */
 
         .login-page {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #eaf2ff, #f8fbff);
+            padding: 25px;
+            background:
+                radial-gradient(circle at top left, #dff5ff 0, transparent 35%),
+                radial-gradient(circle at bottom right, #dceff8 0, transparent 35%),
+                #f5f9fc;
         }
 
-        .login-box {
+        .login-card {
             width: 100%;
             max-width: 430px;
             background: white;
-            border-radius: 18px;
-            padding: 35px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.10);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(22, 80, 110, 0.12);
+            border: 1px solid #e4eef4;
         }
 
-        .login-logo {
-            width: 75px;
-            height: 75px;
+        .medical-logo {
+            width: 76px;
+            height: 76px;
             margin: 0 auto 20px;
-            border-radius: 18px;
-            background: #2563eb;
-            color: white;
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 27px;
+            background: linear-gradient(135deg, #0e83b6, #22a6d5);
+            color: white;
+            font-size: 38px;
             font-weight: 800;
+            box-shadow: 0 12px 25px rgba(14, 131, 182, 0.25);
         }
 
-        .login-title {
+        .login-card h1 {
             text-align: center;
-            margin: 0;
-            font-size: 28px;
-            color: #111827;
+            color: #174a68;
+            font-size: 27px;
+            margin-bottom: 7px;
         }
 
         .login-subtitle {
             text-align: center;
-            color: #6b7280;
-            margin: 8px 0 28px;
+            color: #78909c;
+            margin-bottom: 30px;
         }
 
         .form-group {
@@ -92,72 +132,68 @@
         .form-group label {
             display: block;
             margin-bottom: 7px;
+            color: #35596e;
+            font-weight: 600;
             font-size: 14px;
-            font-weight: 700;
-            color: #374151;
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
+            border: 1px solid #d8e5ec;
+            border-radius: 12px;
             padding: 13px 14px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            background: white;
-            font-size: 15px;
             outline: none;
+            background: #fbfdfe;
+            color: #173d53;
+            transition: 0.2s;
         }
 
         .form-group input:focus,
-        .form-group select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #20a0d0;
+            box-shadow: 0 0 0 4px rgba(32, 160, 208, 0.10);
+            background: white;
         }
 
         .login-button {
             width: 100%;
             border: none;
-            border-radius: 10px;
+            border-radius: 13px;
             padding: 14px;
-            background: #2563eb;
+            background: linear-gradient(135deg, #087fb4, #20a6d5);
             color: white;
-            font-size: 16px;
             font-weight: 700;
-            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 8px 20px rgba(8, 127, 180, 0.20);
         }
 
         .login-button:hover {
-            background: #1d4ed8;
+            transform: translateY(-1px);
         }
 
-        .error-message {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 9px;
-            background: #fee2e2;
-            color: #991b1b;
-            font-size: 14px;
-            display: none;
+        /* =========================
+           APP HEADER
+        ========================= */
+
+        .app-shell {
+            min-height: 100vh;
         }
 
-        /* HEADER */
-
-        .app-header {
+        .topbar {
+            height: 76px;
             background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 15px 25px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-inner {
-            max-width: 1450px;
-            margin: auto;
+            border-bottom: 1px solid #e2edf2;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: 0 3px 15px rgba(30, 80, 100, 0.05);
         }
 
         .brand {
@@ -167,374 +203,496 @@
         }
 
         .brand-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: #2563eb;
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #087fb4, #27a9d6);
             color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #164a68;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: #7c929e;
+            margin-top: 2px;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #55717f;
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 37px;
+            height: 37px;
+            border-radius: 50%;
+            background: #e6f5fb;
+            color: #087fb4;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
         }
 
-        .brand h1 {
-            margin: 0;
-            font-size: 21px;
-        }
-
-        .brand small {
-            color: #6b7280;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-email {
-            color: #4b5563;
-            font-size: 14px;
-        }
-
         .logout-button {
-            border: 1px solid #d1d5db;
+            border: 1px solid #dbe8ee;
             background: white;
-            color: #374151;
-            padding: 9px 14px;
-            border-radius: 8px;
-            cursor: pointer;
+            color: #607d8b;
+            border-radius: 10px;
+            padding: 9px 13px;
             font-weight: 600;
         }
 
         .logout-button:hover {
-            background: #f3f4f6;
+            background: #f5f9fb;
+            color: #d9534f;
         }
 
-        /* MAIN */
+        /* =========================
+           MAIN
+        ========================= */
 
         .main-container {
             max-width: 1450px;
-            margin: 0 auto;
-            padding: 25px;
+            margin: auto;
+            padding: 28px 30px 45px;
         }
 
-        .page-title {
+        .welcome-card {
+            background: linear-gradient(135deg, #087fb4, #22a8d5);
+            color: white;
+            border-radius: 22px;
+            padding: 25px 28px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
-            gap: 15px;
+            box-shadow: 0 12px 30px rgba(8, 127, 180, 0.16);
         }
 
-        .page-title h2 {
-            margin: 0;
+        .welcome-card h2 {
             font-size: 25px;
+            margin-bottom: 5px;
         }
 
-        .date-controls {
+        .welcome-card p {
+            opacity: 0.88;
+        }
+
+        .doctor-icon {
+            font-size: 50px;
+            opacity: 0.9;
+        }
+
+        /* =========================
+           DATE BAR
+        ========================= */
+
+        .date-card {
+            background: white;
+            border: 1px solid #e3edf2;
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 18px rgba(40, 80, 100, 0.05);
+        }
+
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .date-button {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            border: 1px solid #dbe8ee;
+            background: #f8fbfd;
+            color: #167ea9;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .date-button:hover {
+            background: #e9f6fb;
+        }
+
+        .today-button {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: none;
+            background: #e7f5fb;
+            color: #087fb4;
+            font-weight: 700;
+        }
+
+        .current-date {
+            text-align: center;
+        }
+
+        .current-date strong {
+            display: block;
+            color: #194d68;
+            font-size: 20px;
+        }
+
+        .current-date span {
+            color: #8a9ca5;
+            font-size: 13px;
+        }
+
+        /* =========================
+           DASHBOARD GRID
+        ========================= */
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e3edf2;
+            border-radius: 18px;
+            box-shadow: 0 4px 18px rgba(40, 80, 100, 0.05);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px 21px;
+            border-bottom: 1px solid #edf2f5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #204f67;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .panel-title-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            background: #e8f6fb;
+            color: #087fb4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+
+        .panel-body {
+            padding: 21px;
+        }
+
+        /* =========================
+           APPOINTMENT FORM
+        ========================= */
+
+        .appointment-form textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .add-button {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 13px;
+            background: linear-gradient(135deg, #087fb4, #20a6d5);
+            color: white;
+            font-weight: 800;
+            margin-top: 4px;
+            box-shadow: 0 8px 18px rgba(8, 127, 180, 0.18);
+        }
+
+        .add-button:hover {
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           SCHEDULE
+        ========================= */
+
+        .schedule-header {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .date-button {
-            border: 1px solid #d1d5db;
-            background: white;
-            border-radius: 8px;
-            padding: 9px 13px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .date-button:hover {
-            background: #f3f4f6;
-        }
-
-        .current-date {
-            min-width: 180px;
-            text-align: center;
-            font-weight: 700;
-        }
-
-        /* APPOINTMENT FORM */
-
-        .appointment-card {
-            background: white;
-            border-radius: 15px;
-            padding: 22px;
-            margin-bottom: 25px;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .appointment-card h3 {
-            margin: 0 0 18px;
-            font-size: 19px;
-        }
-
-        .appointment-form {
-            display: grid;
-            grid-template-columns: 1.1fr 1.1fr 0.7fr 1fr auto;
-            gap: 12px;
-            align-items: end;
-        }
-
-        .add-button {
-            border: none;
-            background: #16a34a;
-            color: white;
-            border-radius: 9px;
-            padding: 13px 20px;
-            cursor: pointer;
-            font-weight: 700;
-            height: 45px;
-        }
-
-        .add-button:hover {
-            background: #15803d;
-        }
-
-        /* SCHEDULE */
-
-        .schedule-card {
-            background: white;
-            border-radius: 15px;
-            padding: 22px;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .schedule-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .schedule-header h3 {
-            margin: 0;
-        }
-
-        .schedule-info {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .schedule-table-wrapper {
-            overflow-x: auto;
-        }
-
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 850px;
-        }
-
-        .schedule-table th {
-            background: #f8fafc;
-            padding: 12px;
-            text-align: left;
-            font-size: 13px;
-            color: #6b7280;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .schedule-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eef2f7;
-            vertical-align: middle;
-        }
-
-        .time-cell {
-            width: 90px;
-            font-weight: 700;
-            color: #374151;
-        }
-
-        .empty-slot {
-            color: #9ca3af;
-            font-size: 14px;
-        }
-
-        /* PATIENT */
-
-        .patient-card {
-            border: 1px solid #dbeafe;
-            background: #f8fbff;
-            border-radius: 11px;
-            padding: 12px;
-        }
-
-        .patient-name {
+        .schedule-count {
+            background: #eaf6fb;
+            color: #087fb4;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 800;
-            font-size: 15px;
-            margin-bottom: 4px;
+        }
+
+        .schedule-list {
+            padding: 8px 12px 15px;
+        }
+
+        .appointment-row {
+            display: grid;
+            grid-template-columns: 90px 1fr auto;
+            gap: 15px;
+            align-items: center;
+            padding: 13px 10px;
+            border-bottom: 1px solid #edf2f5;
+            transition: 0.15s;
+        }
+
+        .appointment-row:last-child {
+            border-bottom: none;
+        }
+
+        .appointment-row:hover {
+            background: #f8fbfd;
+            border-radius: 10px;
+        }
+
+        .appointment-time {
+            font-size: 16px;
+            font-weight: 800;
+            color: #087fb4;
         }
 
         .patient-info {
-            color: #6b7280;
-            font-size: 13px;
+            min-width: 0;
+        }
+
+        .patient-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #244e62;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .patient-phone {
+            font-size: 12px;
+            color: #8498a2;
             margin-top: 3px;
         }
 
-        .patient-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 9px;
+        .patient-note {
+            font-size: 12px;
+            color: #6f848e;
+            margin-top: 4px;
         }
 
-        .status-button,
-        .delete-button {
-            border: none;
-            border-radius: 7px;
-            padding: 7px 9px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
+        .appointment-actions {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .status-button {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .status-button:hover {
-            background: #d1d5db;
-        }
-
-        .delete-button {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .delete-button:hover {
-            background: #fecaca;
-        }
-
-        /* STATUS */
-
-        .status {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 999px;
-            font-size: 11px;
+            border: none;
+            border-radius: 9px;
+            padding: 7px 10px;
+            font-size: 12px;
             font-weight: 800;
-            margin-top: 5px;
         }
 
         .status-planned {
-            background: #dbeafe;
-            color: #1d4ed8;
+            background: #e9f5fb;
+            color: #087fb4;
         }
 
         .status-arrived {
-            background: #fef3c7;
-            color: #92400e;
+            background: #fff3d8;
+            color: #a16b00;
         }
 
         .status-finished {
-            background: #dcfce7;
-            color: #166534;
+            background: #e6f7ed;
+            color: #218653;
         }
 
         .status-cancelled {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #fdeaea;
+            color: #c64d4d;
         }
 
-        /* MESSAGES */
+        .delete-button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #f0dddd;
+            border-radius: 8px;
+            background: #fffafa;
+            color: #c85b5b;
+            font-weight: 800;
+        }
 
-        .app-message {
-            padding: 13px 16px;
-            border-radius: 9px;
-            margin-bottom: 15px;
+        .delete-button:hover {
+            background: #fdeaea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 45px 20px;
+            color: #8da0a9;
+        }
+
+        .empty-icon {
+            font-size: 42px;
+            margin-bottom: 10px;
+            opacity: 0.65;
+        }
+
+        .empty-state strong {
+            display: block;
+            color: #637d89;
+            margin-bottom: 5px;
+        }
+
+        /* =========================
+           MESSAGES
+        ========================= */
+
+        .message {
+            margin-bottom: 18px;
+            padding: 12px 15px;
+            border-radius: 11px;
             font-size: 14px;
-            display: none;
+            font-weight: 600;
         }
 
-        .app-message.success {
-            display: block;
-            background: #dcfce7;
-            color: #166534;
+        .message.success {
+            background: #e9f8ef;
+            color: #22784c;
+            border: 1px solid #cdebd9;
         }
 
-        .app-message.error {
-            display: block;
-            background: #fee2e2;
-            color: #991b1b;
+        .message.error {
+            background: #fff0f0;
+            color: #b64646;
+            border: 1px solid #f2d1d1;
         }
-
-        /* FATAL ERROR */
 
         .fatal-error {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 25px;
-            background: #fef2f2;
-        }
-
-        .fatal-box {
-            max-width: 700px;
+            max-width: 650px;
+            margin: 80px auto;
             background: white;
-            border: 1px solid #fecaca;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+            border: 1px solid #f0d1d1;
+            border-radius: 18px;
+            padding: 30px;
+            color: #a94444;
+            box-shadow: 0 10px 35px rgba(80, 30, 30, 0.08);
         }
 
-        .fatal-box h2 {
-            margin-top: 0;
-            color: #991b1b;
+        .fatal-error h2 {
+            margin-bottom: 10px;
         }
 
-        /* RESPONSIVE */
+        /* =========================
+           RESPONSIVE
+        ========================= */
 
         @media (max-width: 1000px) {
-            .appointment-form {
-                grid-template-columns: 1fr 1fr;
+            .dashboard-grid {
+                grid-template-columns: 1fr;
             }
 
-            .add-button {
-                width: 100%;
+            .welcome-card {
+                padding: 22px;
             }
         }
 
         @media (max-width: 700px) {
-            .app-header {
-                padding: 12px 15px;
+            .topbar {
+                height: auto;
+                padding: 13px 16px;
+                gap: 12px;
             }
 
-            .header-inner {
-                align-items: flex-start;
+            .user-info span {
+                display: none;
             }
 
-            .user-email {
+            .brand-title {
+                font-size: 17px;
+            }
+
+            .brand-subtitle {
                 display: none;
             }
 
             .main-container {
-                padding: 15px;
+                padding: 18px 13px 35px;
             }
 
-            .page-title {
+            .welcome-card {
+                border-radius: 17px;
+            }
+
+            .welcome-card h2 {
+                font-size: 20px;
+            }
+
+            .doctor-icon {
+                font-size: 36px;
+            }
+
+            .date-card {
                 flex-direction: column;
-                align-items: stretch;
             }
 
-            .date-controls {
-                justify-content: space-between;
-                flex-wrap: wrap;
+            .date-navigation {
+                width: 100%;
+                justify-content: center;
             }
 
-            .appointment-form {
-                grid-template-columns: 1fr;
+            .appointment-row {
+                grid-template-columns: 65px 1fr;
+                gap: 9px;
             }
 
-            .login-box {
-                padding: 25px 20px;
+            .appointment-actions {
+                grid-column: 1 / -1;
+                justify-content: flex-start;
+            }
+
+            .login-card {
+                padding: 30px 22px;
             }
         }
     </style>
@@ -548,11 +706,9 @@
         </div>
     </div>
 
-    <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- JAVASCRIPT I AMBULATORIT -->
-    <script src="app-gvm.js?v=GVM-20260924-07"></script>
+    <script src="app-gvm.js?v=GVM-20260924-08"></script>
 
 </body>
 </html>
