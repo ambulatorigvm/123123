@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-23";
+const APP_VERSION = "GVM-20260924-24";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -887,6 +887,15 @@ async function loadPatients() {
     }
 }
 
+function formatCardNumber(cardNumber) {
+    if (cardNumber === null || cardNumber === undefined || cardNumber === "") {
+        return "GVM-000000";
+    }
+
+    return "GVM-" + String(cardNumber);
+}
+
+
 function renderPatients() {
     const body = document.getElementById("patientsBody");
     const countElement = document.getElementById("patientsCount");
@@ -966,7 +975,7 @@ function renderPatientRow(patient) {
 
         <td>
             <span class="patient-id-badge">
-                ${escapeHtml(patient.card_number || personalId)}
+                ${escapeHtml(formatCardNumber(patient.card_number))}
             </span>
         </td>
 
@@ -1302,7 +1311,7 @@ async function viewPatient(id) {
 
             <div>
                 <span>Kodi i kartelës</span>
-                <strong>${escapeHtml(patient.personal_id || "—")}</strong>
+                <strong>${escapeHtml(formatCardNumber(patient.card_number))}</strong>
             </div>
 
             <div>
