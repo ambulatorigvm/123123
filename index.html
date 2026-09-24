@@ -1,1839 +1,1642 @@
-```html
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AMBULATORI GVM | Hospital System</title>
+    <meta charset="UTF-8">
 
-<link rel="icon" href="data:,">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<style>
+    <title>AMBULATORI GVM | Hospital System</title>
 
-/* =========================================================
-   AMBULATORI GVM
-   HOSPITAL MANAGEMENT SYSTEM
-========================================================= */
+    <link rel="icon" href="data:,">
 
-:root{
-    --hospital-blue:#0c6f91;
-    --hospital-dark:#123f55;
-    --hospital-teal:#18a1b8;
-    --hospital-light:#eaf7fa;
+    <style>
 
-    --green:#24a879;
-    --orange:#e7a83b;
-    --red:#d75d68;
+        :root{
+            --hospital-blue:#0c6f91;
+            --hospital-dark:#123f55;
+            --hospital-teal:#18a1b8;
+            --hospital-light:#eaf7fa;
 
-    --background:#eef4f7;
-    --white:#ffffff;
+            --green:#24a879;
+            --orange:#e7a83b;
+            --red:#d75d68;
 
-    --text:#173b4c;
-    --muted:#78909c;
+            --background:#eef4f7;
+            --white:#ffffff;
 
-    --border:#dce7ec;
+            --text:#173b4c;
+            --muted:#78909c;
 
-    --shadow:
-        0 8px 28px rgba(24,64,82,.08);
-}
+            --border:#dce7ec;
 
+            --shadow:
+                0 8px 28px rgba(24,64,82,.08);
+        }
 
-/* =========================================================
-   RESET
-========================================================= */
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
+        html,
+        body{
+            min-height:100%;
+        }
 
-html,
-body{
-    min-height:100%;
-}
+        body{
 
-body{
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
 
-    font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
-        sans-serif;
+            color:var(--text);
 
-    color:var(--text);
+            background:
+                linear-gradient(
+                    rgba(238,244,247,.91),
+                    rgba(238,244,247,.96)
+                ),
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(24,161,184,.15),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 90% 80%,
+                    rgba(12,111,145,.10),
+                    transparent 30%
+                );
 
-    background:
-        linear-gradient(
-            rgba(238,244,247,.91),
-            rgba(238,244,247,.96)
-        ),
-        radial-gradient(
-            circle at 10% 10%,
-            rgba(24,161,184,.15),
-            transparent 28%
-        ),
-        radial-gradient(
-            circle at 90% 80%,
-            rgba(12,111,145,.10),
-            transparent 30%
-        );
+            min-height:100vh;
+        }
 
-    min-height:100vh;
-}
+        button,
+        input,
+        select,
+        textarea{
+            font-family:inherit;
+        }
 
-button,
-input,
-select,
-textarea{
-    font-family:inherit;
-}
+        button{
+            cursor:pointer;
+        }
 
-button{
-    cursor:pointer;
-}
+        body::before{
 
+            content:"";
 
-/* =========================================================
-   HOSPITAL BACKGROUND
-========================================================= */
+            position:fixed;
 
-body::before{
+            inset:0;
 
-    content:"";
+            z-index:-2;
 
-    position:fixed;
+            opacity:.25;
 
-    inset:0;
+            background-image:
 
-    z-index:-2;
+                linear-gradient(
+                    90deg,
+                    transparent 49%,
+                    rgba(12,111,145,.04) 50%,
+                    transparent 51%
+                ),
 
-    opacity:.25;
+                linear-gradient(
+                    0deg,
+                    transparent 49%,
+                    rgba(12,111,145,.035) 50%,
+                    transparent 51%
+                );
 
-    background-image:
+            background-size:90px 90px;
 
-        linear-gradient(
-            90deg,
-            transparent 49%,
-            rgba(12,111,145,.04) 50%,
-            transparent 51%
-        ),
+            pointer-events:none;
+        }
 
-        linear-gradient(
-            0deg,
-            transparent 49%,
-            rgba(12,111,145,.035) 50%,
-            transparent 51%
-        );
+        body::after{
 
-    background-size:
-        90px 90px;
+            content:"✚";
 
-    pointer-events:none;
-}
+            position:fixed;
 
-body::after{
+            right:-80px;
+            bottom:-110px;
 
-    content:"✚";
+            z-index:-1;
 
-    position:fixed;
+            font-size:520px;
 
-    right:-80px;
-    bottom:-110px;
+            line-height:1;
 
-    z-index:-1;
+            color:rgba(12,111,145,.025);
 
-    font-size:520px;
+            font-weight:900;
 
-    line-height:1;
+            pointer-events:none;
+        }
 
-    color:rgba(12,111,145,.025);
+        .loading{
 
-    font-weight:900;
+            min-height:100vh;
 
-    pointer-events:none;
-}
+            display:flex;
+            flex-direction:column;
 
+            align-items:center;
+            justify-content:center;
 
-/* =========================================================
-   LOADING
-========================================================= */
+            color:var(--hospital-blue);
 
-.loading{
+            font-weight:700;
+        }
 
-    min-height:100vh;
+        .loading::before{
 
-    display:flex;
-    flex-direction:column;
+            content:"✚";
 
-    align-items:center;
-    justify-content:center;
+            width:76px;
+            height:76px;
 
-    color:var(--hospital-blue);
+            display:flex;
 
-    font-weight:700;
-}
+            align-items:center;
+            justify-content:center;
 
-.loading::before{
+            margin-bottom:18px;
 
-    content:"✚";
+            border-radius:24px;
 
-    width:76px;
-    height:76px;
+            color:white;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            font-size:38px;
 
-    margin-bottom:18px;
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--hospital-dark),
+                    var(--hospital-teal)
+                );
 
-    border-radius:24px;
+            box-shadow:
+                0 18px 35px rgba(12,111,145,.22);
+        }
 
-    color:white;
+        .login-page{
 
-    font-size:38px;
+            min-height:100vh;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--hospital-dark),
-            var(--hospital-teal)
-        );
+            display:flex;
 
-    box-shadow:
-        0 18px 35px rgba(12,111,145,.22);
-}
+            align-items:center;
+            justify-content:center;
 
+            padding:30px;
 
-/* =========================================================
-   LOGIN
-========================================================= */
+            background:
+                linear-gradient(
+                    rgba(235,246,249,.91),
+                    rgba(245,249,251,.95)
+                ),
+                radial-gradient(
+                    circle at 20% 30%,
+                    rgba(24,161,184,.20),
+                    transparent 35%
+                );
+        }
 
-.login-page{
+        .login-card{
 
-    min-height:100vh;
+            width:100%;
+            max-width:430px;
 
-    display:flex;
+            background:white;
 
-    align-items:center;
-    justify-content:center;
+            padding:42px;
 
-    padding:30px;
+            border-radius:28px;
 
-    background:
+            border:1px solid var(--border);
 
-        linear-gradient(
-            rgba(235,246,249,.91),
-            rgba(245,249,251,.95)
-        ),
+            box-shadow:
+                0 25px 70px rgba(20,65,85,.14);
+        }
 
-        radial-gradient(
-            circle at 20% 30%,
-            rgba(24,161,184,.20),
-            transparent 35%
-        );
-}
+        .medical-logo{
 
-.login-card{
+            width:86px;
+            height:86px;
 
-    width:100%;
-    max-width:430px;
+            margin:0 auto 20px;
 
-    background:white;
+            display:flex;
 
-    padding:42px;
+            align-items:center;
+            justify-content:center;
 
-    border-radius:28px;
+            border-radius:25px;
 
-    border:
-        1px solid var(--border);
+            color:white;
 
-    box-shadow:
-        0 25px 70px rgba(20,65,85,.14);
-}
+            font-size:43px;
+            font-weight:900;
 
-.medical-logo{
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--hospital-dark),
+                    var(--hospital-teal)
+                );
 
-    width:86px;
-    height:86px;
+            box-shadow:
+                0 15px 32px rgba(12,111,145,.22);
+        }
 
-    margin:
-        0 auto 20px;
+        .login-card h1{
 
-    display:flex;
+            text-align:center;
 
-    align-items:center;
-    justify-content:center;
+            color:var(--hospital-dark);
 
-    border-radius:25px;
+            font-size:27px;
 
-    color:white;
+            margin-bottom:7px;
+        }
 
-    font-size:43px;
-    font-weight:900;
+        .login-subtitle{
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--hospital-dark),
-            var(--hospital-teal)
-        );
+            text-align:center;
 
-    box-shadow:
-        0 15px 32px rgba(12,111,145,.22);
-}
+            color:var(--muted);
 
-.login-card h1{
+            font-size:14px;
 
-    text-align:center;
+            margin-bottom:30px;
+        }
 
-    color:var(--hospital-dark);
+        .form-group{
+            margin-bottom:17px;
+        }
 
-    font-size:27px;
+        .form-group label{
 
-    margin-bottom:7px;
-}
+            display:block;
 
-.login-subtitle{
+            margin-bottom:7px;
 
-    text-align:center;
+            color:#486572;
 
-    color:var(--muted);
+            font-size:12px;
 
-    font-size:14px;
+            font-weight:800;
 
-    margin-bottom:30px;
-}
+            text-transform:uppercase;
+        }
 
+        .form-group input,
+        .form-group select,
+        .form-group textarea{
 
-/* =========================================================
-   FORM
-========================================================= */
+            width:100%;
 
-.form-group{
+            padding:13px 14px;
 
-    margin-bottom:17px;
-}
+            border:1px solid var(--border);
 
-.form-group label{
+            border-radius:11px;
 
-    display:block;
+            outline:none;
 
-    margin-bottom:7px;
+            background:#fbfdfe;
 
-    color:#486572;
+            color:var(--text);
 
-    font-size:12px;
+            transition:.2s;
+        }
 
-    font-weight:800;
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus{
 
-    text-transform:uppercase;
-}
+            border-color:var(--hospital-teal);
 
-.form-group input,
-.form-group select,
-.form-group textarea{
+            background:white;
 
-    width:100%;
+            box-shadow:
+                0 0 0 4px rgba(24,161,184,.09);
+        }
 
-    padding:13px 14px;
+        .form-group textarea{
 
-    border:
-        1px solid var(--border);
+            min-height:90px;
 
-    border-radius:11px;
+            resize:vertical;
+        }
 
-    outline:none;
+        .login-button,
+        .add-button{
 
-    background:#fbfdfe;
+            width:100%;
 
-    color:var(--text);
+            border:0;
 
-    transition:.2s;
-}
+            border-radius:11px;
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
+            padding:14px;
 
-    border-color:
-        var(--hospital-teal);
+            color:white;
 
-    background:white;
+            font-weight:800;
 
-    box-shadow:
-        0 0 0 4px rgba(24,161,184,.09);
-}
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--hospital-dark),
+                    var(--hospital-blue)
+                );
 
-.form-group textarea{
+            box-shadow:
+                0 10px 22px rgba(12,111,145,.18);
 
-    min-height:90px;
+            transition:.2s;
+        }
 
-    resize:vertical;
-}
+        .login-button:hover,
+        .add-button:hover{
 
+            transform:translateY(-1px);
 
-/* =========================================================
-   BUTTON
-========================================================= */
+            box-shadow:
+                0 14px 28px rgba(12,111,145,.25);
+        }
 
-.login-button,
-.add-button{
+        .app-shell{
 
-    width:100%;
+            min-height:100vh;
 
-    border:0;
+            display:flex;
+        }
 
-    border-radius:11px;
+        .sidebar{
 
-    padding:14px;
+            width:250px;
 
-    color:white;
+            min-height:100vh;
 
-    font-weight:800;
+            position:fixed;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--hospital-dark),
-            var(--hospital-blue)
-        );
+            left:0;
+            top:0;
+            bottom:0;
 
-    box-shadow:
-        0 10px 22px rgba(12,111,145,.18);
+            z-index:100;
 
-    transition:.2s;
-}
+            display:flex;
 
-.login-button:hover,
-.add-button:hover{
+            flex-direction:column;
 
-    transform:translateY(-1px);
+            color:white;
 
-    box-shadow:
-        0 14px 28px rgba(12,111,145,.25);
-}
+            background:
+                linear-gradient(
+                    180deg,
+                    #123f55 0%,
+                    #0b3347 100%
+                );
 
+            box-shadow:
+                8px 0 35px rgba(14,54,72,.10);
+        }
 
-/* =========================================================
-   APP
-========================================================= */
+        .sidebar-brand{
 
-.app-shell{
+            height:82px;
 
-    min-height:100vh;
+            padding:0 22px;
 
-    display:flex;
-}
+            display:flex;
 
+            align-items:center;
 
-/* =========================================================
-   SIDEBAR
-========================================================= */
+            gap:12px;
 
-.sidebar{
+            border-bottom:
+                1px solid rgba(255,255,255,.08);
+        }
 
-    width:250px;
+        .sidebar-logo{
 
-    min-height:100vh;
+            width:45px;
+            height:45px;
 
-    position:fixed;
+            display:flex;
 
-    left:0;
-    top:0;
-    bottom:0;
+            align-items:center;
+            justify-content:center;
 
-    z-index:100;
+            border-radius:14px;
 
-    display:flex;
+            background:
+                rgba(255,255,255,.11);
 
-    flex-direction:column;
+            font-size:25px;
 
-    color:white;
+            font-weight:900;
+        }
 
-    background:
-        linear-gradient(
-            180deg,
-            #123f55 0%,
-            #0b3347 100%
-        );
+        .sidebar-title{
 
-    box-shadow:
-        8px 0 35px rgba(14,54,72,.10);
-}
+            font-size:16px;
 
-.sidebar-brand{
+            font-weight:900;
+        }
 
-    height:82px;
+        .sidebar-subtitle{
 
-    padding:
-        0 22px;
+            margin-top:3px;
 
-    display:flex;
+            color:
+                rgba(255,255,255,.45);
 
-    align-items:center;
+            font-size:9px;
 
-    gap:12px;
+            text-transform:uppercase;
 
-    border-bottom:
-        1px solid rgba(255,255,255,.08);
-}
+            letter-spacing:1px;
+        }
 
-.sidebar-logo{
+        .sidebar-nav{
 
-    width:45px;
-    height:45px;
+            padding:23px 13px;
 
-    display:flex;
+            flex:1;
+        }
 
-    align-items:center;
-    justify-content:center;
+        .nav-label{
 
-    border-radius:14px;
+            padding:0 12px 9px;
 
-    background:
-        rgba(255,255,255,.11);
+            color:
+                rgba(255,255,255,.40);
 
-    font-size:25px;
+            font-size:10px;
 
-    font-weight:900;
-}
+            font-weight:800;
 
-.sidebar-title{
+            letter-spacing:1.2px;
 
-    font-size:16px;
+            text-transform:uppercase;
+        }
 
-    font-weight:900;
-}
+        .nav-item{
 
-.sidebar-subtitle{
+            display:flex;
 
-    margin-top:3px;
+            align-items:center;
 
-    color:
-        rgba(255,255,255,.45);
+            gap:12px;
 
-    font-size:9px;
+            padding:12px 13px;
 
-    text-transform:uppercase;
+            margin-bottom:5px;
 
-    letter-spacing:1px;
-}
+            border-radius:11px;
 
+            color:
+                rgba(255,255,255,.68);
 
-/* =========================================================
-   SIDEBAR NAV
-========================================================= */
+            font-size:13px;
 
-.sidebar-nav{
+            font-weight:700;
+        }
 
-    padding:23px 13px;
+        .nav-item:hover{
 
-    flex:1;
-}
+            background:
+                rgba(255,255,255,.07);
 
-.nav-label{
+            color:white;
+        }
 
-    padding:
-        0 12px 9px;
+        .nav-item.active{
 
-    color:
-        rgba(255,255,255,.40);
+            color:white;
 
-    font-size:10px;
+            background:
+                rgba(24,161,184,.22);
 
-    font-weight:800;
+            box-shadow:
+                inset 3px 0 var(--hospital-teal);
+        }
 
-    letter-spacing:1.2px;
+        .nav-icon{
 
-    text-transform:uppercase;
-}
+            width:28px;
+            height:28px;
 
-.nav-item{
+            display:flex;
 
-    display:flex;
+            align-items:center;
+            justify-content:center;
 
-    align-items:center;
+            border-radius:8px;
 
-    gap:12px;
+            background:
+                rgba(255,255,255,.07);
+        }
 
-    padding:
-        12px 13px;
+        .sidebar-footer{
 
-    margin-bottom:5px;
+            padding:16px;
 
-    border-radius:11px;
+            border-top:
+                1px solid rgba(255,255,255,.08);
+        }
 
-    color:
-        rgba(255,255,255,.68);
+        .clinic-status{
 
-    font-size:13px;
+            padding:12px;
 
-    font-weight:700;
-}
+            border-radius:12px;
 
-.nav-item:hover{
+            background:
+                rgba(255,255,255,.055);
 
-    background:
-        rgba(255,255,255,.07);
+            color:
+                rgba(255,255,255,.65);
 
-    color:white;
-}
+            font-size:11px;
+        }
 
-.nav-item.active{
+        .status-dot{
 
-    color:white;
+            width:7px;
+            height:7px;
 
-    background:
-        rgba(24,161,184,.22);
+            display:inline-block;
 
-    box-shadow:
-        inset 3px 0 var(--hospital-teal);
-}
+            margin-right:7px;
 
-.nav-icon{
+            border-radius:50%;
 
-    width:28px;
-    height:28px;
+            background:#35d18e;
 
-    display:flex;
+            box-shadow:
+                0 0 0 4px rgba(53,209,142,.10);
+        }
 
-    align-items:center;
-    justify-content:center;
+        .main-area{
 
-    border-radius:8px;
+            width:
+                calc(100% - 250px);
 
-    background:
-        rgba(255,255,255,.07);
-}
+            margin-left:250px;
 
+            min-height:100vh;
+        }
 
-/* =========================================================
-   SIDEBAR STATUS
-========================================================= */
+        .topbar{
 
-.sidebar-footer{
+            height:82px;
 
-    padding:16px;
+            position:sticky;
 
-    border-top:
-        1px solid rgba(255,255,255,.08);
-}
+            top:0;
 
-.clinic-status{
+            z-index:80;
 
-    padding:12px;
+            display:flex;
 
-    border-radius:12px;
+            align-items:center;
 
-    background:
-        rgba(255,255,255,.055);
+            justify-content:space-between;
 
-    color:
-        rgba(255,255,255,.65);
+            padding:0 30px;
 
-    font-size:11px;
-}
+            background:
+                rgba(255,255,255,.96);
 
-.status-dot{
+            backdrop-filter:blur(12px);
 
-    width:7px;
-    height:7px;
+            border-bottom:
+                1px solid var(--border);
 
-    display:inline-block;
+            box-shadow:
+                0 4px 15px rgba(20,60,80,.04);
+        }
 
-    margin-right:7px;
+        .page-heading{
 
-    border-radius:50%;
+            display:flex;
 
-    background:#35d18e;
+            align-items:center;
 
-    box-shadow:
-        0 0 0 4px rgba(53,209,142,.10);
-}
+            gap:12px;
+        }
 
+        .page-heading-icon{
 
-/* =========================================================
-   MAIN
-========================================================= */
+            width:41px;
+            height:41px;
 
-.main-area{
+            display:flex;
 
-    width:
-        calc(100% - 250px);
+            align-items:center;
+            justify-content:center;
 
-    margin-left:250px;
+            border-radius:11px;
 
-    min-height:100vh;
-}
+            background:
+                var(--hospital-light);
 
+            color:
+                var(--hospital-blue);
 
-/* =========================================================
-   HEADER
-========================================================= */
+            font-size:19px;
+        }
 
-.topbar{
+        .page-heading h2{
 
-    height:82px;
+            color:var(--hospital-dark);
 
-    position:sticky;
+            font-size:18px;
 
-    top:0;
+            font-weight:900;
+        }
 
-    z-index:80;
+        .page-heading p{
 
-    display:flex;
+            margin-top:2px;
 
-    align-items:center;
+            color:var(--muted);
 
-    justify-content:space-between;
+            font-size:11px;
+        }
 
-    padding:
-        0 30px;
+        .user-area{
 
-    background:
-        rgba(255,255,255,.96);
+            display:flex;
 
-    backdrop-filter:
-        blur(12px);
+            align-items:center;
 
-    border-bottom:
-        1px solid var(--border);
+            gap:12px;
+        }
 
-    box-shadow:
-        0 4px 15px rgba(20,60,80,.04);
-}
+        .user-info{
 
-.page-heading{
+            display:flex;
 
-    display:flex;
+            align-items:center;
 
-    align-items:center;
+            gap:9px;
 
-    gap:12px;
-}
+            color:#607983;
 
-.page-heading-icon{
+            font-size:12px;
 
-    width:41px;
-    height:41px;
+            font-weight:700;
+        }
 
-    display:flex;
+        .user-avatar{
 
-    align-items:center;
-    justify-content:center;
+            width:38px;
+            height:38px;
 
-    border-radius:11px;
+            display:flex;
 
-    background:
-        var(--hospital-light);
+            align-items:center;
+            justify-content:center;
 
-    color:
-        var(--hospital-blue);
+            border-radius:50%;
 
-    font-size:19px;
-}
+            background:
+                var(--hospital-light);
 
-.page-heading h2{
+            color:
+                var(--hospital-blue);
 
-    color:var(--hospital-dark);
+            font-weight:900;
+        }
 
-    font-size:18px;
+        .logout-button{
 
-    font-weight:900;
-}
+            padding:9px 12px;
 
-.page-heading p{
+            border:1px solid var(--border);
 
-    margin-top:2px;
+            border-radius:9px;
 
-    color:var(--muted);
+            background:white;
 
-    font-size:11px;
-}
+            color:#687f89;
 
-.user-area{
+            font-size:12px;
 
-    display:flex;
+            font-weight:800;
+        }
 
-    align-items:center;
+        .logout-button:hover{
 
-    gap:12px;
-}
+            color:var(--red);
 
-.user-info{
+            background:#fff1f2;
 
-    display:flex;
+            border-color:#f0d0d3;
+        }
 
-    align-items:center;
+        .main-container{
 
-    gap:9px;
+            max-width:1550px;
 
-    color:#607983;
+            margin:auto;
 
-    font-size:12px;
+            padding:27px 30px 50px;
+        }
 
-    font-weight:700;
-}
+        .welcome-card{
 
-.user-avatar{
+            min-height:150px;
 
-    width:38px;
-    height:38px;
+            position:relative;
 
-    display:flex;
+            overflow:hidden;
 
-    align-items:center;
-    justify-content:center;
+            display:flex;
 
-    border-radius:50%;
+            align-items:center;
 
-    background:
-        var(--hospital-light);
+            justify-content:space-between;
 
-    color:
-        var(--hospital-blue);
+            padding:28px 30px;
 
-    font-weight:900;
-}
+            margin-bottom:22px;
 
-.logout-button{
+            border-radius:20px;
 
-    padding:
-        9px 12px;
+            color:white;
 
-    border:
-        1px solid var(--border);
+            background:
+                linear-gradient(
+                    120deg,
+                    rgba(12,74,98,.98),
+                    rgba(12,126,151,.96),
+                    rgba(25,169,183,.94)
+                );
 
-    border-radius:9px;
+            box-shadow:
+                0 15px 38px rgba(12,111,145,.18);
+        }
 
-    background:white;
+        .welcome-card::before{
 
-    color:#687f89;
+            content:"";
 
-    font-size:12px;
+            position:absolute;
 
-    font-weight:800;
-}
+            width:280px;
+            height:280px;
 
-.logout-button:hover{
+            right:100px;
+            top:-160px;
 
-    color:var(--red);
+            border-radius:50%;
 
-    background:#fff1f2;
+            border:40px solid rgba(255,255,255,.035);
+        }
 
-    border-color:#f0d0d3;
-}
+        .welcome-card::after{
 
+            content:"✚";
 
-/* =========================================================
-   MAIN CONTAINER
-========================================================= */
+            position:absolute;
 
-.main-container{
+            right:35px;
+            bottom:-70px;
 
-    max-width:1550px;
+            font-size:200px;
 
-    margin:auto;
+            color:white;
 
-    padding:
-        27px 30px 50px;
-}
+            opacity:.045;
+        }
 
+        .welcome-card h2{
 
-/* =========================================================
-   HOSPITAL BANNER
-========================================================= */
+            position:relative;
 
-.welcome-card{
+            z-index:2;
 
-    min-height:150px;
+            font-size:25px;
 
-    position:relative;
+            font-weight:900;
 
-    overflow:hidden;
+            margin-bottom:6px;
+        }
 
-    display:flex;
+        .welcome-card p{
 
-    align-items:center;
+            position:relative;
 
-    justify-content:space-between;
+            z-index:2;
 
-    padding:
-        28px 30px;
+            color:
+                rgba(255,255,255,.78);
 
-    margin-bottom:22px;
+            font-size:13px;
+        }
 
-    border-radius:20px;
+        .doctor-icon{
 
-    color:white;
+            position:relative;
 
-    background:
+            z-index:2;
 
-        linear-gradient(
-            120deg,
-            rgba(12,74,98,.98),
-            rgba(12,126,151,.96),
-            rgba(25,169,183,.94)
-        );
+            width:78px;
+            height:78px;
 
-    box-shadow:
-        0 15px 38px rgba(12,111,145,.18);
-}
+            display:flex;
 
-.welcome-card::before{
+            align-items:center;
+            justify-content:center;
 
-    content:"";
+            border-radius:22px;
 
-    position:absolute;
+            background:
+                rgba(255,255,255,.11);
 
-    width:280px;
-    height:280px;
+            border:
+                1px solid rgba(255,255,255,.15);
 
-    right:100px;
-    top:-160px;
+            font-size:40px;
+        }
 
-    border-radius:50%;
+        .date-card{
 
-    border:
-        40px solid rgba(255,255,255,.035);
-}
+            min-height:70px;
 
-.welcome-card::after{
+            display:flex;
 
-    content:"✚";
+            align-items:center;
 
-    position:absolute;
+            justify-content:space-between;
 
-    right:35px;
-    bottom:-70px;
+            gap:20px;
 
-    font-size:200px;
+            margin-bottom:22px;
 
-    color:white;
+            padding:12px 16px;
 
-    opacity:.045;
-}
+            background:white;
 
-.welcome-card h2{
+            border:1px solid var(--border);
 
-    position:relative;
+            border-radius:15px;
 
-    z-index:2;
+            box-shadow:var(--shadow);
+        }
 
-    font-size:25px;
+        .date-navigation{
 
-    font-weight:900;
+            display:flex;
 
-    margin-bottom:6px;
-}
+            align-items:center;
 
-.welcome-card p{
+            gap:7px;
+        }
 
-    position:relative;
+        .date-button{
 
-    z-index:2;
+            width:39px;
+            height:39px;
 
-    color:
-        rgba(255,255,255,.78);
+            border:1px solid var(--border);
 
-    font-size:13px;
-}
+            border-radius:9px;
 
-.doctor-icon{
+            background:#fbfdfe;
 
-    position:relative;
+            color:var(--hospital-blue);
 
-    z-index:2;
+            font-size:18px;
 
-    width:78px;
-    height:78px;
+            font-weight:900;
+        }
 
-    display:flex;
+        .date-button:hover{
 
-    align-items:center;
-    justify-content:center;
+            background:
+                var(--hospital-light);
+        }
 
-    border-radius:22px;
+        .today-button{
 
-    background:
-        rgba(255,255,255,.11);
+            padding:9px 13px;
 
-    border:
-        1px solid rgba(255,255,255,.15);
+            border:0;
 
-    font-size:40px;
-}
+            border-radius:9px;
 
+            background:
+                var(--hospital-light);
 
-/* =========================================================
-   DATE BAR
-========================================================= */
+            color:
+                var(--hospital-dark);
 
-.date-card{
+            font-size:12px;
 
-    min-height:70px;
+            font-weight:900;
+        }
 
-    display:flex;
+        .current-date{
+            text-align:center;
+        }
 
-    align-items:center;
+        .current-date strong{
 
-    justify-content:space-between;
+            display:block;
 
-    gap:20px;
+            color:
+                var(--hospital-dark);
 
-    margin-bottom:22px;
+            font-size:18px;
 
-    padding:
-        12px 16px;
+            font-weight:900;
+        }
 
-    background:white;
+        .current-date span{
 
-    border:
-        1px solid var(--border);
+            display:block;
 
-    border-radius:15px;
+            margin-top:3px;
 
-    box-shadow:var(--shadow);
-}
+            color:
+                var(--muted);
 
-.date-navigation{
+            font-size:11px;
+        }
 
-    display:flex;
+        .dashboard-grid{
 
-    align-items:center;
+            display:grid;
 
-    gap:7px;
-}
+            grid-template-columns:
+                350px minmax(0,1fr);
 
-.date-button{
+            gap:22px;
 
-    width:39px;
-    height:39px;
+            align-items:start;
+        }
 
-    border:
-        1px solid var(--border);
+        .panel{
 
-    border-radius:9px;
+            overflow:hidden;
 
-    background:#fbfdfe;
+            background:white;
 
-    color:var(--hospital-blue);
+            border:1px solid var(--border);
 
-    font-size:18px;
+            border-radius:17px;
 
-    font-weight:900;
-}
+            box-shadow:var(--shadow);
+        }
 
-.date-button:hover{
+        .panel-header{
 
-    background:
-        var(--hospital-light);
-}
+            min-height:68px;
 
-.today-button{
+            display:flex;
 
-    padding:
-        9px 13px;
+            align-items:center;
 
-    border:0;
+            justify-content:space-between;
 
-    border-radius:9px;
+            padding:13px 18px;
 
-    background:
-        var(--hospital-light);
+            border-bottom:
+                1px solid var(--border);
+        }
 
-    color:
-        var(--hospital-dark);
+        .panel-title{
 
-    font-size:12px;
+            display:flex;
 
-    font-weight:900;
-}
+            align-items:center;
 
-.current-date{
+            gap:10px;
 
-    text-align:center;
-}
+            color:
+                var(--hospital-dark);
 
-.current-date strong{
+            font-size:14px;
 
-    display:block;
+            font-weight:900;
+        }
 
-    color:
-        var(--hospital-dark);
+        .panel-title-icon{
 
-    font-size:18px;
+            width:35px;
+            height:35px;
 
-    font-weight:900;
-}
+            display:flex;
 
-.current-date span{
+            align-items:center;
+            justify-content:center;
 
-    display:block;
+            border-radius:10px;
 
-    margin-top:3px;
+            background:
+                var(--hospital-light);
 
-    color:
-        var(--muted);
+            color:
+                var(--hospital-blue);
 
-    font-size:11px;
-}
+            font-size:16px;
+        }
 
+        .panel-body{
+            padding:19px;
+        }
 
-/* =========================================================
-   DASHBOARD
-========================================================= */
+        .appointment-form::before{
 
-.dashboard-grid{
+            content:"TË DHËNAT E VIZITËS";
 
-    display:grid;
+            display:block;
 
-    grid-template-columns:
-        350px minmax(0,1fr);
+            padding-bottom:9px;
 
-    gap:22px;
+            margin-bottom:17px;
 
-    align-items:start;
-}
+            border-bottom:
+                1px solid var(--border);
 
+            color:#93a3aa;
 
-/* =========================================================
-   PANELS
-========================================================= */
+            font-size:9px;
 
-.panel{
+            font-weight:900;
 
-    overflow:hidden;
+            letter-spacing:1.1px;
+        }
 
-    background:white;
+        .schedule-table-wrapper{
 
-    border:
-        1px solid var(--border);
+            width:100%;
 
-    border-radius:17px;
+            overflow-x:auto;
 
-    box-shadow:var(--shadow);
-}
+            padding:0 12px 14px;
+        }
 
-.panel-header{
+        .schedule-table{
 
-    min-height:68px;
+            width:100%;
 
-    display:flex;
+            min-width:700px;
 
-    align-items:center;
+            border-collapse:separate;
 
-    justify-content:space-between;
+            border-spacing:0 6px;
+        }
 
-    padding:
-        13px 18px;
+        .schedule-table thead th{
 
-    border-bottom:
-        1px solid var(--border);
-}
+            padding:11px 13px;
 
-.panel-title{
+            text-align:left;
 
-    display:flex;
+            color:#7c919a;
 
-    align-items:center;
+            background:#f5f9fa;
 
-    gap:10px;
+            border-top:
+                1px solid #e5edf0;
 
-    color:
-        var(--hospital-dark);
+            border-bottom:
+                1px solid #e5edf0;
 
-    font-size:14px;
+            font-size:10px;
 
-    font-weight:900;
-}
+            font-weight:900;
 
-.panel-title-icon{
+            text-transform:uppercase;
 
-    width:35px;
-    height:35px;
+            letter-spacing:.6px;
+        }
 
-    display:flex;
+        .schedule-table thead th:first-child{
 
-    align-items:center;
-    justify-content:center;
+            border-left:
+                1px solid #e5edf0;
 
-    border-radius:10px;
+            border-radius:9px 0 0 9px;
+        }
 
-    background:
-        var(--hospital-light);
+        .schedule-table thead th:last-child{
 
-    color:
-        var(--hospital-blue);
+            border-right:
+                1px solid #e5edf0;
 
-    font-size:16px;
-}
+            border-radius:0 9px 9px 0;
+        }
 
-.panel-body{
+        .schedule-table tbody tr{
 
-    padding:19px;
-}
+            transition:
+                transform .15s,
+                box-shadow .15s;
+        }
 
+        .schedule-table tbody tr:hover{
 
-/* =========================================================
-   FORM
-========================================================= */
+            transform:translateY(-1px);
 
-.appointment-form::before{
+            filter:brightness(.995);
+        }
 
-    content:"TË DHËNAT E VIZITËS";
+        .schedule-table tbody td{
 
-    display:block;
+            padding:13px;
 
-    padding-bottom:9px;
+            background:white;
 
-    margin-bottom:17px;
+            border-top:
+                1px solid #e8eff2;
 
-    border-bottom:
-        1px solid var(--border);
+            border-bottom:
+                1px solid #e8eff2;
 
-    color:#93a3aa;
+            font-size:12px;
 
-    font-size:9px;
+            vertical-align:middle;
+        }
 
-    font-weight:900;
+        .schedule-table tbody td:first-child{
 
-    letter-spacing:1.1px;
-}
+            border-left:
+                1px solid #e8eff2;
 
+            border-radius:10px 0 0 10px;
+        }
 
-/* =========================================================
-   TABLE
-========================================================= */
+        .schedule-table tbody td:last-child{
 
-.schedule-table-wrapper{
+            border-right:
+                1px solid #e8eff2;
 
-    width:100%;
+            border-radius:0 10px 10px 0;
+        }
 
-    overflow-x:auto;
+        .table-time{
 
-    padding:
-        0 12px 14px;
-}
+            color:
+                var(--hospital-dark);
 
-.schedule-table{
+            font-size:13px;
 
-    width:100%;
+            font-weight:900;
 
-    min-width:700px;
+            white-space:nowrap;
+        }
 
-    border-collapse:separate;
+        .table-time::before{
 
-    border-spacing:0 6px;
-}
+            content:"";
 
+            width:7px;
+            height:7px;
 
-/* TABLE HEADER */
+            display:inline-block;
 
-.schedule-table thead th{
+            margin-right:7px;
 
-    padding:
-        11px 13px;
+            border-radius:50%;
 
-    text-align:left;
+            background:
+                var(--hospital-teal);
 
-    color:#7c919a;
+            vertical-align:middle;
+        }
 
-    background:#f5f9fa;
+        .table-patient{
 
-    border-top:
-        1px solid #e5edf0;
+            display:flex;
 
-    border-bottom:
-        1px solid #e5edf0;
+            align-items:center;
 
-    font-size:10px;
+            gap:10px;
+        }
 
-    font-weight:900;
+        .patient-avatar{
 
-    text-transform:uppercase;
+            width:36px;
+            height:36px;
 
-    letter-spacing:.6px;
-}
+            flex:0 0 36px;
 
-.schedule-table thead th:first-child{
+            display:flex;
 
-    border-left:
-        1px solid #e5edf0;
+            align-items:center;
+            justify-content:center;
 
-    border-radius:
-        9px 0 0 9px;
-}
+            border-radius:11px;
 
-.schedule-table thead th:last-child{
+            background:
+                var(--hospital-light);
 
-    border-right:
-        1px solid #e5edf0;
+            color:
+                var(--hospital-blue);
 
-    border-radius:
-        0 9px 9px 0;
-}
+            font-size:12px;
 
+            font-weight:900;
+        }
 
-/* TABLE BODY */
+        .table-patient-name{
 
-.schedule-table tbody tr{
+            color:#214a5d;
 
-    transition:
-        transform .15s,
-        box-shadow .15s;
-}
+            font-size:13px;
 
-.schedule-table tbody tr:hover{
+            font-weight:900;
+        }
 
-    transform:
-        translateY(-1px);
+        .table-phone{
 
-    filter:
-        brightness(.995);
-}
+            margin-top:2px;
 
-.schedule-table tbody td{
+            color:#8a9ba2;
 
-    padding:
-        13px;
+            font-size:10px;
+        }
 
-    background:white;
+        .table-note{
 
-    border-top:
-        1px solid #e8eff2;
+            max-width:220px;
 
-    border-bottom:
-        1px solid #e8eff2;
+            color:#6e838d;
 
-    font-size:12px;
+            font-size:11px;
 
-    vertical-align:middle;
-}
+            white-space:nowrap;
 
-.schedule-table tbody td:first-child{
+            overflow:hidden;
 
-    border-left:
-        1px solid #e8eff2;
+            text-overflow:ellipsis;
+        }
 
-    border-radius:
-        10px 0 0 10px;
-}
+        .table-status{
 
-.schedule-table tbody td:last-child{
+            display:inline-flex;
 
-    border-right:
-        1px solid #e8eff2;
+            align-items:center;
 
-    border-radius:
-        0 10px 10px 0;
-}
+            gap:6px;
 
+            padding:6px 9px;
 
-/* =========================================================
-   TIME CELL
-========================================================= */
+            border-radius:20px;
 
-.table-time{
+            font-size:10px;
 
-    color:
-        var(--hospital-dark);
+            font-weight:900;
 
-    font-size:13px;
+            white-space:nowrap;
+        }
 
-    font-weight:900;
+        .table-status::before{
 
-    white-space:nowrap;
-}
+            content:"";
 
-.table-time::before{
+            width:6px;
+            height:6px;
 
-    content:"";
+            border-radius:50%;
+        }
 
-    width:7px;
-    height:7px;
+        .status-planned{
 
-    display:inline-block;
+            background:#eaf6fa;
 
-    margin-right:7px;
+            color:#177691;
+        }
 
-    border-radius:50%;
+        .status-planned::before{
+            background:#2299b7;
+        }
 
-    background:
-        var(--hospital-teal);
+        .status-arrived{
 
-    vertical-align:middle;
-}
+            background:#fff4df;
 
+            color:#9b6913;
+        }
 
-/* =========================================================
-   PATIENT
-========================================================= */
+        .status-arrived::before{
+            background:#e4a52f;
+        }
 
-.table-patient{
+        .status-finished{
 
-    display:flex;
+            background:#e9f8f1;
 
-    align-items:center;
+            color:#1c7a57;
+        }
 
-    gap:10px;
-}
+        .status-finished::before{
+            background:#27aa78;
+        }
 
-.patient-avatar{
+        .status-cancelled{
 
-    width:36px;
-    height:36px;
+            background:#fff0f1;
 
-    flex:0 0 36px;
+            color:#b84953;
+        }
 
-    display:flex;
+        .status-cancelled::before{
+            background:#d75d68;
+        }
 
-    align-items:center;
-    justify-content:center;
+        .table-actions{
 
-    border-radius:11px;
+            display:flex;
 
-    background:
-        var(--hospital-light);
+            align-items:center;
 
-    color:
-        var(--hospital-blue);
+            gap:5px;
+        }
 
-    font-size:12px;
+        .table-actions .status-button{
 
-    font-weight:900;
-}
+            padding:6px 8px;
 
-.table-patient-name{
+            border:0;
 
-    color:
-        #214a5d;
+            border-radius:7px;
 
-    font-size:13px;
+            font-size:9px;
 
-    font-weight:900;
-}
+            font-weight:900;
+        }
 
-.table-phone{
+        .delete-button{
 
-    margin-top:2px;
+            width:30px;
+            height:30px;
 
-    color:
-        #8a9ba2;
+            border:
+                1px solid #efd8db;
 
-    font-size:10px;
-}
+            border-radius:8px;
 
+            background:#fffafa;
 
-/* =========================================================
-   NOTE
-========================================================= */
+            color:var(--red);
 
-.table-note{
+            font-weight:900;
+        }
 
-    max-width:220px;
+        .delete-button:hover{
 
-    color:
-        #6e838d;
+            background:#fff0f1;
+        }
 
-    font-size:11px;
+        .empty-state{
 
-    white-space:nowrap;
+            padding:55px 20px;
 
-    overflow:hidden;
+            text-align:center;
 
-    text-overflow:ellipsis;
-}
+            color:#93a5ad;
+        }
 
+        .empty-icon{
 
-/* =========================================================
-   STATUS
-========================================================= */
+            width:65px;
+            height:65px;
 
-.table-status{
+            margin:0 auto 13px;
 
-    display:inline-flex;
+            display:flex;
 
-    align-items:center;
+            align-items:center;
+            justify-content:center;
 
-    gap:6px;
+            border-radius:20px;
 
-    padding:
-        6px 9px;
+            background:
+                var(--hospital-light);
 
-    border-radius:20px;
+            color:
+                var(--hospital-teal);
 
-    font-size:10px;
+            font-size:28px;
+        }
 
-    font-weight:900;
+        .empty-state strong{
 
-    white-space:nowrap;
-}
+            display:block;
 
-.table-status::before{
+            margin-bottom:5px;
 
-    content:"";
+            color:#5f7985;
 
-    width:6px;
-    height:6px;
+            font-size:13px;
+        }
 
-    border-radius:50%;
-}
+        .empty-state span{
 
-.status-planned{
+            font-size:11px;
+        }
 
-    background:#eaf6fa;
+        .message{
 
-    color:#177691;
-}
+            margin-bottom:16px;
 
-.status-planned::before{
-    background:#2299b7;
-}
+            padding:11px 14px;
 
-.status-arrived{
+            border-radius:10px;
 
-    background:#fff4df;
+            font-size:12px;
 
-    color:#9b6913;
-}
+            font-weight:700;
+        }
 
-.status-arrived::before{
-    background:#e4a52f;
-}
+        .message.success{
 
-.status-finished{
+            color:#1c7755;
 
-    background:#e9f8f1;
+            background:#e9f8f1;
 
-    color:#1c7a57;
-}
+            border:1px solid #ccebdc;
+        }
 
-.status-finished::before{
-    background:#27aa78;
-}
+        .message.error{
 
-.status-cancelled{
+            color:#b44650;
 
-    background:#fff0f1;
+            background:#fff0f1;
 
-    color:#b84953;
-}
+            border:1px solid #efd0d4;
+        }
 
-.status-cancelled::before{
-    background:#d75d68;
-}
+        .fatal-error{
 
+            max-width:650px;
 
-/* =========================================================
-   ACTIONS
-========================================================= */
+            margin:80px auto;
 
-.table-actions{
+            padding:30px;
 
-    display:flex;
+            background:white;
 
-    align-items:center;
+            border:
+                1px solid #efd0d4;
 
-    gap:5px;
-}
+            border-radius:18px;
 
-.table-actions .status-button{
+            color:#a13f48;
 
-    padding:
-        6px 8px;
+            box-shadow:var(--shadow);
+        }
 
-    border:0;
+        @media(max-width:1050px){
 
-    border-radius:7px;
+            .sidebar{
+                width:215px;
+            }
 
-    font-size:9px;
+            .main-area{
 
-    font-weight:900;
-}
+                width:
+                    calc(100% - 215px);
 
-.delete-button{
+                margin-left:215px;
+            }
 
-    width:30px;
-    height:30px;
+            .dashboard-grid{
 
-    border:
-        1px solid #efd8db;
+                grid-template-columns:1fr;
+            }
+        }
 
-    border-radius:8px;
+        @media(max-width:760px){
 
-    background:#fffafa;
+            .sidebar{
+                display:none;
+            }
 
-    color:var(--red);
+            .main-area{
 
-    font-weight:900;
-}
+                width:100%;
 
-.delete-button:hover{
+                margin-left:0;
+            }
 
-    background:#fff0f1;
-}
+            .topbar{
 
+                height:auto;
 
-/* =========================================================
-   EMPTY TABLE
-========================================================= */
+                padding:12px 15px;
+            }
 
-.empty-state{
+            .main-container{
 
-    padding:
-        55px 20px;
+                padding:17px 12px 35px;
+            }
 
-    text-align:center;
+            .welcome-card{
 
-    color:#93a5ad;
-}
+                min-height:125px;
 
-.empty-icon{
+                padding:20px;
 
-    width:65px;
-    height:65px;
+                border-radius:17px;
+            }
 
-    margin:
-        0 auto 13px;
+            .welcome-card h2{
 
-    display:flex;
+                font-size:19px;
+            }
 
-    align-items:center;
-    justify-content:center;
+            .doctor-icon{
 
-    border-radius:20px;
+                width:55px;
+                height:55px;
 
-    background:
-        var(--hospital-light);
+                font-size:29px;
+            }
 
-    color:
-        var(--hospital-teal);
+            .date-card{
 
-    font-size:28px;
-}
+                flex-direction:column;
+            }
 
-.empty-state strong{
+            .date-navigation{
 
-    display:block;
+                width:100%;
 
-    margin-bottom:5px;
+                justify-content:center;
+            }
 
-    color:#5f7985;
+            .user-info span{
 
-    font-size:13px;
-}
+                display:none;
+            }
+        }
 
-.empty-state span{
+        @media(max-width:500px){
 
-    font-size:11px;
-}
+            .login-card{
 
+                padding:30px 21px;
 
-/* =========================================================
-   MESSAGES
-========================================================= */
+                border-radius:22px;
+            }
 
-.message{
+            .page-heading p{
 
-    margin-bottom:16px;
+                display:none;
+            }
 
-    padding:
-        11px 14px;
+            .logout-button{
 
-    border-radius:10px;
+                padding:8px 9px;
+            }
 
-    font-size:12px;
+            .brand-subtitle{
 
-    font-weight:700;
-}
+                display:none;
+            }
+        }
 
-.message.success{
+    </style>
 
-    color:#1c7755;
-
-    background:#e9f8f1;
-
-    border:1px solid #ccebdc;
-}
-
-.message.error{
-
-    color:#b44650;
-
-    background:#fff0f1;
-
-    border:1px solid #efd0d4;
-}
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-.fatal-error{
-
-    max-width:650px;
-
-    margin:80px auto;
-
-    padding:30px;
-
-    background:white;
-
-    border:
-        1px solid #efd0d4;
-
-    border-radius:18px;
-
-    color:#a13f48;
-
-    box-shadow:var(--shadow);
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media(max-width:1050px){
-
-    .sidebar{
-        width:215px;
-    }
-
-    .main-area{
-
-        width:
-            calc(100% - 215px);
-
-        margin-left:215px;
-    }
-
-    .dashboard-grid{
-
-        grid-template-columns:
-            1fr;
-    }
-}
-
-
-@media(max-width:760px){
-
-    .sidebar{
-        display:none;
-    }
-
-    .main-area{
-
-        width:100%;
-
-        margin-left:0;
-    }
-
-    .topbar{
-
-        height:auto;
-
-        padding:
-            12px 15px;
-    }
-
-    .main-container{
-
-        padding:
-            17px 12px 35px;
-    }
-
-    .welcome-card{
-
-        min-height:125px;
-
-        padding:20px;
-
-        border-radius:17px;
-    }
-
-    .welcome-card h2{
-
-        font-size:19px;
-    }
-
-    .doctor-icon{
-
-        width:55px;
-        height:55px;
-
-        font-size:29px;
-    }
-
-    .date-card{
-
-        flex-direction:column;
-    }
-
-    .date-navigation{
-
-        width:100%;
-
-        justify-content:center;
-    }
-
-    .user-info span{
-
-        display:none;
-    }
-}
-
-
-@media(max-width:500px){
-
-    .login-card{
-
-        padding:
-            30px 21px;
-
-        border-radius:22px;
-    }
-
-    .page-heading p{
-
-        display:none;
-    }
-
-    .logout-button{
-
-        padding:
-            8px 9px;
-    }
-
-    .brand-subtitle{
-
-        display:none;
-    }
-}
-
-</style>
 </head>
-
 
 <body>
 
-<div id="app">
+    <div id="app">
 
-    <div class="loading">
-        Po ngarkohet sistemi...
+        <div class="loading">
+            Po ngarkohet sistemi...
+        </div>
+
     </div>
 
-</div>
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="app-gvm.js?v=GVM-20260924-12"></script>
+    <!-- APPLICATION -->
+    <script src="app-gvm.js?v=GVM-20260924-13"></script>
 
 </body>
 </html>
-```
