@@ -22,21 +22,16 @@
             padding: 0;
             min-height: 100%;
             font-family:
+                Inter,
                 Arial,
                 Helvetica,
                 sans-serif;
-            color: #19323a;
+            background: #f4f8fa;
+            color: #1d2a31;
         }
 
         body {
             min-height: 100vh;
-            background:
-                linear-gradient(
-                    rgba(240, 248, 250, 0.92),
-                    rgba(240, 248, 250, 0.96)
-                ),
-                url("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=2000&q=80")
-                center center / cover fixed;
         }
 
         button,
@@ -49,27 +44,44 @@
             cursor: pointer;
         }
 
-        /* =====================================================
+        /* =========================
+           LOADING
+        ========================= */
+
+        .loading {
+            padding: 30px;
+            text-align: center;
+            color: #71818a;
+            font-size: 15px;
+        }
+
+        /* =========================
            LOGIN
-        ===================================================== */
+        ========================= */
 
         .login-page {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 25px;
+            padding: 20px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef7fa 0%,
+                    #f8fbfc 100%
+                );
         }
 
         .login-card {
             width: 100%;
-            max-width: 430px;
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 24px;
-            padding: 38px;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 36px;
             box-shadow:
-                0 20px 60px rgba(30, 70, 80, 0.16);
-            border: 1px solid #e2edef;
+                0 15px 45px rgba(30, 70, 85, 0.12);
+            border: 1px solid #e1ecef;
         }
 
         .login-logo {
@@ -79,46 +91,46 @@
         }
 
         .login-logo-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 22px;
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            background: #1f8f8a;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #178f7b;
-            color: white;
-            font-size: 34px;
+            font-size: 28px;
             font-weight: 800;
-            box-shadow:
-                0 10px 25px rgba(23, 143, 123, 0.25);
         }
 
         .login-title {
             margin: 0;
             text-align: center;
-            font-size: 26px;
-            color: #17363d;
+            font-size: 25px;
+            font-weight: 800;
+            color: #20343b;
         }
 
         .login-subtitle {
             text-align: center;
-            color: #71858b;
             margin-top: 8px;
             margin-bottom: 28px;
+            color: #71818a;
+            font-size: 14px;
         }
 
         .login-form {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 17px;
         }
 
         .login-form label,
         .appointment-form label {
             display: block;
             margin-bottom: 7px;
-            color: #35535a;
-            font-size: 14px;
+            color: #40545c;
+            font-size: 13px;
             font-weight: 700;
         }
 
@@ -127,73 +139,62 @@
         .appointment-form select {
             width: 100%;
             height: 46px;
-            border: 1px solid #d6e4e8;
+            border: 1px solid #d7e3e7;
             border-radius: 11px;
             padding: 0 13px;
-            background: white;
-            color: #19323a;
             outline: none;
+            background: #ffffff;
+            color: #24353c;
         }
 
         .login-form input:focus,
         .appointment-form input:focus,
         .appointment-form select:focus {
-            border-color: #37a793;
+            border-color: #1f8f8a;
             box-shadow:
-                0 0 0 3px rgba(55, 167, 147, 0.10);
-        }
-
-        .login-error {
-            padding: 11px 13px;
-            border-radius: 10px;
-            background: #fff0f0;
-            border: 1px solid #efc5c5;
-            color: #a63838;
-            font-size: 14px;
-        }
-
-        .login-button,
-        .primary-button {
-            border: 0;
-            border-radius: 11px;
-            background: #178f7b;
-            color: white;
-            font-weight: 700;
-            padding: 12px 20px;
-            transition: 0.2s ease;
+                0 0 0 3px rgba(31, 143, 138, 0.10);
         }
 
         .login-button {
-            width: 100%;
-            height: 48px;
+            height: 46px;
+            border: 0;
+            border-radius: 11px;
+            background: #1f8f8a;
+            color: white;
+            font-weight: 700;
+            margin-top: 4px;
         }
 
-        .login-button:hover,
-        .primary-button:hover {
-            background: #117967;
-            transform: translateY(-1px);
+        .login-button:hover {
+            background: #187b77;
         }
 
-        /* =====================================================
+        .login-error {
+            background: #fff1f1;
+            border: 1px solid #efcaca;
+            color: #b33a3a;
+            border-radius: 10px;
+            padding: 11px 13px;
+            font-size: 13px;
+        }
+
+        /* =========================
            APP
-        ===================================================== */
+        ========================= */
 
         .app {
             min-height: 100vh;
-            background:
-                rgba(242, 249, 250, 0.90);
         }
 
         .top-header {
-            min-height: 78px;
-            background: rgba(255, 255, 255, 0.97);
-            border-bottom: 1px solid #dfeaec;
+            min-height: 76px;
+            padding: 0 28px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2ecef;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 28px;
-            box-shadow:
-                0 4px 18px rgba(30, 70, 80, 0.05);
+            gap: 20px;
         }
 
         .brand {
@@ -203,28 +204,28 @@
         }
 
         .brand-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background: #178f7b;
+            width: 43px;
+            height: 43px;
+            border-radius: 13px;
+            background: #1f8f8a;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
             font-weight: 800;
+            font-size: 21px;
         }
 
         .brand-title {
-            font-weight: 800;
             font-size: 17px;
-            color: #17363d;
+            font-weight: 800;
+            color: #20343b;
         }
 
         .brand-subtitle {
-            color: #789096;
-            font-size: 12px;
             margin-top: 2px;
+            color: #819098;
+            font-size: 12px;
         }
 
         .header-right {
@@ -234,20 +235,19 @@
         }
 
         .system-status {
-            color: #21885d;
-            background: #edf9f2;
-            border: 1px solid #c8ead5;
             padding: 8px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            background: #edf9f2;
+            color: #21824f;
+            font-size: 12px;
             font-weight: 700;
         }
 
         .logout-button {
-            border: 1px solid #d7e3e6;
+            border: 1px solid #dce6e9;
             background: white;
-            color: #526a71;
-            border-radius: 10px;
+            color: #52636b;
+            border-radius: 9px;
             padding: 9px 14px;
             font-weight: 700;
         }
@@ -256,116 +256,123 @@
             background: #f5f8f9;
         }
 
+        /* =========================
+           MAIN
+        ========================= */
+
         .main-container {
             width: min(1250px, calc(100% - 30px));
-            margin: 0 auto;
-            padding: 25px 0 45px;
+            margin: 25px auto 50px;
         }
 
-        /* =====================================================
-           DATE
-        ===================================================== */
+        /* =========================
+           DATE NAVIGATION
+        ========================= */
 
         .date-navigation {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 22px;
         }
 
         .date-arrow {
-            width: 42px;
-            height: 42px;
-            border: 1px solid #d8e5e8;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid #dbe6e9;
             background: white;
-            color: #45656d;
+            color: #53666e;
             font-size: 25px;
             line-height: 1;
         }
 
         .date-arrow:hover {
-            background: #f2f8f9;
+            background: #f2f7f8;
         }
 
         .selected-date {
-            min-width: 280px;
+            min-width: 270px;
             text-align: center;
             font-size: 19px;
             font-weight: 800;
-            color: #23454d;
+            color: #253940;
             text-transform: capitalize;
         }
 
         .today-button {
-            border: 1px solid #cde4df;
-            background: #eff9f6;
-            color: #177d6d;
+            height: 40px;
+            padding: 0 15px;
             border-radius: 10px;
-            padding: 10px 14px;
+            border: 1px solid #bfe0de;
+            background: #eef9f8;
+            color: #167975;
             font-weight: 700;
         }
 
-        /* =====================================================
+        /* =========================
            NEW APPOINTMENT
-        ===================================================== */
+        ========================= */
+
+        .new-appointment-card,
+        .schedule-card {
+            background: #ffffff;
+            border: 1px solid #e0eaed;
+            border-radius: 17px;
+            box-shadow:
+                0 5px 20px rgba(35, 72, 82, 0.05);
+        }
 
         .new-appointment-card {
-            background: rgba(255, 255, 255, 0.97);
-            border: 1px solid #dfeaec;
-            border-radius: 18px;
-            padding: 20px;
+            padding: 22px;
             margin-bottom: 20px;
-            box-shadow:
-                0 8px 25px rgba(30, 70, 80, 0.06);
         }
 
         .new-appointment-title {
-            margin: 0 0 17px;
-            font-size: 18px;
-            color: #24464d;
+            margin: 0 0 18px;
+            font-size: 17px;
+            color: #273b42;
         }
 
         .appointment-form {
             display: grid;
-            grid-template-columns:
-                150px
-                minmax(200px, 1fr)
-                minmax(180px, 0.8fr)
-                auto;
-            gap: 15px;
+            grid-template-columns: 160px 1fr 250px 150px;
+            gap: 14px;
             align-items: end;
         }
 
         .primary-button {
+            width: 100%;
             height: 46px;
-            white-space: nowrap;
+            border: 0;
+            border-radius: 11px;
+            background: #1f8f8a;
+            color: white;
+            font-weight: 800;
         }
 
-        /* =====================================================
+        .primary-button:hover {
+            background: #187b77;
+        }
+
+        /* =========================
            SCHEDULE
-        ===================================================== */
+        ========================= */
 
         .schedule-card {
-            background: rgba(255, 255, 255, 0.97);
-            border: 1px solid #dfeaec;
-            border-radius: 18px;
             overflow: hidden;
-            box-shadow:
-                0 8px 25px rgba(30, 70, 80, 0.06);
         }
 
         .schedule-header {
-            padding: 18px 20px;
+            padding: 20px 22px;
             border-bottom: 1px solid #e5edef;
-            background: #fbfdfd;
         }
 
         .schedule-header h2 {
             margin: 0;
-            font-size: 18px;
-            color: #24464d;
+            font-size: 17px;
+            color: #273b42;
         }
 
         .schedule-table-wrapper {
@@ -388,102 +395,105 @@
 
         .time-cell {
             width: 90px;
-            min-width: 90px;
-            padding: 14px 15px;
-            text-align: center;
-            vertical-align: middle;
-            color: #587178;
+            padding: 13px 16px;
+            color: #52656d;
+            font-size: 13px;
             font-weight: 800;
-            font-size: 14px;
-            background: #fbfdfd;
-            border-right: 1px solid #edf2f3;
+            vertical-align: top;
+            white-space: nowrap;
         }
 
         .schedule-row > td:nth-child(2) {
-            padding: 8px 10px;
-        }
-
-        .loading {
-            padding: 35px;
-            text-align: center;
-            color: #71878d;
+            padding: 7px 14px 7px 0;
         }
 
         .empty-message {
-            color: #9aa9ad;
+            color: #98a5aa;
             font-size: 13px;
         }
 
-        /* =====================================================
+        /* =========================
            PATIENT CARD
-        ===================================================== */
+        ========================= */
 
         .patient-card {
-            min-height: 62px;
+            min-height: 64px;
             border-radius: 14px;
-            padding: 10px 12px;
-            display: flex;
+            padding: 9px 12px;
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto auto;
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
+            gap: 14px;
+
+            /* Ngjyra bazë */
+            background: #f7fbfc;
+            border: 1px solid #e1ecef;
+
             transition:
-                background-color 0.2s ease,
-                border-color 0.2s ease,
+                background 0.2s ease,
+                border 0.2s ease,
                 box-shadow 0.2s ease;
         }
 
-        /* PLANIFIKUAR */
+        /*
+         * PLANIFIKUAR
+         */
         .patient-card.planned {
-            background: #eef6ff !important;
-            border: 1px solid #bdd8f2 !important;
-            border-left: 5px solid #3287d7 !important;
+            background: #eef6ff;
+            border: 1px solid #bdd8f2;
+            border-left: 5px solid #3287d7;
         }
 
-        /* ERDHI */
+        /*
+         * ERDHI
+         */
         .patient-card.arrived {
-            background: #eaf8ef !important;
-            border: 1px solid #a9dfbd !important;
-            border-left: 5px solid #27a269 !important;
+            background: #eaf8ef;
+            border: 1px solid #a9dfbd;
+            border-left: 5px solid #27a269;
             box-shadow:
                 0 3px 12px rgba(39, 162, 105, 0.10);
         }
 
-        /* PËRFUNDOI */
+        /*
+         * PËRFUNDOI
+         */
         .patient-card.finished {
-            background: #eef8f3 !important;
-            border: 1px solid #bfdfcf !important;
-            border-left: 5px solid #21894f !important;
+            background: #eef8f3;
+            border: 1px solid #bfdfcf;
+            border-left: 5px solid #21894f;
         }
 
-        /* ANULUAR */
+        /*
+         * ANULUAR
+         */
         .patient-card.cancelled {
-            background: #fff0f0 !important;
-            border: 1px solid #efc4c4 !important;
-            border-left: 5px solid #c65353 !important;
+            background: #fff0f0;
+            border: 1px solid #efc4c4;
+            border-left: 5px solid #c65353;
             opacity: 0.90;
         }
 
         .patient-wrapper {
             min-width: 0;
-            flex: 1;
             display: flex;
             align-items: center;
             gap: 11px;
         }
 
         .patient-avatar {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
+            flex: 0 0 auto;
+            width: 39px;
+            height: 39px;
             border-radius: 12px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(80, 100, 110, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: white;
-            border: 1px solid rgba(70, 100, 110, 0.14);
-            color: #31606b;
+            color: #41555d;
+            font-size: 12px;
             font-weight: 800;
-            font-size: 13px;
         }
 
         .patient-info {
@@ -491,210 +501,171 @@
         }
 
         .patient-name {
+            font-size: 14px;
             font-weight: 800;
-            color: #24434a;
+            color: #253940;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .patient-label {
-            color: #71858a;
-            font-size: 12px;
             margin-top: 3px;
+            color: #788990;
+            font-size: 12px;
         }
 
         .status-cell {
-            flex: 0 0 auto;
+            white-space: nowrap;
         }
 
         .status {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 28px;
-            padding: 5px 10px;
+            min-width: 94px;
+            padding: 7px 10px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
-            white-space: nowrap;
         }
 
         .status-planned {
             background: #dceeff;
-            color: #276ea9;
+            color: #286fae;
         }
 
         .status-arrived {
-            background: #d5f2df;
-            color: #19754b;
+            background: #d8f2e2;
+            color: #20784b;
         }
 
         .status-finished {
-            background: #dcefe5;
-            color: #216d47;
+            background: #dcefe4;
+            color: #216d42;
         }
 
         .status-cancelled {
-            background: #f9dcdc;
-            color: #a33d3d;
+            background: #ffe0e0;
+            color: #b34d4d;
         }
 
         .actions-cell {
-            flex: 0 0 auto;
+            white-space: nowrap;
         }
 
         .action-buttons {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             gap: 6px;
             flex-wrap: wrap;
-            justify-content: flex-end;
         }
 
         .action-button {
-            border: 0;
+            border: 1px solid transparent;
             border-radius: 8px;
             padding: 7px 9px;
-            font-size: 12px;
-            font-weight: 700;
-            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            background: white;
         }
 
         .action-button.arrived {
-            background: #299b65;
+            color: #237d4e;
+            border-color: #b7ddc6;
+            background: #f5fcf7;
         }
 
         .action-button.finished {
-            background: #237e62;
+            color: #226f45;
+            border-color: #b9dbc8;
+            background: #f4fbf7;
         }
 
         .action-button.cancel {
-            background: #c28a25;
+            color: #ad5555;
+            border-color: #ecc4c4;
+            background: #fff8f8;
         }
 
         .action-button.delete {
-            background: #b95050;
+            color: #68777d;
+            border-color: #dce4e6;
+            background: #ffffff;
         }
 
         .action-button:hover {
-            filter: brightness(0.94);
+            filter: brightness(0.97);
         }
 
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
+        /* =========================
+           MOBILE
+        ========================= */
 
         @media (max-width: 900px) {
             .appointment-form {
                 grid-template-columns: 1fr 1fr;
             }
 
-            .appointment-form > div:last-child {
-                grid-column: 1 / -1;
-            }
-
             .patient-card {
-                flex-wrap: wrap;
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
 
+            .status-cell,
             .actions-cell {
-                width: 100%;
-            }
-
-            .action-buttons {
-                justify-content: flex-start;
+                justify-self: start;
             }
         }
 
         @media (max-width: 650px) {
             .top-header {
                 padding: 12px 15px;
-                gap: 12px;
-                align-items: flex-start;
-            }
-
-            .header-right {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 7px;
             }
 
             .system-status {
-                font-size: 11px;
-                padding: 6px 9px;
-            }
-
-            .logout-button {
-                padding: 7px 10px;
-                font-size: 12px;
+                display: none;
             }
 
             .main-container {
-                width: calc(100% - 16px);
-                padding-top: 15px;
-            }
-
-            .selected-date {
-                min-width: 0;
-                font-size: 15px;
-                flex: 1;
-            }
-
-            .date-navigation {
-                gap: 6px;
-            }
-
-            .date-arrow {
-                width: 38px;
-                height: 38px;
-            }
-
-            .today-button {
-                padding: 8px 10px;
+                width: calc(100% - 20px);
+                margin-top: 15px;
             }
 
             .appointment-form {
                 grid-template-columns: 1fr;
             }
 
-            .appointment-form > div:last-child {
-                grid-column: auto;
+            .selected-date {
+                min-width: 0;
+                font-size: 16px;
             }
 
-            .schedule-card {
-                border-radius: 14px;
+            .date-navigation {
+                gap: 6px;
             }
 
             .time-cell {
-                width: 70px;
-                min-width: 70px;
-                padding: 10px 7px;
-                font-size: 12px;
+                width: 65px;
+                padding-left: 8px;
+                padding-right: 8px;
             }
 
-            .patient-card {
-                padding: 9px;
+            .schedule-row > td:nth-child(2) {
+                padding-right: 8px;
             }
 
-            .status-cell {
-                order: 3;
+            .new-appointment-card {
+                padding: 16px;
             }
 
-            .patient-wrapper {
-                flex: 1 1 100%;
+            .login-card {
+                padding: 25px;
             }
 
-            .actions-cell {
-                flex: 1 1 100%;
-            }
-
-            .action-buttons {
-                width: 100%;
-            }
-
-            .action-button {
-                flex: 1;
+            .brand-subtitle {
+                display: none;
             }
         }
     </style>
@@ -708,9 +679,11 @@
         </div>
     </div>
 
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="app.js?v=GVM-20260924-01"></script>
+    <!-- Aplikacioni -->
+    <script src="app.js?v=GVM-20260924-02"></script>
 
 </body>
 </html>
