@@ -10,345 +10,774 @@
     <link rel="icon" href="data:,">
 
     <style>
+
+        /* =========================================================
+           AMBULATORI GVM
+           CLINICAL / MEDICAL UI
+           Vetëm DESIGN - nuk prek logjikën e aplikacionit
+        ========================================================= */
+
+        :root {
+            --medical-blue: #087ea4;
+            --medical-blue-dark: #075b78;
+            --medical-blue-light: #e9f7fb;
+
+            --clinical-green: #19a974;
+            --clinical-green-light: #e9f8f2;
+
+            --clinical-orange: #e7a42b;
+            --clinical-orange-light: #fff6df;
+
+            --clinical-red: #d9535f;
+            --clinical-red-light: #fff0f1;
+
+            --text-main: #183b4d;
+            --text-soft: #6c8490;
+
+            --background: #f3f7f9;
+            --white: #ffffff;
+
+            --border: #dce8ed;
+
+            --shadow-small:
+                0 2px 8px rgba(20, 67, 86, 0.06);
+
+            --shadow:
+                0 8px 25px rgba(20, 67, 86, 0.08);
+
+            --shadow-large:
+                0 15px 45px rgba(20, 67, 86, 0.12);
+
+            --radius: 16px;
+        }
+
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        html {
+            min-height: 100%;
+            background: var(--background);
+        }
+
         body {
+            min-height: 100vh;
+
             font-family:
                 Inter,
-                -apple-system,
-                BlinkMacSystemFont,
                 "Segoe UI",
                 Arial,
+                Helvetica,
                 sans-serif;
 
-            background: #f4f8fb;
-            color: #183b56;
-            min-height: 100vh;
+            color: var(--text-main);
+
+            background:
+                radial-gradient(
+                    circle at 0% 0%,
+                    rgba(8,126,164,.08),
+                    transparent 28%
+                ),
+                #f3f7f9;
         }
 
         button,
         input,
         select,
         textarea {
-            font: inherit;
+            font-family: inherit;
         }
 
         button {
             cursor: pointer;
         }
 
-        /* =========================
+
+        /* =========================================================
            LOADING
-        ========================= */
+        ========================================================= */
 
         .loading {
             min-height: 100vh;
+
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            gap: 15px;
-            color: #1976a8;
-            font-size: 18px;
-            font-weight: 600;
+
+            gap: 18px;
+
+            color: var(--medical-blue);
+
+            font-size: 17px;
+            font-weight: 700;
         }
 
         .loading::before {
             content: "✚";
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
+
+            width: 72px;
+            height: 72px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #e3f4fb;
-            color: #1685b5;
-            font-size: 30px;
-            font-weight: 800;
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--medical-blue),
+                    #26a7ca
+                );
+
+            color: white;
+
+            font-size: 36px;
+            font-weight: 900;
+
+            box-shadow:
+                0 14px 30px rgba(8,126,164,.22);
         }
 
-        /* =========================
-           LOGIN
-        ========================= */
+
+        /* =========================================================
+           LOGIN - KLINIK
+        ========================================================= */
 
         .login-page {
             min-height: 100vh;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 25px;
+
+            padding: 30px;
+
             background:
-                radial-gradient(circle at top left, #dff5ff 0, transparent 35%),
-                radial-gradient(circle at bottom right, #dceff8 0, transparent 35%),
-                #f5f9fc;
+                linear-gradient(
+                    135deg,
+                    #eef9fc 0%,
+                    #f8fbfc 45%,
+                    #eaf4f7 100%
+                );
+        }
+
+        .login-page::before {
+            content: "";
+
+            position: fixed;
+
+            width: 500px;
+            height: 500px;
+
+            border-radius: 50%;
+
+            background: rgba(8,126,164,.05);
+
+            top: -220px;
+            left: -200px;
+        }
+
+        .login-page::after {
+            content: "";
+
+            position: fixed;
+
+            width: 450px;
+            height: 450px;
+
+            border-radius: 50%;
+
+            background: rgba(25,169,116,.045);
+
+            bottom: -220px;
+            right: -180px;
         }
 
         .login-card {
             width: 100%;
             max-width: 430px;
+
+            position: relative;
+            z-index: 2;
+
             background: white;
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(22, 80, 110, 0.12);
-            border: 1px solid #e4eef4;
+
+            border:
+                1px solid rgba(220,232,237,.9);
+
+            border-radius: 26px;
+
+            padding: 42px;
+
+            box-shadow: var(--shadow-large);
         }
 
         .medical-logo {
-            width: 76px;
-            height: 76px;
+            width: 84px;
+            height: 84px;
+
             margin: 0 auto 20px;
-            border-radius: 22px;
+
+            border-radius: 24px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #0e83b6, #22a6d5);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--medical-blue-dark),
+                    var(--medical-blue)
+                );
+
             color: white;
-            font-size: 38px;
-            font-weight: 800;
-            box-shadow: 0 12px 25px rgba(14, 131, 182, 0.25);
+
+            font-size: 43px;
+            font-weight: 900;
+
+            box-shadow:
+                0 14px 30px rgba(8,126,164,.24);
         }
 
         .login-card h1 {
             text-align: center;
-            color: #174a68;
+
             font-size: 27px;
+
+            color: var(--medical-blue-dark);
+
+            letter-spacing: -.4px;
+
             margin-bottom: 7px;
         }
 
         .login-subtitle {
             text-align: center;
-            color: #78909c;
-            margin-bottom: 30px;
+
+            color: var(--text-soft);
+
+            font-size: 14px;
+
+            margin-bottom: 31px;
         }
 
+
+        /* =========================================================
+           FORM
+        ========================================================= */
+
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 17px;
         }
 
         .form-group label {
             display: block;
+
             margin-bottom: 7px;
-            color: #35596e;
-            font-weight: 600;
-            font-size: 14px;
+
+            font-size: 13px;
+            font-weight: 800;
+
+            color: #345868;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
+
             width: 100%;
-            border: 1px solid #d8e5ec;
+
+            border:
+                1px solid var(--border);
+
             border-radius: 12px;
+
             padding: 13px 14px;
+
             outline: none;
+
+            color: var(--text-main);
+
             background: #fbfdfe;
-            color: #173d53;
-            transition: 0.2s;
+
+            transition:
+                border-color .2s,
+                box-shadow .2s,
+                background .2s;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: #b9d4df;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
-            border-color: #20a0d0;
-            box-shadow: 0 0 0 4px rgba(32, 160, 208, 0.10);
+
             background: white;
+
+            border-color: var(--medical-blue);
+
+            box-shadow:
+                0 0 0 4px rgba(8,126,164,.09);
         }
 
-        .login-button {
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+
+        /* =========================================================
+           BUTTONS
+        ========================================================= */
+
+        .login-button,
+        .add-button {
+
             width: 100%;
+
             border: none;
-            border-radius: 13px;
-            padding: 14px;
-            background: linear-gradient(135deg, #087fb4, #20a6d5);
+
+            border-radius: 12px;
+
+            padding: 14px 18px;
+
             color: white;
-            font-weight: 700;
-            font-size: 16px;
-            box-shadow: 0 8px 20px rgba(8, 127, 180, 0.20);
+
+            font-size: 15px;
+            font-weight: 800;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--medical-blue-dark),
+                    var(--medical-blue)
+                );
+
+            box-shadow:
+                0 8px 20px rgba(8,126,164,.18);
+
+            transition:
+                transform .15s,
+                box-shadow .15s;
         }
 
-        .login-button:hover {
+        .login-button:hover,
+        .add-button:hover {
             transform: translateY(-1px);
+
+            box-shadow:
+                0 11px 25px rgba(8,126,164,.24);
         }
 
-        /* =========================
-           APP HEADER
-        ========================= */
+
+        /* =========================================================
+           APP
+        ========================================================= */
 
         .app-shell {
             min-height: 100vh;
+
+            background:
+                #f3f7f9;
         }
 
+
+        /* =========================================================
+           TOP BAR
+        ========================================================= */
+
         .topbar {
-            height: 76px;
-            background: white;
-            border-bottom: 1px solid #e2edf2;
+
+            height: 78px;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 100;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            box-shadow: 0 3px 15px rgba(30, 80, 100, 0.05);
+
+            padding:
+                0 30px;
+
+            background:
+                rgba(255,255,255,.96);
+
+            backdrop-filter: blur(12px);
+
+            border-bottom:
+                1px solid var(--border);
+
+            box-shadow:
+                0 3px 15px rgba(20,67,86,.05);
         }
 
+
+        /* =========================================================
+           BRAND
+        ========================================================= */
+
         .brand {
+
             display: flex;
             align-items: center;
+
             gap: 13px;
         }
 
         .brand-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 13px;
-            background: linear-gradient(135deg, #087fb4, #27a9d6);
-            color: white;
+
+            width: 48px;
+            height: 48px;
+
+            flex: 0 0 48px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 25px;
-            font-weight: 800;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    var(--medical-blue-dark),
+                    #159bc3
+                );
+
+            color: white;
+
+            font-size: 27px;
+            font-weight: 900;
+
+            box-shadow:
+                0 8px 18px rgba(8,126,164,.20);
         }
 
         .brand-title {
+
             font-size: 20px;
-            font-weight: 800;
-            color: #164a68;
-            letter-spacing: 0.2px;
+
+            font-weight: 900;
+
+            color:
+                var(--medical-blue-dark);
+
+            letter-spacing: -.3px;
         }
 
         .brand-subtitle {
-            font-size: 12px;
-            color: #7c929e;
+
             margin-top: 2px;
+
+            color: #8096a0;
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            text-transform: uppercase;
+
+            letter-spacing: .8px;
         }
 
+
+        /* =========================================================
+           USER
+        ========================================================= */
+
         .user-area {
+
             display: flex;
             align-items: center;
-            gap: 15px;
+
+            gap: 13px;
         }
 
         .user-info {
+
             display: flex;
             align-items: center;
+
             gap: 9px;
-            color: #55717f;
-            font-size: 14px;
-        }
 
-        .user-avatar {
-            width: 37px;
-            height: 37px;
-            border-radius: 50%;
-            background: #e6f5fb;
-            color: #087fb4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-        }
+            color: #58727e;
 
-        .logout-button {
-            border: 1px solid #dbe8ee;
-            background: white;
-            color: #607d8b;
-            border-radius: 10px;
-            padding: 9px 13px;
+            font-size: 13px;
             font-weight: 600;
         }
 
-        .logout-button:hover {
-            background: #f5f9fb;
-            color: #d9534f;
+        .user-avatar {
+
+            width: 38px;
+            height: 38px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                var(--medical-blue-light);
+
+            color:
+                var(--medical-blue);
+
+            font-weight: 900;
         }
 
-        /* =========================
-           MAIN
-        ========================= */
+        .logout-button {
+
+            border:
+                1px solid #dce7ec;
+
+            border-radius: 10px;
+
+            background: white;
+
+            color: #637c87;
+
+            padding:
+                9px 13px;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition: .15s;
+        }
+
+        .logout-button:hover {
+
+            background:
+                var(--clinical-red-light);
+
+            border-color:
+                #f0c9cd;
+
+            color:
+                var(--clinical-red);
+        }
+
+
+        /* =========================================================
+           MAIN CONTAINER
+        ========================================================= */
 
         .main-container {
-            max-width: 1450px;
-            margin: auto;
-            padding: 28px 30px 45px;
+
+            width: 100%;
+            max-width: 1480px;
+
+            margin: 0 auto;
+
+            padding:
+                28px 30px 50px;
         }
 
+
+        /* =========================================================
+           WELCOME / CLINIC HEADER
+        ========================================================= */
+
         .welcome-card {
-            background: linear-gradient(135deg, #087fb4, #22a8d5);
-            color: white;
-            border-radius: 22px;
-            padding: 25px 28px;
-            margin-bottom: 25px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            min-height: 150px;
+
+            margin-bottom: 22px;
+
+            padding:
+                27px 30px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 12px 30px rgba(8, 127, 180, 0.16);
+
+            border-radius: 21px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    #075b78 0%,
+                    #087ea4 48%,
+                    #20a3c7 100%
+                );
+
+            box-shadow:
+                0 14px 32px rgba(8,126,164,.17);
+        }
+
+        .welcome-card::after {
+
+            content: "✚";
+
+            position: absolute;
+
+            right: 90px;
+            bottom: -45px;
+
+            font-size: 180px;
+
+            line-height: 1;
+
+            opacity: .06;
+
+            font-weight: 900;
         }
 
         .welcome-card h2 {
+
             font-size: 25px;
-            margin-bottom: 5px;
+
+            margin-bottom: 7px;
+
+            font-weight: 800;
         }
 
         .welcome-card p {
-            opacity: 0.88;
+
+            color: rgba(255,255,255,.82);
+
+            font-size: 14px;
         }
 
         .doctor-icon {
-            font-size: 50px;
-            opacity: 0.9;
+
+            position: relative;
+            z-index: 2;
+
+            width: 78px;
+            height: 78px;
+
+            border-radius: 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                rgba(255,255,255,.13);
+
+            border:
+                1px solid rgba(255,255,255,.20);
+
+            font-size: 42px;
         }
 
-        /* =========================
-           DATE BAR
-        ========================= */
+
+        /* =========================================================
+           DATE / CALENDAR BAR
+        ========================================================= */
 
         .date-card {
-            background: white;
-            border: 1px solid #e3edf2;
-            border-radius: 18px;
-            padding: 16px;
+
+            min-height: 76px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
+
             gap: 15px;
+
             margin-bottom: 22px;
-            box-shadow: 0 4px 18px rgba(40, 80, 100, 0.05);
+
+            padding:
+                13px 17px;
+
+            background: white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 16px;
+
+            box-shadow: var(--shadow-small);
         }
 
         .date-navigation {
+
             display: flex;
             align-items: center;
-            gap: 9px;
+
+            gap: 8px;
         }
 
         .date-button {
-            width: 42px;
-            height: 42px;
-            border-radius: 11px;
-            border: 1px solid #dbe8ee;
-            background: #f8fbfd;
-            color: #167ea9;
-            font-size: 20px;
-            font-weight: 700;
+
+            width: 40px;
+            height: 40px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 10px;
+
+            background:
+                #f8fbfc;
+
+            color:
+                var(--medical-blue);
+
+            font-size: 19px;
+
+            font-weight: 900;
         }
 
         .date-button:hover {
-            background: #e9f6fb;
+            background:
+                var(--medical-blue-light);
+
+            border-color:
+                #bcdce7;
         }
 
         .today-button {
-            padding: 10px 15px;
+
+            padding:
+                10px 14px;
+
+            border:
+                none;
+
             border-radius: 10px;
-            border: none;
-            background: #e7f5fb;
-            color: #087fb4;
-            font-weight: 700;
+
+            background:
+                var(--medical-blue-light);
+
+            color:
+                var(--medical-blue-dark);
+
+            font-size: 13px;
+
+            font-weight: 800;
+        }
+
+        .today-button:hover {
+            background:
+                #d9f0f7;
         }
 
         .current-date {
@@ -356,124 +785,259 @@
         }
 
         .current-date strong {
+
             display: block;
-            color: #194d68;
-            font-size: 20px;
+
+            color:
+                var(--medical-blue-dark);
+
+            font-size: 19px;
+
+            font-weight: 900;
         }
 
         .current-date span {
-            color: #8a9ca5;
-            font-size: 13px;
+
+            display: block;
+
+            margin-top: 3px;
+
+            color:
+                var(--text-soft);
+
+            font-size: 12px;
         }
 
-        /* =========================
-           DASHBOARD GRID
-        ========================= */
+
+        /* =========================================================
+           DASHBOARD
+        ========================================================= */
 
         .dashboard-grid {
+
             display: grid;
-            grid-template-columns: 360px 1fr;
+
+            grid-template-columns:
+                360px minmax(0, 1fr);
+
             gap: 22px;
+
             align-items: start;
         }
 
+
+        /* =========================================================
+           PANELS
+        ========================================================= */
+
         .panel {
-            background: white;
-            border: 1px solid #e3edf2;
-            border-radius: 18px;
-            box-shadow: 0 4px 18px rgba(40, 80, 100, 0.05);
+
             overflow: hidden;
+
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius);
+
+            box-shadow:
+                var(--shadow-small);
         }
 
         .panel-header {
-            padding: 20px 21px;
-            border-bottom: 1px solid #edf2f5;
+
+            min-height: 68px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
+
+            padding:
+                14px 19px;
+
+            border-bottom:
+                1px solid #e8eff2;
+
+            background:
+                linear-gradient(
+                    to bottom,
+                    #ffffff,
+                    #fbfdfe
+                );
         }
 
         .panel-title {
+
             display: flex;
             align-items: center;
+
             gap: 10px;
-            color: #204f67;
-            font-size: 17px;
-            font-weight: 800;
+
+            color:
+                var(--medical-blue-dark);
+
+            font-size: 16px;
+
+            font-weight: 900;
         }
 
         .panel-title-icon {
-            width: 35px;
-            height: 35px;
+
+            width: 36px;
+            height: 36px;
+
             border-radius: 10px;
-            background: #e8f6fb;
-            color: #087fb4;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
+
+            background:
+                var(--medical-blue-light);
+
+            color:
+                var(--medical-blue);
+
+            font-size: 17px;
+
+            font-weight: 900;
         }
 
         .panel-body {
-            padding: 21px;
+            padding: 20px;
         }
 
-        /* =========================
-           APPOINTMENT FORM
-        ========================= */
 
+        /* =========================================================
+           PATIENT FORM - MEDICAL RECORD LOOK
+        ========================================================= */
+
+        .appointment-form {
+
+            position: relative;
+        }
+
+        .appointment-form::before {
+
+            content: "INFORMACION E PACIENTIT";
+
+            display: block;
+
+            margin-bottom: 16px;
+
+            padding-bottom: 9px;
+
+            border-bottom:
+                1px solid #edf2f4;
+
+            color:
+                #81959e;
+
+            font-size: 10px;
+
+            font-weight: 900;
+
+            letter-spacing: 1.1px;
+        }
+
+        .appointment-form .form-group {
+
+            position: relative;
+        }
+
+        .appointment-form .form-group label {
+
+            color:
+                #486673;
+
+            font-size: 12px;
+
+            text-transform: uppercase;
+
+            letter-spacing: .3px;
+        }
+
+        .appointment-form input,
+        .appointment-form select,
         .appointment-form textarea {
-            min-height: 90px;
-            resize: vertical;
+
+            background:
+                #fafdfe;
         }
 
-        .add-button {
-            width: 100%;
-            border: none;
-            border-radius: 12px;
-            padding: 13px;
-            background: linear-gradient(135deg, #087fb4, #20a6d5);
-            color: white;
-            font-weight: 800;
-            margin-top: 4px;
-            box-shadow: 0 8px 18px rgba(8, 127, 180, 0.18);
-        }
 
-        .add-button:hover {
-            transform: translateY(-1px);
-        }
-
-        /* =========================
+        /* =========================================================
            SCHEDULE
-        ========================= */
+        ========================================================= */
 
         .schedule-header {
+
             display: flex;
             align-items: center;
+
             gap: 8px;
         }
 
         .schedule-count {
-            background: #eaf6fb;
-            color: #087fb4;
-            padding: 5px 9px;
+
+            min-width: 30px;
+
+            padding:
+                5px 9px;
+
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
+
+            text-align: center;
+
+            background:
+                var(--medical-blue-light);
+
+            color:
+                var(--medical-blue);
+
+            font-size: 11px;
+
+            font-weight: 900;
         }
 
         .schedule-list {
-            padding: 8px 12px 15px;
+
+            padding:
+                7px 12px 15px;
         }
 
+
+        /* =========================================================
+           APPOINTMENT ROW
+        ========================================================= */
+
         .appointment-row {
+
+            position: relative;
+
             display: grid;
-            grid-template-columns: 90px 1fr auto;
-            gap: 15px;
+
+            grid-template-columns:
+                85px minmax(0, 1fr) auto;
+
+            gap: 16px;
+
             align-items: center;
-            padding: 13px 10px;
-            border-bottom: 1px solid #edf2f5;
-            transition: 0.15s;
+
+            min-height: 72px;
+
+            padding:
+                12px 11px;
+
+            border-bottom:
+                1px solid #edf2f4;
+
+            transition:
+                background .15s,
+                transform .15s;
         }
 
         .appointment-row:last-child {
@@ -481,234 +1045,601 @@
         }
 
         .appointment-row:hover {
-            background: #f8fbfd;
-            border-radius: 10px;
+
+            background:
+                #f7fbfc;
+
+            border-radius: 11px;
+
+            transform:
+                translateX(2px);
         }
+
+
+        /* =========================================================
+           TIME
+        ========================================================= */
 
         .appointment-time {
-            font-size: 16px;
-            font-weight: 800;
-            color: #087fb4;
+
+            position: relative;
+
+            color:
+                var(--medical-blue-dark);
+
+            font-size: 15px;
+
+            font-weight: 900;
         }
 
+        .appointment-time::before {
+
+            content: "";
+
+            display: inline-block;
+
+            width: 7px;
+            height: 7px;
+
+            margin-right: 7px;
+
+            border-radius: 50%;
+
+            background:
+                var(--medical-blue);
+        }
+
+
+        /* =========================================================
+           PATIENT CARD
+        ========================================================= */
+
         .patient-info {
+
             min-width: 0;
+
+            padding:
+                3px 0;
         }
 
         .patient-name {
+
+            color:
+                #244b5c;
+
             font-size: 15px;
-            font-weight: 800;
-            color: #244e62;
+
+            font-weight: 900;
+
             white-space: nowrap;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
         }
 
         .patient-phone {
-            font-size: 12px;
-            color: #8498a2;
+
             margin-top: 3px;
-        }
 
-        .patient-note {
-            font-size: 12px;
-            color: #6f848e;
-            margin-top: 4px;
-        }
+            color:
+                #8498a1;
 
-        .appointment-actions {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
+            font-size: 11px;
 
-        .status-button {
-            border: none;
-            border-radius: 9px;
-            padding: 7px 10px;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .status-planned {
-            background: #e9f5fb;
-            color: #087fb4;
-        }
-
-        .status-arrived {
-            background: #fff3d8;
-            color: #a16b00;
-        }
-
-        .status-finished {
-            background: #e6f7ed;
-            color: #218653;
-        }
-
-        .status-cancelled {
-            background: #fdeaea;
-            color: #c64d4d;
-        }
-
-        .delete-button {
-            width: 32px;
-            height: 32px;
-            border: 1px solid #f0dddd;
-            border-radius: 8px;
-            background: #fffafa;
-            color: #c85b5b;
-            font-weight: 800;
-        }
-
-        .delete-button:hover {
-            background: #fdeaea;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 45px 20px;
-            color: #8da0a9;
-        }
-
-        .empty-icon {
-            font-size: 42px;
-            margin-bottom: 10px;
-            opacity: 0.65;
-        }
-
-        .empty-state strong {
-            display: block;
-            color: #637d89;
-            margin-bottom: 5px;
-        }
-
-        /* =========================
-           MESSAGES
-        ========================= */
-
-        .message {
-            margin-bottom: 18px;
-            padding: 12px 15px;
-            border-radius: 11px;
-            font-size: 14px;
             font-weight: 600;
         }
 
+        .patient-note {
+
+            margin-top: 4px;
+
+            color:
+                #718791;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================================================
+           STATUS BUTTONS
+        ========================================================= */
+
+        .appointment-actions {
+
+            display: flex;
+            align-items: center;
+
+            justify-content: flex-end;
+
+            gap: 6px;
+
+            flex-wrap: wrap;
+        }
+
+        .status-button {
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding:
+                7px 10px;
+
+            font-size: 11px;
+
+            font-weight: 900;
+
+            transition: .15s;
+        }
+
+        .status-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .status-planned {
+
+            background:
+                var(--medical-blue-light);
+
+            color:
+                var(--medical-blue-dark);
+        }
+
+        .status-arrived {
+
+            background:
+                var(--clinical-orange-light);
+
+            color:
+                #9b6808;
+        }
+
+        .status-finished {
+
+            background:
+                var(--clinical-green-light);
+
+            color:
+                #18764f;
+        }
+
+        .status-cancelled {
+
+            background:
+                var(--clinical-red-light);
+
+            color:
+                #b23f49;
+        }
+
+
+        /* =========================================================
+           DELETE
+        ========================================================= */
+
+        .delete-button {
+
+            width: 31px;
+            height: 31px;
+
+            border:
+                1px solid #eedbde;
+
+            border-radius: 8px;
+
+            background:
+                #fffafa;
+
+            color:
+                var(--clinical-red);
+
+            font-size: 13px;
+
+            font-weight: 900;
+        }
+
+        .delete-button:hover {
+
+            background:
+                var(--clinical-red-light);
+
+            border-color:
+                #eabcc1;
+        }
+
+
+        /* =========================================================
+           EMPTY STATE
+        ========================================================= */
+
+        .empty-state {
+
+            padding:
+                55px 25px;
+
+            text-align: center;
+
+            color:
+                #91a3aa;
+        }
+
+        .empty-icon {
+
+            width: 66px;
+            height: 66px;
+
+            margin:
+                0 auto 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 20px;
+
+            background:
+                #eef7fa;
+
+            color:
+                #65a4b9;
+
+            font-size: 29px;
+
+            opacity: .9;
+        }
+
+        .empty-state strong {
+
+            display: block;
+
+            margin-bottom: 5px;
+
+            color:
+                #607b87;
+
+            font-size: 14px;
+        }
+
+        .empty-state span {
+
+            font-size: 12px;
+        }
+
+
+        /* =========================================================
+           MESSAGES
+        ========================================================= */
+
+        .message {
+
+            margin-bottom:
+                17px;
+
+            padding:
+                12px 15px;
+
+            border-radius:
+                11px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                700;
+        }
+
         .message.success {
-            background: #e9f8ef;
-            color: #22784c;
-            border: 1px solid #cdebd9;
+
+            color:
+                #18764f;
+
+            background:
+                var(--clinical-green-light);
+
+            border:
+                1px solid #cdebdc;
         }
 
         .message.error {
-            background: #fff0f0;
-            color: #b64646;
-            border: 1px solid #f2d1d1;
+
+            color:
+                #b23f49;
+
+            background:
+                var(--clinical-red-light);
+
+            border:
+                1px solid #efd0d4;
         }
 
+
+        /* =========================================================
+           FATAL ERROR
+        ========================================================= */
+
         .fatal-error {
-            max-width: 650px;
-            margin: 80px auto;
-            background: white;
-            border: 1px solid #f0d1d1;
-            border-radius: 18px;
-            padding: 30px;
-            color: #a94444;
-            box-shadow: 0 10px 35px rgba(80, 30, 30, 0.08);
+
+            max-width:
+                650px;
+
+            margin:
+                80px auto;
+
+            padding:
+                30px;
+
+            background:
+                white;
+
+            border:
+                1px solid #efd0d4;
+
+            border-radius:
+                18px;
+
+            color:
+                #a33d45;
+
+            box-shadow:
+                var(--shadow);
         }
 
         .fatal-error h2 {
             margin-bottom: 10px;
         }
 
-        /* =========================
-           RESPONSIVE
-        ========================= */
 
-        @media (max-width: 1000px) {
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 1050px) {
+
             .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
 
-            .welcome-card {
-                padding: 22px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .topbar {
-                height: auto;
-                padding: 13px 16px;
-                gap: 12px;
-            }
-
-            .user-info span {
-                display: none;
-            }
-
-            .brand-title {
-                font-size: 17px;
-            }
-
-            .brand-subtitle {
-                display: none;
-            }
-
-            .main-container {
-                padding: 18px 13px 35px;
-            }
-
-            .welcome-card {
-                border-radius: 17px;
-            }
-
-            .welcome-card h2 {
-                font-size: 20px;
-            }
-
-            .doctor-icon {
-                font-size: 36px;
-            }
-
-            .date-card {
-                flex-direction: column;
-            }
-
-            .date-navigation {
-                width: 100%;
-                justify-content: center;
+                grid-template-columns:
+                    320px minmax(0,1fr);
             }
 
             .appointment-row {
-                grid-template-columns: 65px 1fr;
-                gap: 9px;
+
+                grid-template-columns:
+                    75px minmax(0,1fr);
             }
 
             .appointment-actions {
-                grid-column: 1 / -1;
-                justify-content: flex-start;
+
+                grid-column:
+                    2;
+            }
+        }
+
+
+        @media (max-width: 850px) {
+
+            .dashboard-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+            .main-container {
+
+                padding:
+                    20px;
+            }
+        }
+
+
+        @media (max-width: 650px) {
+
+            .topbar {
+
+                height: auto;
+
+                padding:
+                    12px 15px;
+
+                gap: 12px;
+            }
+
+            .brand-icon {
+
+                width: 42px;
+                height: 42px;
+            }
+
+            .brand-title {
+
+                font-size:
+                    16px;
+            }
+
+            .brand-subtitle {
+
+                display:
+                    none;
+            }
+
+            .user-info span {
+
+                display:
+                    none;
+            }
+
+            .logout-button {
+
+                padding:
+                    8px 10px;
+
+                font-size:
+                    11px;
+            }
+
+            .main-container {
+
+                padding:
+                    15px 11px 30px;
+            }
+
+            .welcome-card {
+
+                min-height:
+                    125px;
+
+                padding:
+                    20px;
+
+                border-radius:
+                    17px;
+            }
+
+            .welcome-card h2 {
+
+                font-size:
+                    19px;
+            }
+
+            .welcome-card p {
+
+                font-size:
+                    12px;
+            }
+
+            .doctor-icon {
+
+                width:
+                    55px;
+
+                height:
+                    55px;
+
+                border-radius:
+                    16px;
+
+                font-size:
+                    30px;
+            }
+
+            .date-card {
+
+                flex-direction:
+                    column;
+
+                padding:
+                    13px;
+            }
+
+            .date-navigation {
+
+                width:
+                    100%;
+
+                justify-content:
+                    center;
+            }
+
+            .current-date strong {
+
+                font-size:
+                    17px;
+            }
+
+            .panel {
+
+                border-radius:
+                    14px;
+            }
+
+            .panel-header {
+
+                padding:
+                    13px 15px;
+            }
+
+            .panel-body {
+
+                padding:
+                    15px;
+            }
+
+            .appointment-row {
+
+                grid-template-columns:
+                    68px minmax(0,1fr);
+
+                gap:
+                    9px;
+
+                padding:
+                    13px 7px;
+            }
+
+            .appointment-actions {
+
+                grid-column:
+                    1 / -1;
+
+                justify-content:
+                    flex-start;
+
+                padding-top:
+                    2px;
             }
 
             .login-card {
-                padding: 30px 22px;
+
+                padding:
+                    30px 22px;
+
+                border-radius:
+                    21px;
             }
         }
+
+
+        /* =========================================================
+           SMALL MEDICAL DETAILS
+        ========================================================= */
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #a5b4bb;
+        }
+
+        select {
+            appearance: auto;
+        }
+
+        ::selection {
+            background:
+                #cdebf3;
+
+            color:
+                #075b78;
+        }
+
     </style>
 </head>
 
 <body>
 
     <div id="app">
+
         <div class="loading">
             Po ngarkohet sistemi...
         </div>
+
     </div>
 
+
+    <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="app-gvm.js?v=GVM-20260924-08"></script>
+
+    <!-- MOS E NDRYSHO KETE FILE -->
+    <script src="app-gvm.js?v=GVM-20260924-09"></script>
 
 </body>
 </html>
