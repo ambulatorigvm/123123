@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-13";
+const APP_VERSION = "GVM-20260924-15";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -10,7 +10,10 @@ let supabaseClient = null;
 let currentUser = null;
 let currentDate = new Date();
 let appointments = [];
+let patients = [];
 let realtimeChannel = null;
+let patientsRealtimeChannel = null;
+let currentView = "appointments";
 
 
 /* =========================================================
@@ -337,6 +340,7 @@ async function login() {
         } = await supabaseClient.auth.signInWithPassword({
 
             email,
+
             password
 
         });
@@ -429,569 +433,707 @@ async function logout() {
 ========================================================= */
 
 function showApp() {
-
-    const app =
-        document.getElementById("app");
-
+    const app = document.getElementById("app");
     if (!app) return;
 
     app.innerHTML = `
-
         <header class="app-header">
-
             <div class="header-inner">
-
                 <div class="brand">
-
-                    <div class="brand-icon">
-                        GVM
-                    </div>
-
+                    <div class="brand-icon">GVM</div>
                     <div>
-
-                        <h1>
-                            AMBULATORI GVM
-                        </h1>
-
-                        <small>
-                            Menaxhimi i vizitave
-                        </small>
-
+                        <h1>AMBULATORI GVM</h1>
+                        <small>Menaxhimi i pacientëve dhe vizitave</small>
                     </div>
-
                 </div>
 
                 <div class="header-actions">
-
                     <div class="online-indicator">
                         <span></span>
                         Online
                     </div>
 
-                    <span
-                        id="userEmail"
-                        class="user-email"
-                    ></span>
+                    <span id="userEmail" class="user-email"></span>
 
-                    <button
-                        id="logoutButton"
-                        class="logout-button"
-                        type="button"
-                    >
+                    <button id="logoutButton" class="logout-button" type="button">
                         Dil
                     </button>
-
                 </div>
-
             </div>
-
         </header>
 
         <main class="main-container">
+            <div id="appMessage" class="app-message"></div>
 
-            <div
-                id="appMessage"
-                class="app-message"
-            ></div>
+            <nav class="main-navigation">
+                <button id="navAppointments" class="nav-button active" type="button">
+                    📅 Vizitat
+                </button>
+                <button id="navPatients" class="nav-button" type="button">
+                    👤 Pacientët
+                </button>
+            </nav>
 
-            <div class="page-title">
-
-                <div>
-
-                    <div class="section-kicker">
-                        PANELI I AMBULATORIT
-                    </div>
-
-                    <h2>
-                        Orari i vizitave
-                    </h2>
-
-                </div>
-
-                <div class="date-controls">
-
-                    <button
-                        id="previousDay"
-                        class="date-button"
-                        type="button"
-                        title="Dita e mëparshme"
-                    >
-                        ←
-                    </button>
-
-                    <div
-                        id="currentDate"
-                        class="current-date"
-                    ></div>
-
-                    <button
-                        id="nextDay"
-                        class="date-button"
-                        type="button"
-                        title="Dita tjetër"
-                    >
-                        →
-                    </button>
-
-                    <button
-                        id="todayButton"
-                        class="date-button today-button"
-                        type="button"
-                    >
-                        Sot
-                    </button>
-
-                </div>
-
-            </div>
-
-            <section class="dashboard-summary">
-
-                <div class="summary-card">
-
-                    <div class="summary-icon">
-                        📋
-                    </div>
-
+            <section id="appointmentsView">
+                <div class="page-title">
                     <div>
-
-                        <span>
-                            Vizita gjithsej
-                        </span>
-
-                        <strong id="totalAppointments">
-                            0
-                        </strong>
-
+                        <div class="section-kicker">PANELI I AMBULATORIT</div>
+                        <h2>Orari i vizitave</h2>
                     </div>
 
+                    <div class="date-controls">
+                        <button id="previousDay" class="date-button" type="button" title="Dita e mëparshme">←</button>
+                        <div id="currentDate" class="current-date"></div>
+                        <button id="nextDay" class="date-button" type="button" title="Dita tjetër">→</button>
+                        <button id="todayButton" class="date-button today-button" type="button">Sot</button>
+                    </div>
                 </div>
 
-                <div class="summary-card">
-
-                    <div class="summary-icon">
-                        🕐
+                <section class="dashboard-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon">📋</div>
+                        <div>
+                            <span>Vizita gjithsej</span>
+                            <strong id="totalAppointments">0</strong>
+                        </div>
                     </div>
 
-                    <div>
-
-                        <span>
-                            Të planifikuara
-                        </span>
-
-                        <strong id="plannedAppointments">
-                            0
-                        </strong>
-
+                    <div class="summary-card">
+                        <div class="summary-icon">🕐</div>
+                        <div>
+                            <span>Të planifikuara</span>
+                            <strong id="plannedAppointments">0</strong>
+                        </div>
                     </div>
 
-                </div>
-
-                <div class="summary-card">
-
-                    <div class="summary-icon">
-                        ✓
+                    <div class="summary-card">
+                        <div class="summary-icon">✓</div>
+                        <div>
+                            <span>Përfunduar</span>
+                            <strong id="finishedAppointments">0</strong>
+                        </div>
                     </div>
 
-                    <div>
+                    <div class="summary-card">
+                        <div class="summary-icon">⏱</div>
+                        <div>
+                            <span>Mbërritur</span>
+                            <strong id="arrivedAppointments">0</strong>
+                        </div>
+                    </div>
+                </section>
 
-                        <span>
-                            Përfunduar
-                        </span>
-
-                        <strong id="finishedAppointments">
-                            0
-                        </strong>
-
+                <section class="appointment-card">
+                    <div class="card-heading">
+                        <div>
+                            <span class="card-kicker">REGJISTRIM I RI</span>
+                            <h3>Shto vizitë të re</h3>
+                        </div>
+                        <div class="medical-cross">+</div>
                     </div>
 
-                </div>
+                    <form id="appointmentForm" class="appointment-form">
+                        <div class="form-group">
+                            <label for="patientName">Emri dhe mbiemri</label>
+                            <input id="patientName" type="text" placeholder="Emri i pacientit" required>
+                        </div>
 
-                <div class="summary-card">
+                        <div class="form-group">
+                            <label for="patientPhone">Telefoni</label>
+                            <input id="patientPhone" type="text" placeholder="Numri i telefonit">
+                        </div>
 
-                    <div class="summary-icon">
-                        ⏱
+                        <div class="form-group">
+                            <label for="appointmentTime">Ora</label>
+                            <select id="appointmentTime" required></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appointmentNote">Shënim</label>
+                            <input id="appointmentNote" type="text" placeholder="Shënim për vizitën">
+                        </div>
+
+                        <button class="add-button" type="submit">
+                            <span>+</span>
+                            Shto vizitë
+                        </button>
+                    </form>
+                </section>
+
+                <section class="schedule-card">
+                    <div class="schedule-header">
+                        <div>
+                            <span class="card-kicker">PROGRAMI DITOR</span>
+                            <h3>Orari ditor</h3>
+                        </div>
+
+                        <div class="schedule-header-right">
+                            <div class="working-hours">🕐 08:00 — 18:00</div>
+                            <div id="scheduleInfo" class="schedule-info">0 vizita</div>
+                        </div>
                     </div>
 
-                    <div>
+                    <div class="schedule-table-wrapper">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>Ora</th>
+                                    <th>Pacienti</th>
+                                    <th>Telefoni</th>
+                                    <th>Shënimi</th>
+                                    <th>Statusi</th>
+                                    <th>Veprime</th>
+                                </tr>
+                            </thead>
 
-                        <span>
-                            Mbërritur
-                        </span>
-
-                        <strong id="arrivedAppointments">
-                            0
-                        </strong>
-
+                            <tbody id="scheduleBody">
+                                <tr>
+                                    <td colspan="6" class="loading-cell">
+                                        <div class="loading-spinner"></div>
+                                        Po ngarkohet orari...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                </div>
-
+                </section>
             </section>
 
-            <section class="appointment-card">
-
-                <div class="card-heading">
-
+            <section id="patientsView" class="patients-view" style="display:none;">
+                <div class="page-title">
                     <div>
-
-                        <span class="card-kicker">
-                            REGJISTRIM I RI
-                        </span>
-
-                        <h3>
-                            Shto vizitë të re
-                        </h3>
-
+                        <div class="section-kicker">REGJISTRI MJEKËSOR</div>
+                        <h2>Pacientët</h2>
                     </div>
 
-                    <div class="medical-cross">
-                        +
-                    </div>
-
-                </div>
-
-                <form
-                    id="appointmentForm"
-                    class="appointment-form"
-                >
-
-                    <div class="form-group">
-
-                        <label for="patientName">
-                            Emri dhe mbiemri
-                        </label>
-
-                        <input
-                            id="patientName"
-                            type="text"
-                            placeholder="Emri i pacientit"
-                            required
-                        >
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="patientPhone">
-                            Telefoni
-                        </label>
-
-                        <input
-                            id="patientPhone"
-                            type="text"
-                            placeholder="Numri i telefonit"
-                        >
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="appointmentTime">
-                            Ora
-                        </label>
-
-                        <select
-                            id="appointmentTime"
-                            required
-                        >
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="appointmentNote">
-                            Shënim
-                        </label>
-
-                        <input
-                            id="appointmentNote"
-                            type="text"
-                            placeholder="Shënim për vizitën"
-                        >
-
-                    </div>
-
-                    <button
-                        class="add-button"
-                        type="submit"
-                    >
+                    <button id="newPatientButton" class="add-button patient-top-button" type="button">
                         <span>+</span>
-                        Shto vizitë
+                        Shto pacient
                     </button>
-
-                </form>
-
-            </section>
-
-            <section class="schedule-card">
-
-                <div class="schedule-header">
-
-                    <div>
-
-                        <span class="card-kicker">
-                            PROGRAMI DITOR
-                        </span>
-
-                        <h3>
-                            Orari ditor
-                        </h3>
-
-                    </div>
-
-                    <div class="schedule-header-right">
-
-                        <div class="working-hours">
-                            🕐 08:00 — 18:00
-                        </div>
-
-                        <div
-                            id="scheduleInfo"
-                            class="schedule-info"
-                        >
-                            0 vizita
-                        </div>
-
-                    </div>
-
                 </div>
 
-                <div class="schedule-table-wrapper">
-
-                    <table class="schedule-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Ora
-                                </th>
-
-                                <th>
-                                    Pacienti
-                                </th>
-
-                                <th>
-                                    Telefoni
-                                </th>
-
-                                <th>
-                                    Shënimi
-                                </th>
-
-                                <th>
-                                    Statusi
-                                </th>
-
-                                <th>
-                                    Veprime
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody
-                            id="scheduleBody"
+                <section class="patients-toolbar">
+                    <div class="patient-search-wrap">
+                        <span class="patient-search-icon">🔎</span>
+                        <input
+                            id="patientSearch"
+                            class="patient-search"
+                            type="search"
+                            placeholder="Kërko me nr. kartelë, emër ose telefon..."
+                            autocomplete="off"
                         >
+                    </div>
 
-                            <tr>
+                    <div id="patientsCount" class="patients-count">0 pacientë</div>
+                </section>
 
-                                <td
-                                    colspan="6"
-                                    class="loading-cell"
-                                >
+                <section class="schedule-card patients-card">
+                    <div class="schedule-table-wrapper">
+                        <table class="schedule-table patients-table">
+                            <thead>
+                                <tr>
+                                    <th>Pacienti</th>
+                                    <th>Telefoni</th>
+                                    <th>Datëlindja</th>
+                                    <th>Kodi i kartelës</th>
+                                    <th>Shënime</th>
+                                    <th>Veprime</th>
+                                </tr>
+                            </thead>
 
-                                    <div class="loading-spinner"></div>
-
-                                    Po ngarkohet orari...
-
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
+                            <tbody id="patientsBody">
+                                <tr>
+                                    <td colspan="6" class="loading-cell">
+                                        <div class="loading-spinner"></div>
+                                        Po ngarkohen pacientët...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </section>
-
         </main>
+
+        <div id="patientModal" class="patient-modal" aria-hidden="true">
+            <div class="patient-modal-backdrop" data-close-patient-modal></div>
+
+            <div class="patient-modal-box" role="dialog" aria-modal="true">
+                <div class="patient-modal-header">
+                    <div>
+                        <span class="card-kicker">KARTELA E PACIENTIT</span>
+                        <h3 id="patientModalTitle">Shto pacient</h3>
+                    </div>
+
+                    <button id="closePatientModal" class="modal-close" type="button" aria-label="Mbyll">
+                        ×
+                    </button>
+                </div>
+
+                <form id="patientForm" class="patient-form">
+                    <input id="patientId" type="hidden">
+
+                    <div class="form-group">
+                        <label for="patientFullName">Emri dhe mbiemri *</label>
+                        <input id="patientFullName" type="text" required placeholder="Emri dhe mbiemri">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientRecordPhone">Telefoni</label>
+                        <input id="patientRecordPhone" type="text" placeholder="Numri i telefonit">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientBirthDate">Datëlindja</label>
+                        <input id="patientBirthDate" type="date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientPersonalId">Nr. personal / ID</label>
+                        <input id="patientPersonalId" type="text" placeholder="Numri personal">
+                    </div>
+
+                    <div class="form-group patient-full-width">
+                        <label for="patientAddress">Adresa</label>
+                        <input id="patientAddress" type="text" placeholder="Adresa">
+                    </div>
+
+                    <div class="form-group patient-full-width">
+                        <label for="patientNotes">Shënime</label>
+                        <textarea id="patientNotes" rows="4" placeholder="Shënime për pacientin"></textarea>
+                    </div>
+
+                    <div class="patient-form-actions">
+                        <button id="cancelPatientButton" class="modal-secondary-button" type="button">
+                            Anulo
+                        </button>
+
+                        <button class="add-button" type="submit">
+                            Ruaj pacientin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     `;
 
-    const userEmail =
-        document.getElementById(
-            "userEmail"
-        );
+    injectPatientStyles();
 
-    if (userEmail && currentUser) {
+    const userEmail = document.getElementById("userEmail");
+    if (userEmail && currentUser) userEmail.textContent = currentUser.email || "";
 
-        userEmail.textContent =
-            currentUser.email || "";
+    const logoutButton = document.getElementById("logoutButton");
+    if (logoutButton) logoutButton.addEventListener("click", logout);
 
+    const navAppointments = document.getElementById("navAppointments");
+    const navPatients = document.getElementById("navPatients");
+
+    if (navAppointments) {
+        navAppointments.addEventListener("click", showAppointmentsView);
     }
 
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            logout
-        );
-
+    if (navPatients) {
+        navPatients.addEventListener("click", showPatientsView);
     }
 
-    const previousDay =
-        document.getElementById(
-            "previousDay"
-        );
-
+    const previousDay = document.getElementById("previousDay");
     if (previousDay) {
-
-        previousDay.addEventListener(
-            "click",
-            function () {
-
-                currentDate.setDate(
-                    currentDate.getDate() - 1
-                );
-
-                updateDateDisplay();
-                loadAppointments();
-
-            }
-        );
-
+        previousDay.addEventListener("click", function () {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDateDisplay();
+            loadAppointments();
+        });
     }
 
-    const nextDay =
-        document.getElementById(
-            "nextDay"
-        );
-
+    const nextDay = document.getElementById("nextDay");
     if (nextDay) {
-
-        nextDay.addEventListener(
-            "click",
-            function () {
-
-                currentDate.setDate(
-                    currentDate.getDate() + 1
-                );
-
-                updateDateDisplay();
-                loadAppointments();
-
-            }
-        );
-
+        nextDay.addEventListener("click", function () {
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateDateDisplay();
+            loadAppointments();
+        });
     }
 
-    const todayButton =
-        document.getElementById(
-            "todayButton"
-        );
-
+    const todayButton = document.getElementById("todayButton");
     if (todayButton) {
-
-        todayButton.addEventListener(
-            "click",
-            function () {
-
-                currentDate =
-                    new Date();
-
-                updateDateDisplay();
-                loadAppointments();
-
-            }
-        );
-
+        todayButton.addEventListener("click", function () {
+            currentDate = new Date();
+            updateDateDisplay();
+            loadAppointments();
+        });
     }
 
-    const appointmentForm =
-        document.getElementById(
-            "appointmentForm"
-        );
-
+    const appointmentForm = document.getElementById("appointmentForm");
     if (appointmentForm) {
-
-        appointmentForm.addEventListener(
-            "submit",
-            async function (event) {
-
-                event.preventDefault();
-
-                await addAppointment();
-
-            }
-        );
-
+        appointmentForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            await addAppointment();
+        });
     }
 
-    updateDateDisplay();
+    const newPatientButton = document.getElementById("newPatientButton");
+    if (newPatientButton) {
+        newPatientButton.addEventListener("click", function () {
+            openPatientModal();
+        });
+    }
 
-    populateTimeSelect();
+    const closePatientModal = document.getElementById("closePatientModal");
+    if (closePatientModal) {
+        closePatientModal.addEventListener("click", closePatientModalWindow);
+    }
 
-    loadAppointments();
+    const cancelPatientButton = document.getElementById("cancelPatientButton");
+    if (cancelPatientButton) {
+        cancelPatientButton.addEventListener("click", closePatientModalWindow);
+    }
 
-    setupRealtime();
+    document.querySelectorAll("[data-close-patient-modal]").forEach(function (element) {
+        element.addEventListener("click", closePatientModalWindow);
+    });
 
-}
-
-
-/* =========================================================
-   DATE KEY
-========================================================= */
-
-function dateKey(date) {
-
-    const year =
-        date.getFullYear();
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-}
-
-
-/* =========================================================
-   DATE FORMAT
-========================================================= */
-
-function formatDate(date) {
-
-    return date.toLocaleDateString(
-        "sq-AL",
-        {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-            year: "numeric"
+    const patientForm = document.getElementById("patientForm");
+    if (patientForm) {
+        patientForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            await savePatient();
+        });
+    }
+            .modal-close:hover {
+            background: #e8eef0;
         }
-    );
+
+        .patient-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            padding: 24px;
+        }
+
+        .patient-full-width {
+            grid-column: 1 / -1;
+        }
+
+        .patient-form textarea {
+            width: 100%;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .patient-form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .modal-secondary-button {
+            min-height: 42px;
+            padding: 0 18px;
+            border: 1px solid #d5dfe3;
+            border-radius: 9px;
+            background: #fff;
+            color: #52656d;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .modal-secondary-button:hover {
+            background: #f5f8f9;
+        }
+
+        .patient-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            grid-column: 1 / -1;
+            padding: 18px;
+            border-radius: 12px;
+            background: #f5f9fa;
+        }
+
+        .patient-profile-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 58px;
+            height: 58px;
+            flex: 0 0 58px;
+            border-radius: 50%;
+            background: #d9eeeb;
+            color: #0f766e;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .patient-profile h4 {
+            margin: 0 0 4px;
+            color: #23383f;
+            font-size: 18px;
+        }
+
+        .patient-profile p {
+            margin: 0;
+            color: #718188;
+            font-size: 13px;
+        }
+
+        .patient-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            grid-column: 1 / -1;
+        }
+
+        .patient-detail-grid > div {
+            padding: 14px;
+            border: 1px solid #e4ebed;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .patient-detail-grid span {
+            display: block;
+            margin-bottom: 5px;
+            color: #7a898f;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .patient-detail-grid strong {
+            display: block;
+            color: #2d4249;
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+        .patient-history {
+            grid-column: 1 / -1;
+            margin-top: 5px;
+        }
+
+        .patient-history-title {
+            margin-bottom: 10px;
+        }
+
+        .patient-history-title h4 {
+            margin: 4px 0 0;
+            color: #263c43;
+            font-size: 16px;
+        }
+
+        .patient-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .patient-history-item {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr 1.5fr;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #e5ebed;
+            border-radius: 10px;
+            background: #fafcfc;
+        }
+
+        .patient-history-item strong,
+        .patient-history-item span {
+            display: block;
+        }
+
+        .patient-history-item strong {
+            color: #2c4148;
+            font-size: 12px;
+        }
+
+        .patient-history-item > div:first-child span {
+            margin-top: 3px;
+            color: #78888e;
+            font-size: 11px;
+        }
+
+        .patient-history-note {
+            color: #66777e;
+            font-size: 11px;
+            word-break: break-word;
+        }
+
+        .patient-history-empty {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f7f9fa;
+            color: #78888e;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .patient-cell {
+            min-width: 230px;
+        }
+
+        .patient-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .patient-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            flex: 0 0 36px;
+            border-radius: 50%;
+            background: #e3f2f0;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .patient-details strong {
+            display: block;
+            color: #2b4047;
+            font-size: 12px;
+        }
+
+        .patient-details span {
+            display: block;
+            margin-top: 3px;
+            color: #94a0a5;
+            font-size: 10px;
+        }
+
+        .phone-link {
+            color: #42616a;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .phone-link span {
+            margin-right: 5px;
+        }
+
+        .phone-link:hover {
+            color: #0f766e;
+        }
+
+        .muted-text {
+            color: #a0aaae;
+        }
+
+        .note-text {
+            display: block;
+            max-width: 180px;
+            overflow: hidden;
+            color: #68787e;
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .app-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 500;
+            display: none;
+            max-width: 420px;
+            padding: 13px 17px;
+            border-radius: 10px;
+            box-shadow: 0 12px 35px rgba(15,23,42,.14);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .app-message.show {
+            display: block;
+        }
+
+        .app-message.success {
+            background: #ecfdf5;
+            border: 1px solid #b7ead3;
+            color: #087443;
+        }
+
+        .app-message.error {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+        }
+
+        @media (max-width: 900px) {
+
+            .patients-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .patient-search-wrap {
+                max-width: none;
+            }
+
+            .patient-history-item {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .main-navigation {
+                width: 100%;
+            }
+
+            .nav-button {
+                flex: 1;
+            }
+
+            .patient-form,
+            .patient-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-full-width,
+            .patient-form-actions {
+                grid-column: auto;
+            }
+
+            .patient-modal {
+                padding: 10px;
+            }
+
+            .patient-modal-box {
+                max-height: 95vh;
+                border-radius: 14px;
+            }
+
+            .patient-modal-header {
+                padding: 17px;
+            }
+
+            .patient-form {
+                padding: 17px;
+            }
+
+            .patients-table {
+                min-width: 850px;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
 }
 
 
 /* =========================================================
-   UPDATE DATE
+   DATE
 ========================================================= */
 
 function updateDateDisplay() {
@@ -1004,59 +1146,20 @@ function updateDateDisplay() {
     if (!element) return;
 
     element.textContent =
-        formatDate(currentDate);
-
-}
-
-
-/* =========================================================
-   GENERATE TIMES
-========================================================= */
-
-function generateTimes() {
-
-    const times = [];
-
-    const startMinutes =
-        8 * 60;
-
-    const endMinutes =
-        18 * 60;
-
-    for (
-        let minutes = startMinutes;
-        minutes <= endMinutes;
-        minutes += 15
-    ) {
-
-        const hour =
-            Math.floor(
-                minutes / 60
-            );
-
-        const minute =
-            minutes % 60;
-
-        const h =
-            String(hour)
-                .padStart(2, "0");
-
-        const m =
-            String(minute)
-                .padStart(2, "0");
-
-        times.push(
-            `${h}:${m}`
+        currentDate.toLocaleDateString(
+            "sq-AL",
+            {
+                weekday: "long",
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }
         );
-
-    }
-
-    return times;
 }
 
 
 /* =========================================================
-   POPULATE TIME
+   TIME SELECT
 ========================================================= */
 
 function populateTimeSelect() {
@@ -1070,48 +1173,37 @@ function populateTimeSelect() {
 
     select.innerHTML = "";
 
-    const placeholder =
-        document.createElement(
-            "option"
-        );
+    for (
+        let hour = 8;
+        hour <= 18;
+        hour++
+    ) {
 
-    placeholder.value = "";
+        for (
+            let minute = 0;
+            minute < 60;
+            minute += 15
+        ) {
 
-    placeholder.textContent =
-        "Zgjidh orën";
+            if (
+                hour === 18 &&
+                minute > 0
+            ) {
+                continue;
+            }
 
-    placeholder.disabled = true;
-
-    placeholder.selected = true;
-
-    select.appendChild(
-        placeholder
-    );
-
-    const times =
-        generateTimes();
-
-    times.forEach(
-        function (time) {
+            const time =
+                `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
             const option =
-                document.createElement(
-                    "option"
-                );
+                document.createElement("option");
 
-            option.value =
-                time;
+            option.value = time;
+            option.textContent = time;
 
-            option.textContent =
-                time;
-
-            select.appendChild(
-                option
-            );
-
+            select.appendChild(option);
         }
-    );
-
+    }
 }
 
 
@@ -1130,18 +1222,17 @@ async function loadAppointments() {
 
     body.innerHTML = `
         <tr>
-            <td
-                colspan="6"
-                class="loading-cell"
-            >
+            <td colspan="6" class="loading-cell">
                 <div class="loading-spinner"></div>
                 Po ngarkohet orari...
             </td>
         </tr>
     `;
 
-    const selectedDate =
-        dateKey(currentDate);
+    const dateString =
+        formatDateForDatabase(
+            currentDate
+        );
 
     try {
 
@@ -1153,7 +1244,7 @@ async function loadAppointments() {
             .select("*")
             .eq(
                 "appointment_date",
-                selectedDate
+                dateString
             )
             .order(
                 "appointment_time",
@@ -1169,15 +1260,14 @@ async function loadAppointments() {
                 error
             );
 
-            showMessage(
-                "Gabim gjatë ngarkimit të vizitave: " +
-                error.message,
-                "error"
-            );
-
-            appointments = [];
-
-            renderAppointments();
+            body.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-day-cell">
+                        Nuk u ngarkuan vizitat:
+                        ${escapeHtml(error.message)}
+                    </td>
+                </tr>
+            `;
 
             return;
         }
@@ -1185,7 +1275,8 @@ async function loadAppointments() {
         appointments =
             data || [];
 
-        renderAppointments();
+        renderSchedule();
+        updateDashboard();
 
     } catch (error) {
 
@@ -1194,14 +1285,828 @@ async function loadAppointments() {
             error
         );
 
+        body.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-day-cell">
+                    Gabim gjatë ngarkimit të orarit.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+/* =========================================================
+   RENDER SCHEDULE
+========================================================= */
+
+function renderSchedule() {
+
+    const body =
+        document.getElementById(
+            "scheduleBody"
+        );
+
+    const info =
+        document.getElementById(
+            "scheduleInfo"
+        );
+
+    if (!body) return;
+
+    body.innerHTML = "";
+
+    const appointmentMap =
+        {};
+
+    appointments.forEach(
+        function (appointment) {
+
+            const key =
+                normalizeTime(
+                    appointment.appointment_time
+                );
+
+            appointmentMap[key] =
+                appointment;
+
+        }
+    );
+
+    const slots =
+        generateTimeSlots();
+
+    let occupiedCount = 0;
+
+    slots.forEach(
+        function (time) {
+
+            const appointment =
+                appointmentMap[time];
+
+            if (appointment) {
+                occupiedCount++;
+            }
+
+            const tr =
+                document.createElement("tr");
+
+            tr.className =
+                appointment
+                    ? "appointment-row occupied"
+                    : "appointment-row";
+
+            const patientName =
+                appointment
+                    ? appointment.patient_name || "Pa emër"
+                    : "";
+
+            const phone =
+                appointment
+                    ? appointment.patient_phone || "—"
+                    : "";
+
+            const note =
+                appointment
+                    ? appointment.note || "—"
+                    : "";
+
+            const status =
+                appointment
+                    ? appointment.status || "planned"
+                    : "";
+
+            tr.innerHTML = `
+                <td class="time-cell">
+                    <strong>${escapeHtml(time)}</strong>
+                </td>
+
+                <td class="patient-name-cell">
+                    ${
+                        appointment
+                            ? `
+                                <div class="schedule-patient">
+                                    <div class="mini-avatar">
+                                        ${escapeHtml(getInitials(patientName))}
+                                    </div>
+                                    <div>
+                                        <strong>
+                                            ${escapeHtml(patientName)}
+                                        </strong>
+                                    </div>
+                                </div>
+                              `
+                            : `
+                                <span class="empty-slot">
+                                    E lirë
+                                </span>
+                              `
+                    }
+                </td>
+
+                <td>
+                    ${
+                        appointment
+                            ? escapeHtml(phone)
+                            : `<span class="muted-text">—</span>`
+                    }
+                </td>
+
+                <td>
+                    ${
+                        appointment
+                            ? `<span class="note-text">${escapeHtml(note)}</span>`
+                            : `<span class="muted-text">—</span>`
+                    }
+                </td>
+
+                <td>
+                    ${
+                        appointment
+                            ? `
+                                <span class="status ${statusClass(status)}">
+                                    <span class="status-dot"></span>
+                                    ${escapeHtml(statusText(status))}
+                                </span>
+                              `
+                            : `<span class="muted-text">—</span>`
+                    }
+                </td>
+
+                <td>
+                    ${
+                        appointment
+                            ? `
+                                <div class="appointment-actions">
+
+                                    <button
+                                        type="button"
+                                        class="action-button"
+                                        data-action="status"
+                                    >
+                                        ${nextStatusButtonText(status)}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="action-button action-delete"
+                                        data-action="delete"
+                                    >
+                                        🗑 Fshi
+                                    </button>
+
+                                </div>
+                              `
+                            : `
+                                <button
+                                    type="button"
+                                    class="action-button quick-add-button"
+                                    data-action="quick-add"
+                                >
+                                    + Shto
+                                </button>
+                              `
+                    }
+                </td>
+            `;
+
+            const quickAddButton =
+                tr.querySelector(
+                    '[data-action="quick-add"]'
+                );
+
+            if (quickAddButton) {
+
+                quickAddButton.addEventListener(
+                    "click",
+                    function () {
+
+                        const timeSelect =
+                            document.getElementById(
+                                "appointmentTime"
+                            );
+
+                        if (timeSelect) {
+                            timeSelect.value =
+                                time;
+                        }
+
+                        const patientInput =
+                            document.getElementById(
+                                "patientName"
+                            );
+
+                        if (patientInput) {
+                            patientInput.focus();
+                        }
+
+                        window.scrollTo({
+                            top: 0,
+                            behavior: "smooth"
+                        });
+
+                    }
+                );
+            }
+
+            const statusButton =
+                tr.querySelector(
+                    '[data-action="status"]'
+                );
+
+            if (statusButton && appointment) {
+
+                statusButton.addEventListener(
+                    "click",
+                    async function () {
+
+                        await changeAppointmentStatus(
+                            appointment
+                        );
+
+                    }
+                );
+            }
+
+            const deleteButton =
+                tr.querySelector(
+                    '[data-action="delete"]'
+                );
+
+            if (deleteButton && appointment) {
+
+                deleteButton.addEventListener(
+                    "click",
+                    async function () {
+
+                        await deleteAppointment(
+                            appointment.id
+                        );
+
+                    }
+                );
+            }
+
+            body.appendChild(tr);
+
+        }
+    );
+
+    if (info) {
+
+        info.textContent =
+            `${occupiedCount} ${
+                occupiedCount === 1
+                    ? "vizitë"
+                    : "vizita"
+            }`;
+
+    }
+}
+
+
+/* =========================================================
+   GENERATE TIME SLOTS
+========================================================= */
+
+function generateTimeSlots() {
+
+    const slots = [];
+
+    for (
+        let hour = 8;
+        hour <= 18;
+        hour++
+    ) {
+
+        for (
+            let minute = 0;
+            minute < 60;
+            minute += 15
+        ) {
+
+            if (
+                hour === 18 &&
+                minute > 0
+            ) {
+                continue;
+            }
+
+            slots.push(
+                `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+            );
+
+        }
+    }
+
+    return slots;
+}
+
+
+/* =========================================================
+   ADD APPOINTMENT
+========================================================= */
+
+async function addAppointment() {
+
+    const nameElement =
+        document.getElementById(
+            "patientName"
+        );
+
+    const phoneElement =
+        document.getElementById(
+            "patientPhone"
+        );
+
+    const timeElement =
+        document.getElementById(
+            "appointmentTime"
+        );
+
+    const noteElement =
+        document.getElementById(
+            "appointmentNote"
+        );
+
+    if (!nameElement || !timeElement) {
+        return;
+    }
+
+    const patientName =
+        nameElement.value.trim();
+
+    const patientPhone =
+        phoneElement
+            ? phoneElement.value.trim()
+            : "";
+
+    const appointmentTime =
+        timeElement.value;
+
+    const note =
+        noteElement
+            ? noteElement.value.trim()
+            : "";
+
+    if (!patientName) {
+
         showMessage(
-            "Gabim gjatë ngarkimit të orarit.",
+            "Vendos emrin e pacientit.",
             "error"
         );
 
-        appointments = [];
+        return;
+    }
+
+    if (!appointmentTime) {
+
+        showMessage(
+            "Zgjidh orën e vizitës.",
+            "error"
+        );
+
+        return;
+    }
+
+    const appointmentDate =
+        formatDateForDatabase(
+            currentDate
+        );
+
+    const duplicate =
+        appointments.find(
+            function (appointment) {
+
+                return (
+                    normalizeTime(
+                        appointment.appointment_time
+                    ) ===
+                    normalizeTime(
+                        appointmentTime
+                    )
+                );
+
+            }
+        );
+
+    if (duplicate) {
+
+        showMessage(
+            `Ora ${appointmentTime} është tashmë e zënë.`,
+            "error"
+        );
+
+        return;
+    }
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("appointments")
+            .insert([
+                {
+                    patient_name:
+                        patientName,
+
+                    patient_phone:
+                        patientPhone,
+
+                    appointment_date:
+                        appointmentDate,
+
+                    appointment_time:
+                        appointmentTime,
+
+                    note:
+                        note,
+
+                    status:
+                        "planned"
+                }
+            ])
+            .select()
+            .single();
+
+        if (error) {
+
+            console.error(
+                "ADD APPOINTMENT ERROR:",
+                error
+            );
+
+            showMessage(
+                "Vizita nuk u shtua: " +
+                error.message,
+                "error"
+            );
+
+            return;
+        }
+
+        appointments.push(
+            data
+        );
+
+        renderSchedule();
+        updateDashboard();
+
+        nameElement.value = "";
+
+        if (phoneElement) {
+            phoneElement.value = "";
+        }
+
+        if (noteElement) {
+            noteElement.value = "";
+        }
+
+        showMessage(
+            "Vizita u shtua me sukses.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "ADD APPOINTMENT EXCEPTION:",
+            error
+        );
+
+        showMessage(
+            "Gabim gjatë shtimit të vizitës.",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   CHANGE STATUS
+========================================================= */
+
+async function changeAppointmentStatus(
+    appointment
+) {
+
+    const currentStatus =
+        appointment.status ||
+        "planned";
+
+    const nextStatus =
+        getNextStatus(
+            currentStatus
+        );
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("appointments")
+            .update({
+                status:
+                    nextStatus
+            })
+            .eq(
+                "id",
+                appointment.id
+            )
+            .select()
+            .single();
+
+        if (error) {
+
+            console.error(
+                "CHANGE STATUS ERROR:",
+                error
+            );
+
+            showMessage(
+                "Statusi nuk u ndryshua: " +
+                error.message,
+                "error"
+            );
+
+            return;
+        }
+
+        appointments =
+            appointments.map(
+                function (item) {
+
+                    return item.id === data.id
+                        ? data
+                        : item;
+
+                }
+            );
+
+        renderSchedule();
+        updateDashboard();
+
+        showMessage(
+            "Statusi u përditësua.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "CHANGE STATUS EXCEPTION:",
+            error
+        );
+
+        showMessage(
+            "Gabim gjatë ndryshimit të statusit.",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   DELETE APPOINTMENT
+========================================================= */
+
+async function deleteAppointment(
+    id
+) {
+
+    const appointment =
+        appointments.find(
+            function (item) {
+                return item.id === id;
+            }
+        );
+
+    if (!appointment) return;
+
+    const confirmed =
+        window.confirm(
+            `A je i sigurt që dëshiron të fshish vizitën e "${appointment.patient_name || "pacientit"}" në orën ${normalizeTime(appointment.appointment_time)}?`
+        );
+
+    if (!confirmed) return;
+
+    try {
+
+        const {
+            error
+        } = await supabaseClient
+            .from("appointments")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
+
+        if (error) {
+
+            console.error(
+                "DELETE APPOINTMENT ERROR:",
+                error
+            );
+
+            showMessage(
+                "Vizita nuk u fshi: " +
+                error.message,
+                "error"
+            );
+
+            return;
+        }
+
+        appointments =
+            appointments.filter(
+                function (item) {
+                    return item.id !== id;
+                }
+            );
+
+        renderSchedule();
+        updateDashboard();
+
+        showMessage(
+            "Vizita u fshi.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "DELETE APPOINTMENT EXCEPTION:",
+            error
+        );
+
+        showMessage(
+            "Gabim gjatë fshirjes së vizitës.",
+            "error"
+        );
+    }
+}
+                            </button>
+                        `
+                        : ""
+                }
+
+                <button
+                    type="button"
+                    class="action-button action-delete"
+                    data-action="delete"
+                >
+                    🗑 Fshi
+                </button>
+
+            </div>
+
+        </td>
+
+    `;
+
+    const arrivedButton =
+        tr.querySelector(
+            '[data-action="arrived"]'
+        );
+
+    if (arrivedButton) {
+
+        arrivedButton.addEventListener(
+            "click",
+            async function () {
+
+                await updateAppointmentStatus(
+                    appointment.id,
+                    "arrived"
+                );
+
+            }
+        );
+
+    }
+
+    const finishedButton =
+        tr.querySelector(
+            '[data-action="finished"]'
+        );
+
+    if (finishedButton) {
+
+        finishedButton.addEventListener(
+            "click",
+            async function () {
+
+                await updateAppointmentStatus(
+                    appointment.id,
+                    "finished"
+                );
+
+            }
+        );
+
+    }
+
+    const deleteButton =
+        tr.querySelector(
+            '[data-action="delete"]'
+        );
+
+    if (deleteButton) {
+
+        deleteButton.addEventListener(
+            "click",
+            async function () {
+
+                await deleteAppointment(
+                    appointment.id
+                );
+
+            }
+        );
+
+    }
+
+    return tr;
+
+}
+
+
+/* =========================================================
+   UPDATE APPOINTMENT STATUS
+========================================================= */
+
+async function updateAppointmentStatus(
+    id,
+    status
+) {
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("appointments")
+            .update({
+                status: status
+            })
+            .eq(
+                "id",
+                id
+            )
+            .select()
+            .single();
+
+        if (error) {
+
+            console.error(
+                "UPDATE STATUS ERROR:",
+                error
+            );
+
+            showMessage(
+                "Statusi nuk u përditësua: " +
+                error.message,
+                "error"
+            );
+
+            return;
+
+        }
+
+        appointments =
+            appointments.map(
+                function (appointment) {
+
+                    return appointment.id === data.id
+                        ? data
+                        : appointment;
+
+                }
+            );
 
         renderAppointments();
+
+        showMessage(
+            "Statusi u përditësua me sukses.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "UPDATE STATUS EXCEPTION:",
+            error
+        );
+
+        showMessage(
+            "Gabim gjatë përditësimit të statusit.",
+            "error"
+        );
 
     }
 
@@ -1209,150 +2114,674 @@ async function loadAppointments() {
 
 
 /* =========================================================
-   RENDER APPOINTMENTS - TABLE
+   DELETE APPOINTMENT
 ========================================================= */
 
-function renderAppointments() {
+async function deleteAppointment(
+    id
+) {
 
-    const body =
-        document.getElementById(
-            "scheduleBody"
+    const appointment =
+        appointments.find(
+            function (item) {
+                return item.id === id;
+            }
         );
 
-    if (!body) return;
+    if (!appointment) return;
 
-    body.innerHTML = "";
-
-    updateDashboardCounters();
-
-    const scheduleInfo =
-        document.getElementById(
-            "scheduleInfo"
+    const confirmed =
+        window.confirm(
+            `A je i sigurt që dëshiron të fshish vizitën e "${appointment.patient_name || "pacientit"}" në orën ${normalizeTime(appointment.appointment_time)}?`
         );
 
-    if (scheduleInfo) {
+    if (!confirmed) return;
 
-        scheduleInfo.textContent =
-            `${appointments.length} ${
-                appointments.length === 1
-                    ? "vizitë"
-                    : "vizita"
-            }`;
+    try {
+
+        const {
+            error
+        } = await supabaseClient
+            .from("appointments")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
+
+        if (error) {
+
+            console.error(
+                "DELETE APPOINTMENT ERROR:",
+                error
+            );
+
+            showMessage(
+                "Vizita nuk u fshi: " +
+                error.message,
+                "error"
+            );
+
+            return;
+
+        }
+
+        appointments =
+            appointments.filter(
+                function (item) {
+                    return item.id !== id;
+                }
+            );
+
+        renderAppointments();
+
+        showMessage(
+            "Vizita u fshi.",
+            "success"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "DELETE APPOINTMENT EXCEPTION:",
+            error
+        );
+
+        showMessage(
+            "Gabim gjatë fshirjes së vizitës.",
+            "error"
+        );
 
     }
 
-    const times =
-        generateTimes();
+}
 
-    let hasAppointments =
-        false;
 
-    times.forEach(
-        function (time) {
+/* =========================================================
+   DASHBOARD COUNTERS
+========================================================= */
 
-            const matchingAppointments =
-                appointments.filter(
-                    function (appointment) {
+function updateDashboardCounters() {
 
-                        return normalizeTime(
-                            appointment.appointment_time
-                        ) === time;
+    const totalElement =
+        document.getElementById(
+            "totalAppointments"
+        );
+
+    const plannedElement =
+        document.getElementById(
+            "plannedAppointments"
+        );
+
+    const finishedElement =
+        document.getElementById(
+            "finishedAppointments"
+        );
+
+    const arrivedElement =
+        document.getElementById(
+            "arrivedAppointments"
+        );
+
+    const total =
+        appointments.length;
+
+    const planned =
+        appointments.filter(
+            function (appointment) {
+                return (
+                    appointment.status ===
+                    "planned"
+                );
+            }
+        ).length;
+
+    const finished =
+        appointments.filter(
+            function (appointment) {
+                return (
+                    appointment.status ===
+                    "finished"
+                );
+            }
+        ).length;
+
+    const arrived =
+        appointments.filter(
+            function (appointment) {
+                return (
+                    appointment.status ===
+                    "arrived"
+                );
+            }
+        ).length;
+
+    if (totalElement) {
+        totalElement.textContent =
+            total;
+    }
+
+    if (plannedElement) {
+        plannedElement.textContent =
+            planned;
+    }
+
+    if (finishedElement) {
+        finishedElement.textContent =
+            finished;
+    }
+
+    if (arrivedElement) {
+        arrivedElement.textContent =
+            arrived;
+    }
+
+}
+
+
+/* =========================================================
+   OLD DASHBOARD COMPATIBILITY
+========================================================= */
+
+function updateDashboard() {
+
+    updateDashboardCounters();
+
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function setupRealtime() {
+
+    try {
+
+        if (realtimeChannel) {
+
+            supabaseClient.removeChannel(
+                realtimeChannel
+            );
+
+        }
+
+        realtimeChannel =
+            supabaseClient
+                .channel(
+                    "appointments-realtime"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "appointments"
+                    },
+                    function (payload) {
+
+                        console.log(
+                            "Realtime update:",
+                            payload
+                        );
+
+                        loadAppointments();
+
+                    }
+                )
+                .subscribe(
+                    function (status) {
+
+                        console.log(
+                            "Realtime status:",
+                            status
+                        );
 
                     }
                 );
 
-            if (
-                matchingAppointments.length === 0
-            ) {
+    } catch (error) {
 
-                const tr =
-                    document.createElement(
-                        "tr"
-                    );
+        console.error(
+            "REALTIME ERROR:",
+            error
+        );
 
-                tr.className =
-                    "empty-time-row";
+    }
 
-                tr.innerHTML = `
+}
 
-                    <td class="time-cell">
 
-                        <div class="time-label">
-                            ${escapeHtml(time)}
-                        </div>
+/* =========================================================
+   PATIENT REALTIME
+========================================================= */
 
-                    </td>
+function setupPatientsRealtime() {
 
-                    <td colspan="5">
+    try {
 
-                        <div class="free-slot">
+        if (patientsRealtimeChannel) {
 
-                            <span class="free-dot"></span>
-
-                            Orar i lirë
-
-                        </div>
-
-                    </td>
-
-                `;
-
-                body.appendChild(tr);
-
-                return;
-            }
-
-            hasAppointments = true;
-
-            matchingAppointments.forEach(
-                function (appointment, index) {
-
-                    body.appendChild(
-                        renderAppointmentRow(
-                            appointment,
-                            time,
-                            index
-                        )
-                    );
-
-                }
+            supabaseClient.removeChannel(
+                patientsRealtimeChannel
             );
 
         }
+
+        patientsRealtimeChannel =
+            supabaseClient
+                .channel(
+                    "patients-realtime"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "patients"
+                    },
+                    function (payload) {
+
+                        console.log(
+                            "Patients realtime update:",
+                            payload
+                        );
+
+                        if (
+                            currentView ===
+                            "patients"
+                        ) {
+
+                            loadPatients();
+
+                        }
+
+                    }
+                )
+                .subscribe(
+                    function (status) {
+
+                        console.log(
+                            "Patients realtime status:",
+                            status
+                        );
+
+                    }
+                );
+
+    } catch (error) {
+
+        console.error(
+            "PATIENT REALTIME ERROR:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   STATUS HELPERS
+========================================================= */
+
+function statusText(status) {
+
+    switch (status) {
+
+        case "planned":
+            return "Planifikuar";
+
+        case "arrived":
+            return "Mbërritur";
+
+        case "finished":
+            return "Përfunduar";
+
+        case "cancelled":
+            return "Anuluar";
+
+        default:
+            return "Planifikuar";
+
+    }
+
+}
+
+
+function statusClass(status) {
+
+    switch (status) {
+
+        case "planned":
+            return "status-planned";
+
+        case "arrived":
+            return "status-arrived";
+
+        case "finished":
+            return "status-finished";
+
+        case "cancelled":
+            return "status-cancelled";
+
+        default:
+            return "status-planned";
+
+    }
+
+}
+
+
+/* =========================================================
+   NEXT STATUS
+========================================================= */
+
+function getNextStatus(status) {
+
+    switch (status) {
+
+        case "planned":
+            return "arrived";
+
+        case "arrived":
+            return "finished";
+
+        case "finished":
+            return "planned";
+
+        case "cancelled":
+            return "planned";
+
+        default:
+            return "planned";
+
+    }
+
+}
+
+
+function nextStatusButtonText(status) {
+
+    switch (status) {
+
+        case "planned":
+            return "✓ Mbërriti";
+
+        case "arrived":
+            return "✓ Përfundoi";
+
+        case "finished":
+            return "↻ Planifiko";
+
+        case "cancelled":
+            return "↻ Aktivizo";
+
+        default:
+            return "✓ Mbërriti";
+
+    }
+
+}
+
+
+/* =========================================================
+   DATE DATABASE
+========================================================= */
+
+function formatDateForDatabase(
+    date
+) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================================
+   NORMALIZE TIME
+========================================================= */
+
+function normalizeTime(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+    const text =
+        String(value);
+
+    return text.substring(
+        0,
+        5
     );
 
-    if (!hasAppointments) {
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function getInitials(
+    name
+) {
+
+    if (!name) {
+        return "?";
+    }
+
+    const parts =
+        String(name)
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+
+    if (parts.length === 1) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+    return (
+        parts[0].charAt(0) +
+        parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   SHOW MESSAGE
+========================================================= */
+
+function showMessage(
+    message,
+    type = "success"
+) {
+
+    const element =
+        document.getElementById(
+            "appMessage"
+        );
+
+    if (!element) return;
+
+    element.textContent =
+        message;
+
+    element.className =
+        `app-message show ${type}`;
+
+    clearTimeout(
+        showMessage.timer
+    );
+
+    showMessage.timer =
+        setTimeout(
+            function () {
+
+                element.className =
+                    "app-message";
+
+            },
+            3500
+        );
+
+}
+
+
+/* =========================================================
+   PATIENTS LOAD
+========================================================= */
+
+async function loadPatients() {
+
+    const body =
+        document.getElementById(
+            "patientsBody"
+        );
+
+    if (!body) return;
+
+    body.innerHTML = `
+        <tr>
+            <td
+                colspan="6"
+                class="loading-cell"
+            >
+                <div class="loading-spinner"></div>
+                Po ngarkohen pacientët...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("patients")
+            .select("*")
+            .order(
+                "full_name",
+                {
+                    ascending: true
+                }
+            );
+
+        if (error) {
+
+            console.error(
+                "LOAD PATIENTS ERROR:",
+                error
+            );
+
+            body.innerHTML = `
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-day-cell"
+                    >
+                        Nuk u ngarkuan pacientët:
+                        ${escapeHtml(
+                            error.message
+                        )}
+                    </td>
+                </tr>
+            `;
+
+            return;
+
+        }
+
+        patients =
+            data || [];
+
+        renderPatients();
+
+    } catch (error) {
+
+        console.error(
+            "LOAD PATIENTS EXCEPTION:",
+            error
+        );
 
         body.innerHTML = `
-
             <tr>
-
                 <td
                     colspan="6"
                     class="empty-day-cell"
                 >
-
-                    <div class="empty-day">
-
-                        <div class="empty-day-icon">
-                            📅
-                        </div>
-
-                        <h4>
-                            Nuk ka vizita të planifikuara
-                        </h4>
-
-                        <p>
-                            Orari i kësaj dite është i lirë.
-                            Mund të shtosh një vizitë të re nga formulari më sipër.
-                        </p>
-
-                    </div>
-
+                    Gabim gjatë ngarkimit të pacientëve.
                 </td>
-
             </tr>
-
         `;
 
     }
@@ -1361,13 +2790,149 @@ function renderAppointments() {
 
 
 /* =========================================================
-   RENDER ONE TABLE ROW
+   RENDER PATIENTS
 ========================================================= */
 
-function renderAppointmentRow(
-    appointment,
-    time,
-    index
+function renderPatients() {
+
+    const body =
+        document.getElementById(
+            "patientsBody"
+        );
+
+    const countElement =
+        document.getElementById(
+            "patientsCount"
+        );
+
+    const searchElement =
+        document.getElementById(
+            "patientSearch"
+        );
+
+    if (!body) return;
+
+    const search =
+        searchElement
+            ? searchElement.value
+                .trim()
+                .toLowerCase()
+            : "";
+
+    const filtered =
+        patients.filter(
+            function (patient) {
+
+                if (!search) {
+                    return true;
+                }
+
+                return [
+
+                    patient.full_name,
+
+                    patient.phone,
+
+                    patient.personal_id,
+
+                    patient.address
+
+                ]
+                    .filter(Boolean)
+                    .some(
+                        function (value) {
+
+                            return String(
+                                value
+                            )
+                                .toLowerCase()
+                                .includes(
+                                    search
+                                );
+
+                        }
+                    );
+
+            }
+        );
+
+    if (countElement) {
+
+        countElement.textContent =
+            `${filtered.length} ${
+                filtered.length === 1
+                    ? "pacient"
+                    : "pacientë"
+            }`;
+
+    }
+
+    body.innerHTML = "";
+
+    if (
+        filtered.length === 0
+    ) {
+
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="6"
+                    class="empty-day-cell"
+                >
+
+                    <div class="empty-day">
+
+                        <div class="empty-day-icon">
+                            👤
+                        </div>
+
+                        <h4>
+                            ${
+                                search
+                                    ? "Nuk u gjet asnjë pacient"
+                                    : "Nuk ka ende pacientë"
+                            }
+                        </h4>
+
+                        <p>
+                            ${
+                                search
+                                    ? "Provo numrin e kartelës, emrin ose telefonin."
+                                    : "Kliko “Shto pacient” për të regjistruar pacientin e parë."
+                            }
+                        </p>
+
+                    </div>
+
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+    filtered.forEach(
+        function (patient) {
+
+            body.appendChild(
+                renderPatientRow(
+                    patient
+                )
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PATIENT ROW
+========================================================= */
+
+function renderPatientRow(
+    patient
 ) {
 
     const tr =
@@ -1379,41 +2944,32 @@ function renderAppointmentRow(
         "appointment-row";
 
     const name =
-        appointment.patient_name ||
+        patient.full_name ||
         "Pa emër";
 
     const phone =
-        appointment.patient_phone ||
+        patient.phone ||
         "—";
 
-    const note =
-        appointment.note ||
+    const birthDate =
+        patient.birth_date
+            ? formatPatientBirthDate(
+                patient.birth_date
+            )
+            : "—";
+
+    const personalId =
+        patient.personal_id ||
         "—";
 
-    const status =
-        appointment.status ||
-        "planned";
+    const notes =
+        patient.notes ||
+        "—";
 
     const initials =
         getInitials(name);
 
     tr.innerHTML = `
-
-        <td class="time-cell">
-
-            <div class="time-badge">
-
-                <span class="time-icon">
-                    ◷
-                </span>
-
-                <strong>
-                    ${escapeHtml(time)}
-                </strong>
-
-            </div>
-
-        </td>
 
         <td class="patient-cell">
 
@@ -1430,7 +2986,7 @@ function renderAppointmentRow(
                     </strong>
 
                     <span>
-                        Pacient
+                        Kërko sipas emrit ose kodit të kartelës
                     </span>
 
                 </div>
@@ -1461,72 +3017,147 @@ function renderAppointmentRow(
 
         </td>
 
-        <td class="note-cell">
-
-            ${
-                note !== "—"
-                    ? `
-                        <span
-                            class="note-text"
-                            title="${escapeHtml(note)}"
-                        >
-                            📝 ${escapeHtml(note)}
-                        </span>
-                    `
-                    : `
-                        <span class="muted-text">
-                            Pa shënim
-                        </span>
-                    `
-            }
-
+        <td>
+            ${escapeHtml(birthDate)}
         </td>
 
-        <td class="status-cell">
+        <td>
 
-            <span
-                class="status ${statusClass(status)}"
-            >
-
-                <span class="status-dot"></span>
-
-                ${escapeHtml(
-                    statusText(status)
-                )}
-
+            <span class="patient-id-badge">
+                ${escapeHtml(personalId)}
             </span>
 
         </td>
 
-        <td class="actions-cell">
+        <td>
+
+            <span
+                class="note-text"
+                title="${escapeHtml(notes)}"
+            >
+                ${escapeHtml(notes)}
+            </span>
+
+        </td>
+
+        <td>
 
             <div class="appointment-actions">
 
-                ${
-                    status !== "arrived"
-                        ? `
-                            <button
-                                type="button"
-                                class="action-button action-arrived"
-                                data-action="arrived"
-                                title="Shëno si të mbërritur"
-                            >
-                                ✓ Mbërriti
-                            </button>
-                        `
-                        : ""
-                }
+                <button
+                    type="button"
+                    class="action-button patient-view-button"
+                    data-patient-action="view"
+                >
+                    👁 Hap
+                </button>
 
-                ${
-                    status !== "finished"
-                        ? `
-                            <button
-                                type="button"
-                                class="action-button action-finished"
-                                data-action="finished"
-                                title="Përfundo vizitën"
-                            >
-                                ✓ Përfundoi
+                <button
+                    type="button"
+                    class="action-button patient-edit-button"
+                    data-patient-action="edit"
+                >
+                    ✏ Ndrysho
+                </button>
+
+                <button
+                    type="button"
+                    class="action-button action-delete"
+                    data-patient-action="delete"
+                >
+                    🗑 Fshi
+                </button>
+
+            </div>
+
+        </td>
+
+    `;
+
+    tr.querySelectorAll(
+        "[data-patient-action]"
+    ).forEach(
+        function (button) {
+
+            button.addEventListener(
+                "click",
+                async function () {
+
+                    const action =
+                        button.dataset
+                            .patientAction;
+
+                    if (
+                        action ===
+                        "view"
+                    ) {
+
+                        await viewPatient(
+                            patient.id
+                        );
+
+                    } else if (
+                        action ===
+                        "edit"
+                    ) {
+
+                        openPatientModal(
+                            patient
+                        );
+
+                    } else if (
+                        action ===
+                        "delete"
+                    ) {
+
+                        await deletePatient(
+                            patient.id
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+    return tr;
+
+}
+
+
+/* =========================================================
+   PATIENT BIRTH DATE
+========================================================= */
+
+function formatPatientBirthDate(
+    value
+) {
+
+    try {
+
+        const date =
+            new Date(
+                `${value}T00:00:00`
+            );
+
+        return date.toLocaleDateString(
+            "sq-AL",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }
+        );
+
+    } catch (error) {
+
+        return value;
+
+    }
+
+}
                             </button>
                         `
                         : ""
