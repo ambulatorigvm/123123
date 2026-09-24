@@ -19,10 +19,6 @@ let appointments = [];
 let realtimeChannel = null;
 
 
-/* =========================
-   START
-========================= */
-
 document.addEventListener(
     "DOMContentLoaded",
     async function () {
@@ -36,10 +32,6 @@ document.addEventListener(
     }
 );
 
-
-/* =========================
-   SESSION
-========================= */
 
 async function checkSession() {
 
@@ -59,7 +51,6 @@ async function checkSession() {
 
             return;
         }
-
 
         if (
             result.data &&
@@ -87,12 +78,6 @@ async function checkSession() {
                     event
                 );
 
-                console.log(
-                    "Session:",
-                    session
-                );
-
-
                 if (session) {
 
                     currentUser =
@@ -118,10 +103,6 @@ async function checkSession() {
     }
 }
 
-
-/* =========================
-   LOGIN
-========================= */
 
 function showLogin() {
 
@@ -156,9 +137,7 @@ function showLogin() {
                     'Sistemi i menaxhimit të vizitave' +
                 '</div>' +
 
-                '<form ' +
-                    'id="loginForm" ' +
-                    'class="login-form">' +
+                '<form id="loginForm" class="login-form">' +
 
                     '<div>' +
 
@@ -188,9 +167,7 @@ function showLogin() {
 
                     '</div>' +
 
-                    '<div ' +
-                        'id="loginError" ' +
-                        'class="login-error">' +
+                    '<div id="loginError" class="login-error">' +
                     '</div>' +
 
                     '<button ' +
@@ -224,10 +201,6 @@ function showLogin() {
 }
 
 
-/* =========================
-   LOGIN FUNCTION
-========================= */
-
 async function login(event) {
 
     event.preventDefault();
@@ -253,10 +226,6 @@ async function login(event) {
 
     errorBox.style.display =
         "none";
-
-
-    errorBox.textContent =
-        "";
 
 
     try {
@@ -304,10 +273,6 @@ async function login(event) {
 }
 
 
-/* =========================
-   LOGOUT
-========================= */
-
 async function logout() {
 
     try {
@@ -339,10 +304,6 @@ async function logout() {
     }
 }
 
-
-/* =========================
-   MAIN APP
-========================= */
 
 function showApp() {
 
@@ -390,49 +351,26 @@ function showApp() {
 
             '</header>' +
 
-
             '<main class="main-container">' +
-
 
                 '<div class="date-navigation">' +
 
-                    '<button ' +
-                        'id="prevDay" ' +
-                        'class="date-arrow" ' +
-                        'type="button">' +
-
+                    '<button id="prevDay" class="date-arrow" type="button">' +
                         '‹' +
-
                     '</button>' +
 
-
-                    '<div ' +
-                        'id="selectedDate" ' +
-                        'class="selected-date">' +
+                    '<div id="selectedDate" class="selected-date">' +
                     '</div>' +
 
-
-                    '<button ' +
-                        'id="nextDay" ' +
-                        'class="date-arrow" ' +
-                        'type="button">' +
-
+                    '<button id="nextDay" class="date-arrow" type="button">' +
                         '›' +
-
                     '</button>' +
 
-
-                    '<button ' +
-                        'id="todayButton" ' +
-                        'class="today-button" ' +
-                        'type="button">' +
-
+                    '<button id="todayButton" class="today-button" type="button">' +
                         'Sot' +
-
                     '</button>' +
 
                 '</div>' +
-
 
                 '<section class="new-appointment-card">' +
 
@@ -440,11 +378,7 @@ function showApp() {
                         'Shto vizitë' +
                     '</h2>' +
 
-
-                    '<form ' +
-                        'id="appointmentForm" ' +
-                        'class="appointment-form">' +
-
+                    '<form id="appointmentForm" class="appointment-form">' +
 
                         '<div>' +
 
@@ -452,13 +386,10 @@ function showApp() {
                                 'Ora' +
                             '</label>' +
 
-                            '<select ' +
-                                'id="appointmentTime" ' +
-                                'required>' +
+                            '<select id="appointmentTime" required>' +
                             '</select>' +
 
                         '</div>' +
-
 
                         '<div>' +
 
@@ -474,7 +405,6 @@ function showApp() {
 
                         '</div>' +
 
-
                         '<div>' +
 
                             '<label for="patientPhone">' +
@@ -488,24 +418,17 @@ function showApp() {
 
                         '</div>' +
 
-
                         '<div>' +
 
-                            '<button ' +
-                                'class="primary-button" ' +
-                                'type="submit">' +
-
+                            '<button class="primary-button" type="submit">' +
                                 'Shto vizitë' +
-
                             '</button>' +
 
                         '</div>' +
 
-
                     '</form>' +
 
                 '</section>' +
-
 
                 '<section class="schedule-card">' +
 
@@ -517,10 +440,7 @@ function showApp() {
 
                     '</div>' +
 
-
-                    '<div ' +
-                        'id="appointments" ' +
-                        'class="schedule-table-wrapper">' +
+                    '<div id="appointments" class="schedule-table-wrapper">' +
 
                         '<div class="loading">' +
                             'Po ngarkohet orari...' +
@@ -530,36 +450,22 @@ function showApp() {
 
                 '</section>' +
 
-
             '</main>' +
 
         '</div>';
 
 
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
-
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
+    document
+        .getElementById("logoutButton")
+        .addEventListener(
             "click",
             logout
         );
-    }
 
 
-    const prevDay =
-        document.getElementById(
-            "prevDay"
-        );
-
-
-    if (prevDay) {
-
-        prevDay.addEventListener(
+    document
+        .getElementById("prevDay")
+        .addEventListener(
             "click",
             function () {
 
@@ -567,25 +473,16 @@ function showApp() {
                     currentDate.getDate() - 1
                 );
 
-
                 updateDateDisplay();
-
 
                 loadAppointments();
             }
         );
-    }
 
 
-    const nextDay =
-        document.getElementById(
-            "nextDay"
-        );
-
-
-    if (nextDay) {
-
-        nextDay.addEventListener(
+    document
+        .getElementById("nextDay")
+        .addEventListener(
             "click",
             function () {
 
@@ -593,75 +490,49 @@ function showApp() {
                     currentDate.getDate() + 1
                 );
 
-
                 updateDateDisplay();
-
 
                 loadAppointments();
             }
         );
-    }
 
 
-    const todayButton =
-        document.getElementById(
-            "todayButton"
-        );
-
-
-    if (todayButton) {
-
-        todayButton.addEventListener(
+    document
+        .getElementById("todayButton")
+        .addEventListener(
             "click",
             function () {
 
                 currentDate =
                     new Date();
 
-
                 updateDateDisplay();
-
 
                 loadAppointments();
             }
         );
-    }
 
 
-    const appointmentForm =
-        document.getElementById(
-            "appointmentForm"
-        );
-
-
-    if (appointmentForm) {
-
-        appointmentForm.addEventListener(
+    document
+        .getElementById("appointmentForm")
+        .addEventListener(
             "submit",
             addAppointment
         );
-    }
 
 
     populateTimeSelect();
 
-
     updateDateDisplay();
-
 
     setupRealtime();
 }
 
 
-/* =========================
-   DATE
-========================= */
-
 function dateKey(date) {
 
     const year =
         date.getFullYear();
-
 
     const month =
         String(
@@ -671,7 +542,6 @@ function dateKey(date) {
             "0"
         );
 
-
     const day =
         String(
             date.getDate()
@@ -679,7 +549,6 @@ function dateKey(date) {
             2,
             "0"
         );
-
 
     return (
         year +
@@ -712,11 +581,9 @@ function updateDateDisplay() {
             "selectedDate"
         );
 
-
     if (!element) {
         return;
     }
-
 
     element.textContent =
         formatDate(
@@ -725,14 +592,9 @@ function updateDateDisplay() {
 }
 
 
-/* =========================
-   TIMES
-========================= */
-
 function generateTimes() {
 
     const times = [];
-
 
     for (
         let hour = 8;
@@ -748,7 +610,6 @@ function generateTimes() {
         );
     }
 
-
     return times;
 }
 
@@ -760,15 +621,11 @@ function populateTimeSelect() {
             "appointmentTime"
         );
 
-
     if (!select) {
         return;
     }
 
-
-    select.innerHTML =
-        "";
-
+    select.innerHTML = "";
 
     generateTimes().forEach(
         function (time) {
@@ -778,14 +635,11 @@ function populateTimeSelect() {
                     "option"
                 );
 
-
             option.value =
                 time;
 
-
             option.textContent =
                 time;
-
 
             select.appendChild(
                 option
@@ -795,10 +649,6 @@ function populateTimeSelect() {
 }
 
 
-/* =========================
-   LOAD APPOINTMENTS
-========================= */
-
 async function loadAppointments() {
 
     const container =
@@ -806,11 +656,9 @@ async function loadAppointments() {
             "appointments"
         );
 
-
     if (!container) {
         return;
     }
-
 
     container.innerHTML =
         '<div class="loading">' +
@@ -837,7 +685,6 @@ async function loadAppointments() {
 
 
         if (result.error) {
-
             throw result.error;
         }
 
@@ -858,24 +705,15 @@ async function loadAppointments() {
 
         container.innerHTML =
             '<div class="empty-message">' +
-
                 'Nuk u ngarkuan vizitat.' +
-
                 '<br><br>' +
-
                 escapeHtml(
-                    error.message ||
-                    ""
+                    error.message || ""
                 ) +
-
             '</div>';
     }
 }
 
-
-/* =========================
-   RENDER APPOINTMENTS
-========================= */
 
 function renderAppointments() {
 
@@ -883,7 +721,6 @@ function renderAppointments() {
         document.getElementById(
             "appointments"
         );
-
 
     if (!container) {
         return;
@@ -904,7 +741,6 @@ function renderAppointments() {
                 normalizeTime(
                     appointment.appointment_time
                 );
-
 
             byTime[time] =
                 appointment;
@@ -943,12 +779,8 @@ function renderAppointments() {
 
                         '<td colspan="3">' +
 
-                            '<div ' +
-                                'class="empty-message" ' +
-                                'style="padding:10px;text-align:left;">' +
-
+                            '<div class="empty-message" style="padding:10px;text-align:left;">' +
                                 'Orari i lirë' +
-
                             '</div>' +
 
                         '</td>' +
@@ -968,10 +800,6 @@ function renderAppointments() {
         html;
 }
 
-
-/* =========================
-   PATIENT CARD
-========================= */
 
 function renderPatient(
     appointment,
@@ -1004,22 +832,16 @@ function renderPatient(
         );
 
 
-    let actionButtons =
-        "";
+    let actionButtons = "";
 
 
     if (status === "planned") {
 
         actionButtons +=
-            '<button ' +
-                'type="button" ' +
-                'class="action-button arrived" ' +
-                'onclick="changeStatus(\'' +
-                    appointment.id +
-                    '\', \'arrived\')">' +
-
+            '<button type="button" class="action-button arrived" onclick="changeStatus(\'' +
+                appointment.id +
+                '\', \'arrived\')">' +
                 'Erdhi' +
-
             '</button>';
     }
 
@@ -1027,15 +849,10 @@ function renderPatient(
     if (status === "arrived") {
 
         actionButtons +=
-            '<button ' +
-                'type="button" ' +
-                'class="action-button finished" ' +
-                'onclick="changeStatus(\'' +
-                    appointment.id +
-                    '\', \'finished\')">' +
-
+            '<button type="button" class="action-button finished" onclick="changeStatus(\'' +
+                appointment.id +
+                '\', \'finished\')">' +
                 'Përfundoi' +
-
             '</button>';
     }
 
@@ -1046,34 +863,23 @@ function renderPatient(
     ) {
 
         actionButtons +=
-            '<button ' +
-                'type="button" ' +
-                'class="action-button cancel" ' +
-                'onclick="changeStatus(\'' +
-                    appointment.id +
-                    '\', \'cancelled\')">' +
-
+            '<button type="button" class="action-button cancel" onclick="changeStatus(\'' +
+                appointment.id +
+                '\', \'cancelled\')">' +
                 'Anulo' +
-
             '</button>';
     }
 
 
     actionButtons +=
-        '<button ' +
-            'type="button" ' +
-            'class="action-button delete" ' +
-            'onclick="deleteAppointment(\'' +
-                appointment.id +
-            '\')">' +
-
+        '<button type="button" class="action-button delete" onclick="deleteAppointment(\'' +
+            appointment.id +
+        '\')">' +
             'Fshi' +
-
         '</button>';
 
 
-    let phoneHtml =
-        "";
+    let phoneHtml = "";
 
 
     if (safePhone) {
@@ -1117,7 +923,6 @@ function renderPatient(
 
                     '</div>' +
 
-
                     '<div class="status-cell">' +
 
                         '<span class="status ' +
@@ -1130,13 +935,10 @@ function renderPatient(
 
                     '</div>' +
 
-
                     '<div class="actions-cell">' +
 
                         '<div class="action-buttons">' +
-
                             actionButtons +
-
                         '</div>' +
 
                     '</div>' +
@@ -1149,10 +951,6 @@ function renderPatient(
     );
 }
 
-
-/* =========================
-   STATUS TEXT
-========================= */
 
 function statusText(status) {
 
@@ -1193,10 +991,6 @@ function statusClass(status) {
     }
 }
 
-
-/* =========================
-   ADD APPOINTMENT
-========================= */
 
 async function addAppointment(event) {
 
@@ -1249,7 +1043,6 @@ async function addAppointment(event) {
 
 
         if (existingResult.error) {
-
             throw existingResult.error;
         }
 
@@ -1273,9 +1066,7 @@ async function addAppointment(event) {
                 .insert([
                     {
                         appointment_date:
-                            dateKey(
-                                currentDate
-                            ),
+                            dateKey(currentDate),
 
                         appointment_time:
                             time,
@@ -1294,21 +1085,18 @@ async function addAppointment(event) {
 
 
         if (insertResult.error) {
-
             throw insertResult.error;
         }
 
 
         document.getElementById(
             "patientName"
-        ).value =
-            "";
+        ).value = "";
 
 
         document.getElementById(
             "patientPhone"
-        ).value =
-            "";
+        ).value = "";
 
 
         await loadAppointments();
@@ -1329,10 +1117,6 @@ async function addAppointment(event) {
 }
 
 
-/* =========================
-   CHANGE STATUS
-========================= */
-
 async function changeStatus(
     id,
     status
@@ -1343,11 +1127,9 @@ async function changeStatus(
         const result =
             await supabaseClient
                 .from("appointments")
-                .update(
-                    {
-                        status: status
-                    }
-                )
+                .update({
+                    status: status
+                })
                 .eq(
                     "id",
                     id
@@ -1355,7 +1137,6 @@ async function changeStatus(
 
 
         if (result.error) {
-
             throw result.error;
         }
 
@@ -1377,10 +1158,6 @@ async function changeStatus(
     }
 }
 
-
-/* =========================
-   DELETE APPOINTMENT
-========================= */
 
 async function deleteAppointment(id) {
 
@@ -1408,7 +1185,6 @@ async function deleteAppointment(id) {
 
 
         if (result.error) {
-
             throw result.error;
         }
 
@@ -1430,10 +1206,6 @@ async function deleteAppointment(id) {
     }
 }
 
-
-/* =========================
-   REALTIME
-========================= */
 
 function setupRealtime() {
 
@@ -1476,10 +1248,6 @@ function setupRealtime() {
             );
 }
 
-
-/* =========================
-   HELPERS
-========================= */
 
 function normalizeTime(value) {
 
@@ -1535,30 +1303,10 @@ function getInitials(name) {
 function escapeHtml(value) {
 
     return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 ```
