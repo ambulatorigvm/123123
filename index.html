@@ -41,7 +41,8 @@
 
         button,
         input,
-        select {
+        select,
+        textarea {
             font: inherit;
         }
 
@@ -142,13 +143,13 @@
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            height: 46px;
             border: 1px solid #d8e1e5;
             border-radius: 10px;
             background: #fff;
-            padding: 0 13px;
+            padding: 10px 13px;
             outline: none;
             color: #1d2933;
             transition:
@@ -156,8 +157,19 @@
                 box-shadow .2s;
         }
 
+        .form-group input,
+        .form-group select {
+            height: 46px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             border-color: #0f766e;
             box-shadow:
                 0 0 0 3px rgba(15, 118, 110, 0.10);
@@ -908,7 +920,8 @@
             border-radius: 20px;
             background: #fff;
             border: 1px solid #e1e8ec;
-            box-shadow: 0 20px 50px rgba(15,23,42,.08);
+            box-shadow:
+                0 20px 50px rgba(15,23,42,.08);
             text-align: center;
         }
 
@@ -921,6 +934,250 @@
             color: #718087;
             line-height: 1.6;
             font-size: 14px;
+        }
+
+        .fatal-box button {
+            margin-top: 15px;
+            padding: 10px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: #0f766e;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* =========================
+           PATIENTS
+        ========================= */
+
+        .patients-page {
+            width: 100%;
+        }
+
+        .patients-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .patients-search {
+            width: min(420px, 100%);
+            height: 44px;
+            border: 1px solid #d8e1e5;
+            border-radius: 10px;
+            padding: 0 14px;
+            outline: none;
+            background: #fff;
+        }
+
+        .patients-search:focus {
+            border-color: #0f766e;
+            box-shadow:
+                0 0 0 3px rgba(15,118,110,.10);
+        }
+
+        .patients-card {
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #e1e8ec;
+            border-radius: 17px;
+            box-shadow:
+                0 6px 25px rgba(15,23,42,.04);
+        }
+
+        .patients-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .patients-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        .patients-table th {
+            height: 46px;
+            padding: 0 15px;
+            background: #f8fafb;
+            border-bottom: 1px solid #e5ebee;
+            color: #73828a;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .patients-table td {
+            padding: 13px 15px;
+            border-bottom: 1px solid #edf1f3;
+            color: #42545c;
+            font-size: 12px;
+        }
+
+        .patients-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .patient-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .patient-name-cell strong {
+            color: #253940;
+            font-size: 13px;
+        }
+
+        .patient-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .patient-action {
+            border: 1px solid #dce5e8;
+            border-radius: 7px;
+            background: #fff;
+            padding: 6px 9px;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .patient-action.primary {
+            color: #0f766e;
+            border-color: #bfe5e1;
+            background: #f2fbfa;
+        }
+
+        .patient-action.danger {
+            color: #be123c;
+            border-color: #fecdd3;
+            background: #fff8f9;
+        }
+
+        /* =========================
+           MODAL
+        ========================= */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15,23,42,.48);
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-box {
+            width: min(620px, 100%);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow:
+                0 25px 70px rgba(15,23,42,.20);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 20px 22px;
+            border-bottom: 1px solid #edf1f3;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #21363e;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 8px;
+            background: #f3f6f7;
+            color: #64748b;
+            font-size: 20px;
+        }
+
+        .modal-body {
+            padding: 22px;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .modal-grid .full {
+            grid-column: 1 / -1;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 17px 22px;
+            border-top: 1px solid #edf1f3;
+        }
+
+        .modal-button {
+            min-height: 40px;
+            padding: 0 15px;
+            border-radius: 9px;
+            border: 1px solid #dce5e8;
+            background: #fff;
+            font-weight: 700;
+        }
+
+        .modal-button.primary {
+            border-color: #0f766e;
+            background: #0f766e;
+            color: #fff;
+        }
+
+        .modal-button.danger {
+            color: #be123c;
+        }
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        .app-navigation {
+            width: min(1400px, calc(100% - 40px));
+            margin: 0 auto;
+            padding-top: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-button {
+            border: 1px solid #dce5e8;
+            border-radius: 9px;
+            background: #fff;
+            color: #60717a;
+            padding: 9px 15px;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .nav-button.active {
+            border-color: #0f766e;
+            background: #0f766e;
+            color: #fff;
         }
 
         /* =========================
@@ -946,7 +1203,8 @@
 
         @media (max-width: 850px) {
             .header-inner,
-            .main-container {
+            .main-container,
+            .app-navigation {
                 width: min(100% - 24px, 1400px);
             }
 
@@ -985,6 +1243,15 @@
             .schedule-header-right {
                 width: 100%;
                 justify-content: space-between;
+            }
+
+            .patients-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .patients-search {
+                width: 100%;
             }
         }
 
@@ -1067,30 +1334,70 @@
             .today-button {
                 padding: 0 10px;
             }
+
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-grid .full {
+                grid-column: auto;
+            }
+
+            .modal-body {
+                padding: 18px;
+            }
+
+            .modal-footer {
+                padding: 15px 18px;
+            }
         }
     </style>
 </head>
 
 <body>
 
+    <!--
+        Kjo është zona ku aplikacioni GVM
+        ndërton login-in dhe sistemin.
+    -->
     <div id="app">
-        <div class="loading-cell" style="
-            min-height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-direction:column;
-        ">
+        <div
+            class="loading-cell"
+            style="
+                min-height:100vh;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                flex-direction:column;
+            "
+        >
             <div class="loading-spinner"></div>
-            Po ngarkohet sistemi...
+
+            <div>
+                Po ngarkohet sistemi...
+            </div>
         </div>
     </div>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- =====================================================
+         SUPABASE
+         Duhet të ngarkohet PARA app-gvm.js
+    ====================================================== -->
 
-    <!-- AMBULATORI GVM -->
-    <script src="app-gvm.js?v=GVM-20260924-13"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <!-- =====================================================
+         AMBULATORI GVM
+
+         VETËM KY JavaScript duhet të ngarkohet.
+         Mos shto app.js.
+    ====================================================== -->
+
+    <script
+        src="app-gvm.js?v=GVM-20260924-16"
+    ></script>
 
 </body>
 </html>
