@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-22";
+const APP_VERSION = "GVM-20260924-23";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -587,7 +587,7 @@ function showApp() {
 
                             <tbody id="scheduleBody">
                                 <tr>
-                                    <td colspan="7" class="loading-cell">
+                                    <td colspan="6" class="loading-cell">
                                         <div class="loading-spinner"></div>
                                         Po ngarkohet orari...
                                     </td>
@@ -632,9 +632,9 @@ function showApp() {
                             <thead>
                                 <tr>
                                     <th>Pacienti</th>
-                                    <th>Nr. kartelës</th>
                                     <th>Telefoni</th>
                                     <th>Datëlindja</th>
+                                    <th>Kodi i kartelës</th>
                                     <th>Shënime</th>
                                     <th>Veprime</th>
                                 </tr>
@@ -642,7 +642,7 @@ function showApp() {
 
                             <tbody id="patientsBody">
                                 <tr>
-                                    <td colspan="7" class="loading-cell">
+                                    <td colspan="6" class="loading-cell">
                                         <div class="loading-spinner"></div>
                                         Po ngarkohen pacientët...
                                     </td>
@@ -650,6 +650,7 @@ function showApp() {
                             </tbody>
                         </table>
                     </div>
+                    <div id="patientPagination" class="patient-pagination"></div>
                 </section>
             </section>
         </main>
@@ -671,11 +672,6 @@ function showApp() {
 
                 <form id="patientForm" class="patient-form">
                     <input id="patientId" type="hidden">
-
-                    <div class="form-group">
-                        <label for="patientCardNumber">Nr. kartelës</label>
-                        <input id="patientCardNumber" type="text" readonly placeholder="Gjenerohet automatikisht">
-                    </div>
 
                     <div class="form-group">
                         <label for="patientFullName">Emri dhe mbiemri *</label>
@@ -853,191 +849,84 @@ async function showPatientsView() {
    PATIENTS
 ========================================================= */
 
+let patientPage = 1;
+const PATIENTS_PER_PAGE = 100;
+let lastPatientSearch = "";
+
 async function loadPatients() {
     const body = document.getElementById("patientsBody");
     const countElement = document.getElementById("patientsCount");
-
-    if (body) {
-        body.innerHTML = `
-            <tr>
-                <td colspan="7" class="loading-cell">
-                    <div class="loading-spinner"></div>
-                    Po ngarkohen pacientët... 0
-                </td>
-            </tr>
-        `;
-    }
-
+    if (!body) return;
+    body.innerHTML = `<tr><td colspan="6" class="loading-cell"><div class="loading-spinner"></div>Po ngarkohen pacientët... 0</td></tr>`;
     try {
-        var allPatients = [];
-        var batchSize = 500;
-        var lastCardNumber = 0;
-        var batchNumber = 0;
-
+        const allPatients = [];
+        const batchSize = 500;
+        let lastCardNumber = 0;
         while (true) {
-            batchNumber++;
-
-            const { data, error } = await supabaseClient
-                .from("patients")
-                .select("*")
-                .gt("card_number", lastCardNumber)
-                .order("card_number", { ascending: true })
-                .limit(batchSize);
-
+            const { data, error } = await supabaseClient.from("patients").select("*").gt("card_number", lastCardNumber).order("card_number", { ascending: true }).limit(batchSize);
             if (error) {
                 console.error("LOAD PATIENTS ERROR:", error);
-                if (body) {
-                    body.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="empty-day-cell">
-                                Nuk u ngarkuan pacientët: ${escapeHtml(error.message)}
-                            </td>
-                        </tr>
-                    `;
-                }
+                body.innerHTML = `<tr><td colspan="6" class="empty-day-cell">Nuk u ngarkuan pacientët: ${escapeHtml(error.message)}</td></tr>`;
                 return;
             }
-
-            var rows = data || [];
-
-            if (rows.length === 0) {
-                break;
-            }
-
-            allPatients = allPatients.concat(rows);
-
-            var lastRow = rows[rows.length - 1];
-            var nextCardNumber = Number(lastRow.card_number);
-
-            if (!isFinite(nextCardNumber) || nextCardNumber <= lastCardNumber) {
-                console.error("Invalid card_number pagination value:", lastRow);
-                break;
-            }
-
-            lastCardNumber = nextCardNumber;
-
-            if (countElement) {
-                countElement.textContent =
-                    allPatients.length + " pacientë — duke ngarkuar...";
-            }
-
-            if (body) {
-                body.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="loading-cell">
-                            <div class="loading-spinner"></div>
-                            Po ngarkohen pacientët... ${allPatients.length}
-                        </td>
-                    </tr>
-                `;
-            }
-
-            if (rows.length < batchSize) {
-                break;
-            }
-
-            if (batchNumber > 1000) {
-                console.error("Patient pagination safety limit reached.");
-                break;
-            }
+            const rows = data || [];
+            if (!rows.length) break;
+            allPatients.push.apply(allPatients, rows);
+            lastCardNumber = Number(rows[rows.length - 1].card_number);
+            if (countElement) countElement.textContent = allPatients.length + " pacientë — duke ngarkuar...";
+            if (rows.length < batchSize) break;
         }
-
         patients = allPatients;
-
-        console.log("====================================");
+        patientPage = 1;
+        lastPatientSearch = "";
         console.log("TOTAL PATIENTS LOADED:", patients.length);
-        console.log("LAST CARD NUMBER:", lastCardNumber);
-        console.log("====================================");
-
         renderPatients();
-
     } catch (error) {
         console.error("LOAD PATIENTS EXCEPTION:", error);
-        if (body) {
-            body.innerHTML = `
-                <tr>
-                    <td colspan="7" class="empty-day-cell">
-                        Gabim gjatë ngarkimit të pacientëve: ${escapeHtml(error.message || String(error))}
-                    </td>
-                </tr>
-            `;
-        }
+        body.innerHTML = `<tr><td colspan="6" class="empty-day-cell">Gabim gjatë ngarkimit të pacientëve: ${escapeHtml(error.message || String(error))}</td></tr>`;
     }
-}
-function formatCardNumber(value) {
-    if (value === null || value === undefined || value === "") {
-        return "-";
-    }
-
-    var number = Number(value);
-
-    if (!isFinite(number)) {
-        return String(value);
-    }
-
-    return "GVM-" + String(Math.floor(number)).padStart(6, "0");
 }
 
 function renderPatients() {
     const body = document.getElementById("patientsBody");
     const countElement = document.getElementById("patientsCount");
     const searchElement = document.getElementById("patientSearch");
-
     if (!body) return;
-
-    const search = searchElement
-        ? searchElement.value.trim().toLowerCase()
-        : "";
-
+    const search = searchElement ? searchElement.value.trim().toLowerCase() : "";
+    if (search !== lastPatientSearch) { patientPage = 1; lastPatientSearch = search; }
     const filtered = patients.filter(function (patient) {
         if (!search) return true;
-
-        return [
-            patient.full_name,
-            patient.phone,
-            patient.personal_id,
-            patient.card_number,
-            formatCardNumber(patient.card_number),
-            patient.address,
-            patient.card_number,
-            formatCardNumber(patient.card_number)
-        ]
-            .filter(Boolean)
-            .some(function (value) {
-                return String(value).toLowerCase().includes(search);
-            });
+        return [patient.card_number, patient.full_name, patient.phone, patient.personal_id, patient.address].filter(Boolean).some(function (value) {
+            return String(value).toLowerCase().includes(search);
+        });
     });
-
-    if (countElement) {
-        countElement.textContent =
-            `${filtered.length} ${filtered.length === 1 ? "pacient" : "pacientë"}`;
-    }
-
+    if (countElement) countElement.textContent = `${filtered.length} ${filtered.length === 1 ? "pacient" : "pacientë"}`;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PATIENTS_PER_PAGE));
+    if (patientPage > totalPages) patientPage = totalPages;
+    const start = (patientPage - 1) * PATIENTS_PER_PAGE;
+    const pagePatients = filtered.slice(start, start + PATIENTS_PER_PAGE);
     body.innerHTML = "";
-
     if (filtered.length === 0) {
-        body.innerHTML = `
-            <tr>
-                <td colspan="7" class="empty-day-cell">
-                    <div class="empty-day">
-                        <div class="empty-day-icon">👤</div>
-                        <h4>${search ? "Nuk u gjet asnjë pacient" : "Nuk ka ende pacientë"}</h4>
-                        <p>
-                            ${search
-                                ? "Provo numrin e kartelës, emrin ose telefonin."
-                                : "Kliko “Shto pacient” për të regjistruar pacientin e parë."}
-                        </p>
-                    </div>
-                </td>
-            </tr>
-        `;
-        return;
+        body.innerHTML = `<tr><td colspan="6" class="empty-day-cell"><div class="empty-day"><div class="empty-day-icon">👤</div><h4>${search ? "Nuk u gjet asnjë pacient" : "Nuk ka ende pacientë"}</h4><p>${search ? "Provo numrin e kartelës, emrin ose telefonin." : "Kliko “Shto pacient” për të regjistruar pacientin e parë."}</p></div></td></tr>`;
+    } else {
+        pagePatients.forEach(function (patient) { body.appendChild(renderPatientRow(patient)); });
     }
-
-    filtered.forEach(function (patient) {
-        body.appendChild(renderPatientRow(patient));
-    });
+    renderPatientPagination(filtered.length, totalPages);
 }
+
+function renderPatientPagination(total, totalPages) {
+    const container = document.getElementById("patientPagination");
+    if (!container) return;
+    if (total <= PATIENTS_PER_PAGE) { container.innerHTML = ""; return; }
+    const from = (patientPage - 1) * PATIENTS_PER_PAGE + 1;
+    const to = Math.min(patientPage * PATIENTS_PER_PAGE, total);
+    container.innerHTML = `<div class="patient-page-info">Duke shfaqur ${from}–${to} nga ${total} pacientë</div><div class="patient-page-buttons"><button type="button" class="date-button" id="patientPrevPage" ${patientPage === 1 ? "disabled" : ""}>← Më parë</button><span class="patient-page-number">Faqja ${patientPage} / ${totalPages}</span><button type="button" class="date-button" id="patientNextPage" ${patientPage === totalPages ? "disabled" : ""}>Më pas →</button></div>`;
+    const prev = document.getElementById("patientPrevPage");
+    const next = document.getElementById("patientNextPage");
+    if (prev) prev.addEventListener("click", function () { if (patientPage > 1) { patientPage--; renderPatients(); } });
+    if (next) next.addEventListener("click", function () { if (patientPage < totalPages) { patientPage++; renderPatients(); } });
+}
+
 
 function renderPatientRow(patient) {
     const tr = document.createElement("tr");
@@ -1063,12 +952,6 @@ function renderPatientRow(patient) {
             </div>
         </td>
 
-        <td>
-            <span class="patient-card-number">
-                ${escapeHtml(formatCardNumber(patient.card_number))}
-            </span>
-        </td>
-
         <td class="phone-cell">
             ${
                 phone !== "—"
@@ -1080,6 +963,12 @@ function renderPatientRow(patient) {
         </td>
 
         <td>${escapeHtml(birthDate)}</td>
+
+        <td>
+            <span class="patient-id-badge">
+                ${escapeHtml(patient.card_number || personalId)}
+            </span>
+        </td>
 
         <td>
             <span class="note-text" title="${escapeHtml(notes)}">
@@ -1151,7 +1040,6 @@ function openPatientModal(patient = null) {
     const modal = document.getElementById("patientModal");
     const title = document.getElementById("patientModalTitle");
     const id = document.getElementById("patientId");
-    const cardNumber = document.getElementById("patientCardNumber");
     const name = document.getElementById("patientFullName");
     const phone = document.getElementById("patientRecordPhone");
     const birthDate = document.getElementById("patientBirthDate");
@@ -1164,7 +1052,6 @@ function openPatientModal(patient = null) {
     if (patient) {
         title.textContent = "Ndrysho pacientin";
         id.value = patient.id || "";
-        if (cardNumber) cardNumber.value = formatCardNumber(patient.card_number);
         name.value = patient.full_name || "";
         phone.value = patient.phone || "";
         birthDate.value = patient.birth_date || "";
@@ -1174,7 +1061,6 @@ function openPatientModal(patient = null) {
     } else {
         title.textContent = "Shto pacient";
         id.value = "";
-        if (cardNumber) cardNumber.value = "Do të gjenerohet automatikisht";
         name.value = "";
         phone.value = "";
         birthDate.value = "";
@@ -1406,11 +1292,6 @@ async function viewPatient(id) {
 
         <div class="patient-detail-grid">
             <div>
-                <span>Nr. kartelës</span>
-                <strong class="patient-card-number-large">${escapeHtml(formatCardNumber(patient.card_number))}</strong>
-            </div>
-
-            <div>
                 <span>Datëlindja</span>
                 <strong>${escapeHtml(
                     patient.birth_date
@@ -1420,7 +1301,7 @@ async function viewPatient(id) {
             </div>
 
             <div>
-                <span>Nr. personal / ID</span>
+                <span>Kodi i kartelës</span>
                 <strong>${escapeHtml(patient.personal_id || "—")}</strong>
             </div>
 
@@ -1614,24 +1495,6 @@ function injectPatientStyles() {
             color: #66777e;
             font-size: 12px;
             font-weight: 800;
-        }
-
-        .patient-card-number {
-            display: inline-block;
-            padding: 6px 9px;
-            border-radius: 8px;
-            background: #e8f5f3;
-            color: #0f766e;
-            font-size: 12px;
-            font-weight: 900;
-            letter-spacing: .2px;
-            white-space: nowrap;
-        }
-
-        .patient-card-number-large {
-            color: #0f766e;
-            font-weight: 900;
-            letter-spacing: .3px;
         }
 
         .patient-id-badge {
