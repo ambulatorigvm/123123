@@ -1,15 +1,17 @@
 ```javascript
 const APP_VERSION = "GVM-20260924-01";
 
-const SUPABASE_URL = "https://ubpteaqdkxcriqyaxrux.supabase.co";
+const SUPABASE_URL =
+    "https://ubpteaqdkxcriqyaxrux.supabase.co";
 
 const SUPABASE_KEY =
     "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
 let currentUser = null;
 let currentDate = new Date();
@@ -21,25 +23,49 @@ let realtimeChannel = null;
    START
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", async () => {
-    console.log("AMBULATORI GVM:", APP_VERSION);
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    await checkSession();
+        console.log(
+            "AMBULATORI GVM:",
+            APP_VERSION
+        );
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        console.log("Auth event:", event);
-        console.log("Session:", session);
+        await checkSession();
 
-        if (session) {
-            currentUser = session.user;
-            showApp();
-            await loadAppointments();
-        } else {
-            currentUser = null;
-            showLogin();
-        }
-    });
-});
+        supabaseClient.auth.onAuthStateChange(
+            async (event, session) => {
+
+                console.log(
+                    "Auth event:",
+                    event
+                );
+
+                console.log(
+                    "Session:",
+                    session
+                );
+
+                if (session) {
+
+                    currentUser =
+                        session.user;
+
+                    showApp();
+
+                    await loadAppointments();
+
+                } else {
+
+                    currentUser = null;
+
+                    showLogin();
+                }
+            }
+        );
+    }
+);
 
 
 /* =========================================================
@@ -47,25 +73,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 ========================================================= */
 
 async function checkSession() {
+
     try {
-        const { data, error } =
+
+        const {
+            data,
+            error
+        } =
             await supabaseClient.auth.getSession();
 
         if (error) {
+
             console.error(error);
+
             showLogin();
+
             return;
         }
 
         if (data.session) {
-            currentUser = data.session.user;
+
+            currentUser =
+                data.session.user;
+
             showApp();
+
             await loadAppointments();
+
         } else {
+
             showLogin();
         }
+
     } catch (error) {
-        console.error("checkSession error:", error);
+
+        console.error(
+            "checkSession error:",
+            error
+        );
+
         showLogin();
     }
 }
@@ -76,19 +122,27 @@ async function checkSession() {
 ========================================================= */
 
 function showLogin() {
+
     if (realtimeChannel) {
-        supabaseClient.removeChannel(realtimeChannel);
+
+        supabaseClient.removeChannel(
+            realtimeChannel
+        );
+
         realtimeChannel = null;
     }
 
     document.body.innerHTML = `
         <div class="login-page">
+
             <div class="login-card">
 
                 <div class="login-logo">
+
                     <div class="login-logo-icon">
                         G
                     </div>
+
                 </div>
 
                 <h1 class="login-title">
@@ -99,9 +153,13 @@ function showLogin() {
                     Sistemi i menaxhimit të vizitave
                 </div>
 
-                <form id="loginForm" class="login-form">
+                <form
+                    id="loginForm"
+                    class="login-form"
+                >
 
                     <div>
+
                         <label for="email">
                             Email
                         </label>
@@ -112,9 +170,11 @@ function showLogin() {
                             autocomplete="email"
                             required
                         >
+
                     </div>
 
                     <div>
+
                         <label for="password">
                             Fjalëkalimi
                         </label>
@@ -125,6 +185,7 @@ function showLogin() {
                             autocomplete="current-password"
                             required
                         >
+
                     </div>
 
                     <div
@@ -143,56 +204,90 @@ function showLogin() {
                 </form>
 
             </div>
+
         </div>
     `;
 
-    const form = document.getElementById("loginForm");
+    const form =
+        document.getElementById(
+            "loginForm"
+        );
 
     if (form) {
-        form.addEventListener("submit", login);
+
+        form.addEventListener(
+            "submit",
+            login
+        );
     }
 }
 
 
+/* =========================================================
+   LOGIN ACTION
+========================================================= */
+
 async function login(event) {
+
     event.preventDefault();
 
     const email =
-        document.getElementById("email").value.trim();
+        document
+            .getElementById("email")
+            .value
+            .trim();
 
     const password =
-        document.getElementById("password").value;
+        document
+            .getElementById("password")
+            .value;
 
     const errorBox =
-        document.getElementById("loginError");
+        document.getElementById(
+            "loginError"
+        );
 
-    errorBox.style.display = "none";
+    errorBox.style.display =
+        "none";
+
     errorBox.textContent = "";
 
     try {
-        const { data, error } =
-            await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .signInWithPassword({
+                    email,
+                    password
+                });
 
         if (error) {
             throw error;
         }
 
-        currentUser = data.user;
+        currentUser =
+            data.user;
 
         showApp();
 
         await loadAppointments();
 
     } catch (error) {
-        console.error("Login error:", error);
+
+        console.error(
+            "Login error:",
+            error
+        );
 
         errorBox.textContent =
-            error.message || "Gabim gjatë hyrjes.";
+            error.message ||
+            "Gabim gjatë hyrjes.";
 
-        errorBox.style.display = "block";
+        errorBox.style.display =
+            "block";
     }
 }
 
@@ -202,19 +297,29 @@ async function login(event) {
 ========================================================= */
 
 async function logout() {
+
     try {
+
         if (realtimeChannel) {
-            await supabaseClient.removeChannel(
-                realtimeChannel
-            );
+
+            await supabaseClient
+                .removeChannel(
+                    realtimeChannel
+                );
 
             realtimeChannel = null;
         }
 
-        await supabaseClient.auth.signOut();
+        await supabaseClient
+            .auth
+            .signOut();
 
     } catch (error) {
-        console.error("Logout error:", error);
+
+        console.error(
+            "Logout error:",
+            error
+        );
     }
 }
 
@@ -224,6 +329,7 @@ async function logout() {
 ========================================================= */
 
 function showApp() {
+
     document.body.innerHTML = `
         <div class="app">
 
@@ -236,6 +342,7 @@ function showApp() {
                     </div>
 
                     <div>
+
                         <div class="brand-title">
                             AMBULATORI GVM
                         </div>
@@ -243,6 +350,7 @@ function showApp() {
                         <div class="brand-subtitle">
                             Menaxhimi i vizitave
                         </div>
+
                     </div>
 
                 </div>
@@ -314,6 +422,7 @@ function showApp() {
                     >
 
                         <div>
+
                             <label for="appointmentTime">
                                 Ora
                             </label>
@@ -321,11 +430,13 @@ function showApp() {
                             <select
                                 id="appointmentTime"
                                 required
-                            >
-                            </select>
+                            ></select>
+
                         </div>
 
+
                         <div>
+
                             <label for="patientName">
                                 Emri i pacientit
                             </label>
@@ -336,9 +447,12 @@ function showApp() {
                                 placeholder="Emri dhe mbiemri"
                                 required
                             >
+
                         </div>
 
+
                         <div>
+
                             <label for="patientPhone">
                                 Telefoni
                             </label>
@@ -348,15 +462,19 @@ function showApp() {
                                 type="text"
                                 placeholder="Numri i telefonit"
                             >
+
                         </div>
 
+
                         <div>
+
                             <button
                                 class="primary-button"
                                 type="submit"
                             >
                                 Shto vizitë
                             </button>
+
                         </div>
 
                     </form>
@@ -378,9 +496,11 @@ function showApp() {
                         id="appointments"
                         class="schedule-table-wrapper"
                     >
+
                         <div class="loading">
                             Po ngarkohet orari...
                         </div>
+
                     </div>
 
                 </section>
@@ -390,50 +510,87 @@ function showApp() {
         </div>
     `;
 
-    document
-        .getElementById("logoutButton")
-        .addEventListener("click", logout);
 
     document
-        .getElementById("prevDay")
-        .addEventListener("click", () => {
-            currentDate.setDate(
-                currentDate.getDate() - 1
-            );
+        .getElementById(
+            "logoutButton"
+        )
+        .addEventListener(
+            "click",
+            logout
+        );
 
-            updateDateDisplay();
-            loadAppointments();
-        });
-
-    document
-        .getElementById("nextDay")
-        .addEventListener("click", () => {
-            currentDate.setDate(
-                currentDate.getDate() + 1
-            );
-
-            updateDateDisplay();
-            loadAppointments();
-        });
 
     document
-        .getElementById("todayButton")
-        .addEventListener("click", () => {
-            currentDate = new Date();
+        .getElementById(
+            "prevDay"
+        )
+        .addEventListener(
+            "click",
+            () => {
 
-            updateDateDisplay();
-            loadAppointments();
-        });
+                currentDate.setDate(
+                    currentDate.getDate() - 1
+                );
+
+                updateDateDisplay();
+
+                loadAppointments();
+            }
+        );
+
 
     document
-        .getElementById("appointmentForm")
+        .getElementById(
+            "nextDay"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                currentDate.setDate(
+                    currentDate.getDate() + 1
+                );
+
+                updateDateDisplay();
+
+                loadAppointments();
+            }
+        );
+
+
+    document
+        .getElementById(
+            "todayButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                currentDate =
+                    new Date();
+
+                updateDateDisplay();
+
+                loadAppointments();
+            }
+        );
+
+
+    document
+        .getElementById(
+            "appointmentForm"
+        )
         .addEventListener(
             "submit",
             addAppointment
         );
 
+
     populateTimeSelect();
+
     updateDateDisplay();
+
     setupRealtime();
 }
 
@@ -443,21 +600,26 @@ function showApp() {
 ========================================================= */
 
 function dateKey(date) {
-    const year = date.getFullYear();
 
-    const month = String(
-        date.getMonth() + 1
-    ).padStart(2, "0");
+    const year =
+        date.getFullYear();
 
-    const day = String(
-        date.getDate()
-    ).padStart(2, "0");
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
 
 
 function formatDate(date) {
+
     return new Intl.DateTimeFormat(
         "sq-AL",
         {
@@ -471,15 +633,20 @@ function formatDate(date) {
 
 
 function updateDateDisplay() {
+
     const element =
-        document.getElementById("selectedDate");
+        document.getElementById(
+            "selectedDate"
+        );
 
     if (!element) {
         return;
     }
 
     element.textContent =
-        formatDate(currentDate);
+        formatDate(
+            currentDate
+        );
 }
 
 
@@ -488,6 +655,7 @@ function updateDateDisplay() {
 ========================================================= */
 
 function generateTimes() {
+
     const times = [];
 
     for (
@@ -495,8 +663,11 @@ function generateTimes() {
         hour <= 18;
         hour++
     ) {
+
         times.push(
-            String(hour).padStart(2, "0") + ":00"
+            String(hour)
+                .padStart(2, "0") +
+            ":00"
         );
     }
 
@@ -505,6 +676,7 @@ function generateTimes() {
 
 
 function populateTimeSelect() {
+
     const select =
         document.getElementById(
             "appointmentTime"
@@ -516,15 +688,25 @@ function populateTimeSelect() {
 
     select.innerHTML = "";
 
-    generateTimes().forEach(time => {
-        const option =
-            document.createElement("option");
+    generateTimes().forEach(
+        time => {
 
-        option.value = time;
-        option.textContent = time;
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-        select.appendChild(option);
-    });
+            option.value =
+                time;
+
+            option.textContent =
+                time;
+
+            select.appendChild(
+                option
+            );
+        }
+    );
 }
 
 
@@ -533,8 +715,11 @@ function populateTimeSelect() {
 ========================================================= */
 
 async function loadAppointments() {
+
     const container =
-        document.getElementById("appointments");
+        document.getElementById(
+            "appointments"
+        );
 
     if (!container) {
         return;
@@ -546,41 +731,65 @@ async function loadAppointments() {
         </div>
     `;
 
+
     try {
-        const date = dateKey(currentDate);
+
+        const date =
+            dateKey(
+                currentDate
+            );
+
 
         const {
             data,
             error
-        } = await supabaseClient
-            .from("appointments")
-            .select("*")
-            .eq("appointment_date", date)
-            .order("appointment_time", {
-                ascending: true
-            });
+        } =
+            await supabaseClient
+                .from("appointments")
+                .select("*")
+                .eq(
+                    "appointment_date",
+                    date
+                )
+                .order(
+                    "appointment_time",
+                    {
+                        ascending: true
+                    }
+                );
+
 
         if (error) {
             throw error;
         }
 
-        appointments = data || [];
+
+        appointments =
+            data || [];
+
 
         renderAppointments();
 
+
     } catch (error) {
+
         console.error(
             "loadAppointments error:",
             error
         );
 
+
         container.innerHTML = `
             <div class="empty-message">
+
                 Nuk u ngarkuan vizitat.
+
                 <br>
+
                 ${escapeHtml(
                     error.message || ""
                 )}
+
             </div>
         `;
     }
@@ -592,70 +801,97 @@ async function loadAppointments() {
 ========================================================= */
 
 function renderAppointments() {
+
     const container =
-        document.getElementById("appointments");
+        document.getElementById(
+            "appointments"
+        );
 
     if (!container) {
         return;
     }
 
-    const times = generateTimes();
+
+    const times =
+        generateTimes();
+
 
     const byTime = {};
 
-    appointments.forEach(appointment => {
-        const time =
-            normalizeTime(
-                appointment.appointment_time
-            );
 
-        byTime[time] = appointment;
-    });
+    appointments.forEach(
+        appointment => {
+
+            const time =
+                normalizeTime(
+                    appointment.appointment_time
+                );
+
+            byTime[time] =
+                appointment;
+        }
+    );
+
 
     let html = `
         <table class="schedule-table">
             <tbody>
     `;
 
-    times.forEach(time => {
-        const appointment =
-            byTime[time];
 
-        if (appointment) {
-            html += renderPatient(
-                appointment,
-                time
-            );
-        } else {
-            html += `
-                <tr class="schedule-row free">
+    times.forEach(
+        time => {
 
-                    <td class="time-cell">
-                        ${time}
-                    </td>
+            const appointment =
+                byTime[time];
 
-                    <td colspan="3">
 
-                        <div
-                            class="empty-message"
-                            style="padding:10px;text-align:left;"
-                        >
-                            Orari i lirë
-                        </div>
+            if (appointment) {
 
-                    </td>
+                html +=
+                    renderPatient(
+                        appointment,
+                        time
+                    );
 
-                </tr>
-            `;
+            } else {
+
+                html += `
+                    <tr class="schedule-row free">
+
+                        <td class="time-cell">
+                            ${time}
+                        </td>
+
+                        <td colspan="3">
+
+                            <div
+                                class="empty-message"
+                                style="
+                                    padding:10px;
+                                    text-align:left;
+                                "
+                            >
+                                Orari i lirë
+                            </div>
+
+                        </td>
+
+                    </tr>
+                `;
+            }
         }
-    });
+    );
+
 
     html += `
             </tbody>
         </table>
     `;
 
-    container.innerHTML = html;
+
+    container.innerHTML =
+        html;
 }
 
 
@@ -667,8 +903,11 @@ function renderPatient(
     appointment,
     time
 ) {
+
     const status =
-        appointment.status || "planned";
+        appointment.status ||
+        "planned";
+
 
     const safeName =
         escapeHtml(
@@ -676,11 +915,13 @@ function renderPatient(
             "Pa emër"
         );
 
+
     const safePhone =
         escapeHtml(
             appointment.patient_phone ||
             ""
         );
+
 
     const initials =
         getInitials(
@@ -688,63 +929,587 @@ function renderPatient(
             "P"
         );
 
+
     let actionButtons = "";
 
+
     if (status === "planned") {
+
         actionButtons += `
             <button
                 type="button"
                 class="action-button arrived"
-                onclick="changeStatus('${appointment.id}', 'arrived')"
+                onclick="
+                    changeStatus(
+                        '${appointment.id}',
+                        'arrived'
+                    )
+                "
             >
                 Erdhi
             </button>
         `;
     }
 
+
     if (status === "arrived") {
+
         actionButtons += `
             <button
                 type="button"
                 class="action-button finished"
-                onclick="changeStatus('${appointment.id}', 'finished')"
+                onclick="
+                    changeStatus(
+                        '${appointment.id}',
+                        'finished'
+                    )
+                "
             >
                 Përfundoi
             </button>
         `;
     }
 
+
     if (
         status !== "finished" &&
         status !== "cancelled"
     ) {
+
         actionButtons += `
             <button
                 type="button"
                 class="action-button cancel"
-                onclick="changeStatus('${appointment.id}', 'cancelled')"
+                onclick="
+                    changeStatus(
+                        '${appointment.id}',
+                        'cancelled'
+                    )
+                "
             >
                 Anulo
             </button>
         `;
     }
 
+
     actionButtons += `
         <button
             type="button"
             class="action-button delete"
-            onclick="deleteAppointment('${appointment.id}')"
+            onclick="
+                deleteAppointment(
+                    '${appointment.id}'
+                )
+            "
         >
             Fshi
         </button>
     `;
 
-    /*
-       KËTU ËSHTË NDRYSHIMI KRYESOR:
 
-       patient-card merr klasën e statusit:
-       planned
-       arrived
-       finished
-       cancelled
+    /*
+       KJO PJESË ËSHTË E RËNDËSISHME.
+
+       Kartës i shtohet statusi:
+
+       patient-card planned
+       patient-card arrived
+       patient-card finished
+       patient-card cancelled
+
+       CSS-ja në index.html
+       ngjyros të gjithë kartën.
+    */
+
+
+    return `
+        <tr class="schedule-row occupied">
+
+            <td class="time-cell">
+                ${time}
+            </td>
+
+            <td colspan="3">
+
+                <div
+                    class="patient-card ${status}"
+                >
+
+                    <div class="patient-wrapper">
+
+                        <div class="patient-avatar">
+                            ${initials}
+                        </div>
+
+                        <div class="patient-info">
+
+                            <div class="patient-name">
+                                ${safeName}
+                            </div>
+
+                            ${
+                                safePhone
+                                    ? `
+                                        <div class="patient-label">
+                                            ${safePhone}
+                                        </div>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-cell">
+
+                        <span
+                            class="
+                                status
+                                ${statusClass(status)}
+                            "
+                        >
+                            ${statusText(status)}
+                        </span>
+
+                    </div>
+
+
+                    <div class="actions-cell">
+
+                        <div class="action-buttons">
+                            ${actionButtons}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </td>
+
+        </tr>
+    `;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function statusText(status) {
+
+    switch (status) {
+
+        case "arrived":
+            return "Erdhi";
+
+        case "finished":
+            return "Përfundoi";
+
+        case "cancelled":
+            return "Anuluar";
+
+        case "planned":
+        default:
+            return "Planifikuar";
+    }
+}
+
+
+function statusClass(status) {
+
+    switch (status) {
+
+        case "arrived":
+            return "status-arrived";
+
+        case "finished":
+            return "status-finished";
+
+        case "cancelled":
+            return "status-cancelled";
+
+        case "planned":
+        default:
+            return "status-planned";
+    }
+}
+
+
+/* =========================================================
+   ADD APPOINTMENT
+========================================================= */
+
+async function addAppointment(
+    event
+) {
+
+    event.preventDefault();
+
+
+    const time =
+        document
+            .getElementById(
+                "appointmentTime"
+            )
+            .value;
+
+
+    const patientName =
+        document
+            .getElementById(
+                "patientName"
+            )
+            .value
+            .trim();
+
+
+    const patientPhone =
+        document
+            .getElementById(
+                "patientPhone"
+            )
+            .value
+            .trim();
+
+
+    if (!patientName) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            data: existing,
+            error: checkError
+        } =
+            await supabaseClient
+                .from("appointments")
+                .select("id")
+                .eq(
+                    "appointment_date",
+                    dateKey(
+                        currentDate
+                    )
+                )
+                .eq(
+                    "appointment_time",
+                    time
+                )
+                .limit(1);
+
+
+        if (checkError) {
+            throw checkError;
+        }
+
+
+        if (
+            existing &&
+            existing.length > 0
+        ) {
+
+            alert(
+                "Ky orar është tashmë i zënë."
+            );
+
+            return;
+        }
+
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("appointments")
+                .insert([
+                    {
+                        appointment_date:
+                            dateKey(
+                                currentDate
+                            ),
+
+                        appointment_time:
+                            time,
+
+                        patient_name:
+                            patientName,
+
+                        patient_phone:
+                            patientPhone ||
+                            null,
+
+                        status:
+                            "planned"
+                    }
+                ]);
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        document
+            .getElementById(
+                "patientName"
+            )
+            .value = "";
+
+
+        document
+            .getElementById(
+                "patientPhone"
+            )
+            .value = "";
+
+
+        await loadAppointments();
+
+
+    } catch (error) {
+
+        console.error(
+            "addAppointment error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Vizita nuk u shtua."
+        );
+    }
+}
+
+
+/* =========================================================
+   CHANGE STATUS
+========================================================= */
+
+async function changeStatus(
+    id,
+    status
+) {
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("appointments")
+                .update({
+                    status:
+                        status
+                })
+                .eq(
+                    "id",
+                    id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await loadAppointments();
+
+
+    } catch (error) {
+
+        console.error(
+            "changeStatus error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Statusi nuk u ndryshua."
+        );
+    }
+}
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+async function deleteAppointment(
+    id
+) {
+
+    const confirmed =
+        confirm(
+            "A dëshironi ta fshini këtë vizitë?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("appointments")
+                .delete()
+                .eq(
+                    "id",
+                    id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await loadAppointments();
+
+
+    } catch (error) {
+
+        console.error(
+            "deleteAppointment error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Vizita nuk u fshi."
+        );
+    }
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function setupRealtime() {
+
+    if (realtimeChannel) {
+        return;
+    }
+
+
+    realtimeChannel =
+        supabaseClient
+            .channel(
+                "appointments-realtime"
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "appointments"
+                },
+                payload => {
+
+                    console.log(
+                        "Realtime update:",
+                        payload
+                    );
+
+                    loadAppointments();
+                }
+            )
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "Realtime status:",
+                        status
+                    );
+                }
+            );
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function normalizeTime(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+    return String(value)
+        .substring(0, 5);
+}
+
+
+function getInitials(
+    name
+) {
+
+    const parts =
+        String(name)
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+
+
+    if (parts.length === 0) {
+        return "P";
+    }
+
+
+    if (parts.length === 1) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[1].charAt(0)
+    ).toUpperCase();
+}
+
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
 ```
