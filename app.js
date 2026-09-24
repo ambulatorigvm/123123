@@ -1,5 +1,5 @@
 ```javascript
-const APP_VERSION = "GVM-20260924-01";
+const APP_VERSION = "GVM-20260924-02";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -19,13 +19,13 @@ let appointments = [];
 let realtimeChannel = null;
 
 
-/* =========================================================
+/* =====================================================
    START
-========================================================= */
+===================================================== */
 
 document.addEventListener(
     "DOMContentLoaded",
-    async () => {
+    async function () {
 
         console.log(
             "AMBULATORI GVM:",
@@ -35,7 +35,7 @@ document.addEventListener(
         await checkSession();
 
         supabaseClient.auth.onAuthStateChange(
-            async (event, session) => {
+            async function (event, session) {
 
                 console.log(
                     "Auth event:",
@@ -68,19 +68,19 @@ document.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    SESSION
-========================================================= */
+===================================================== */
 
 async function checkSession() {
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const result =
             await supabaseClient.auth.getSession();
+
+        const data = result.data;
+        const error = result.error;
 
         if (error) {
 
@@ -91,7 +91,7 @@ async function checkSession() {
             return;
         }
 
-        if (data.session) {
+        if (data && data.session) {
 
             currentUser =
                 data.session.user;
@@ -117,9 +117,9 @@ async function checkSession() {
 }
 
 
-/* =========================================================
+/* =====================================================
    LOGIN
-========================================================= */
+===================================================== */
 
 function showLogin() {
 
@@ -223,24 +223,19 @@ function showLogin() {
 }
 
 
-/* =========================================================
-   LOGIN ACTION
-========================================================= */
-
 async function login(event) {
 
     event.preventDefault();
 
     const email =
-        document
-            .getElementById("email")
-            .value
-            .trim();
+        document.getElementById(
+            "email"
+        ).value.trim();
 
     const password =
-        document
-            .getElementById("password")
-            .value;
+        document.getElementById(
+            "password"
+        ).value;
 
     const errorBox =
         document.getElementById(
@@ -250,19 +245,21 @@ async function login(event) {
     errorBox.style.display =
         "none";
 
-    errorBox.textContent = "";
+    errorBox.textContent =
+        "";
 
     try {
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth
-                .signInWithPassword({
-                    email,
-                    password
-                });
+        const result =
+            await supabaseClient.auth.signInWithPassword(
+                {
+                    email: email,
+                    password: password
+                }
+            );
+
+        const data = result.data;
+        const error = result.error;
 
         if (error) {
             throw error;
@@ -292,9 +289,9 @@ async function login(event) {
 }
 
 
-/* =========================================================
+/* =====================================================
    LOGOUT
-========================================================= */
+===================================================== */
 
 async function logout() {
 
@@ -302,17 +299,14 @@ async function logout() {
 
         if (realtimeChannel) {
 
-            await supabaseClient
-                .removeChannel(
-                    realtimeChannel
-                );
+            await supabaseClient.removeChannel(
+                realtimeChannel
+            );
 
             realtimeChannel = null;
         }
 
-        await supabaseClient
-            .auth
-            .signOut();
+        await supabaseClient.auth.signOut();
 
     } catch (error) {
 
@@ -324,9 +318,9 @@ async function logout() {
 }
 
 
-/* =========================================================
-   APP
-========================================================= */
+/* =====================================================
+   MAIN APP
+===================================================== */
 
 function showApp() {
 
@@ -511,23 +505,30 @@ function showApp() {
     `;
 
 
-    document
-        .getElementById(
+    const logoutButton =
+        document.getElementById(
             "logoutButton"
-        )
-        .addEventListener(
+        );
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
             "click",
             logout
         );
+    }
 
 
-    document
-        .getElementById(
+    const prevDay =
+        document.getElementById(
             "prevDay"
-        )
-        .addEventListener(
+        );
+
+    if (prevDay) {
+
+        prevDay.addEventListener(
             "click",
-            () => {
+            function () {
 
                 currentDate.setDate(
                     currentDate.getDate() - 1
@@ -538,15 +539,19 @@ function showApp() {
                 loadAppointments();
             }
         );
+    }
 
 
-    document
-        .getElementById(
+    const nextDay =
+        document.getElementById(
             "nextDay"
-        )
-        .addEventListener(
+        );
+
+    if (nextDay) {
+
+        nextDay.addEventListener(
             "click",
-            () => {
+            function () {
 
                 currentDate.setDate(
                     currentDate.getDate() + 1
@@ -557,15 +562,19 @@ function showApp() {
                 loadAppointments();
             }
         );
+    }
 
 
-    document
-        .getElementById(
+    const todayButton =
+        document.getElementById(
             "todayButton"
-        )
-        .addEventListener(
+        );
+
+    if (todayButton) {
+
+        todayButton.addEventListener(
             "click",
-            () => {
+            function () {
 
                 currentDate =
                     new Date();
@@ -575,16 +584,21 @@ function showApp() {
                 loadAppointments();
             }
         );
+    }
 
 
-    document
-        .getElementById(
+    const appointmentForm =
+        document.getElementById(
             "appointmentForm"
-        )
-        .addEventListener(
+        );
+
+    if (appointmentForm) {
+
+        appointmentForm.addEventListener(
             "submit",
             addAppointment
         );
+    }
 
 
     populateTimeSelect();
@@ -595,9 +609,9 @@ function showApp() {
 }
 
 
-/* =========================================================
+/* =====================================================
    DATE
-========================================================= */
+===================================================== */
 
 function dateKey(date) {
 
@@ -614,7 +628,13 @@ function dateKey(date) {
             date.getDate()
         ).padStart(2, "0");
 
-    return `${year}-${month}-${day}`;
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
 }
 
 
@@ -644,15 +664,13 @@ function updateDateDisplay() {
     }
 
     element.textContent =
-        formatDate(
-            currentDate
-        );
+        formatDate(currentDate);
 }
 
 
-/* =========================================================
-   TIME
-========================================================= */
+/* =====================================================
+   TIMES
+===================================================== */
 
 function generateTimes() {
 
@@ -665,9 +683,10 @@ function generateTimes() {
     ) {
 
         times.push(
-            String(hour)
-                .padStart(2, "0") +
-            ":00"
+            String(hour).padStart(
+                2,
+                "0"
+            ) + ":00"
         );
     }
 
@@ -686,10 +705,11 @@ function populateTimeSelect() {
         return;
     }
 
-    select.innerHTML = "";
+    select.innerHTML =
+        "";
 
     generateTimes().forEach(
-        time => {
+        function (time) {
 
             const option =
                 document.createElement(
@@ -710,9 +730,9 @@ function populateTimeSelect() {
 }
 
 
-/* =========================================================
+/* =====================================================
    LOAD APPOINTMENTS
-========================================================= */
+===================================================== */
 
 async function loadAppointments() {
 
@@ -731,7 +751,6 @@ async function loadAppointments() {
         </div>
     `;
 
-
     try {
 
         const date =
@@ -739,11 +758,7 @@ async function loadAppointments() {
                 currentDate
             );
 
-
-        const {
-            data,
-            error
-        } =
+        const result =
             await supabaseClient
                 .from("appointments")
                 .select("*")
@@ -758,18 +773,20 @@ async function loadAppointments() {
                     }
                 );
 
+        const data =
+            result.data;
+
+        const error =
+            result.error;
 
         if (error) {
             throw error;
         }
 
-
         appointments =
             data || [];
 
-
         renderAppointments();
-
 
     } catch (error) {
 
@@ -778,27 +795,22 @@ async function loadAppointments() {
             error
         );
 
-
         container.innerHTML = `
             <div class="empty-message">
-
                 Nuk u ngarkuan vizitat.
-
                 <br>
-
                 ${escapeHtml(
                     error.message || ""
                 )}
-
             </div>
         `;
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    RENDER APPOINTMENTS
-========================================================= */
+===================================================== */
 
 function renderAppointments() {
 
@@ -811,16 +823,13 @@ function renderAppointments() {
         return;
     }
 
-
     const times =
         generateTimes();
 
-
     const byTime = {};
 
-
     appointments.forEach(
-        appointment => {
+        function (appointment) {
 
             const time =
                 normalizeTime(
@@ -840,11 +849,10 @@ function renderAppointments() {
 
 
     times.forEach(
-        time => {
+        function (time) {
 
             const appointment =
                 byTime[time];
-
 
             if (appointment) {
 
@@ -867,10 +875,7 @@ function renderAppointments() {
 
                             <div
                                 class="empty-message"
-                                style="
-                                    padding:10px;
-                                    text-align:left;
-                                "
+                                style="padding:10px;text-align:left;"
                             >
                                 Orari i lirë
                             </div>
@@ -889,15 +894,14 @@ function renderAppointments() {
         </table>
     `;
 
-
     container.innerHTML =
         html;
 }
 
 
-/* =========================================================
-   PATIENT CARD
-========================================================= */
+/* =====================================================
+   PATIENT
+===================================================== */
 
 function renderPatient(
     appointment,
@@ -930,7 +934,8 @@ function renderPatient(
         );
 
 
-    let actionButtons = "";
+    let actionButtons =
+        "";
 
 
     if (status === "planned") {
@@ -939,12 +944,7 @@ function renderPatient(
             <button
                 type="button"
                 class="action-button arrived"
-                onclick="
-                    changeStatus(
-                        '${appointment.id}',
-                        'arrived'
-                    )
-                "
+                onclick="changeStatus('${appointment.id}', 'arrived')"
             >
                 Erdhi
             </button>
@@ -958,12 +958,7 @@ function renderPatient(
             <button
                 type="button"
                 class="action-button finished"
-                onclick="
-                    changeStatus(
-                        '${appointment.id}',
-                        'finished'
-                    )
-                "
+                onclick="changeStatus('${appointment.id}', 'finished')"
             >
                 Përfundoi
             </button>
@@ -980,12 +975,7 @@ function renderPatient(
             <button
                 type="button"
                 class="action-button cancel"
-                onclick="
-                    changeStatus(
-                        '${appointment.id}',
-                        'cancelled'
-                    )
-                "
+                onclick="changeStatus('${appointment.id}', 'cancelled')"
             >
                 Anulo
             </button>
@@ -997,30 +987,11 @@ function renderPatient(
         <button
             type="button"
             class="action-button delete"
-            onclick="
-                deleteAppointment(
-                    '${appointment.id}'
-                )
-            "
+            onclick="deleteAppointment('${appointment.id}')"
         >
             Fshi
         </button>
     `;
-
-
-    /*
-       KJO PJESË ËSHTË E RËNDËSISHME.
-
-       Kartës i shtohet statusi:
-
-       patient-card planned
-       patient-card arrived
-       patient-card finished
-       patient-card cancelled
-
-       CSS-ja në index.html
-       ngjyros të gjithë kartën.
-    */
 
 
     return `
@@ -1032,9 +1003,7 @@ function renderPatient(
 
             <td colspan="3">
 
-                <div
-                    class="patient-card ${status}"
-                >
+                <div class="patient-card ${status}">
 
                     <div class="patient-wrapper">
 
@@ -1066,10 +1035,7 @@ function renderPatient(
                     <div class="status-cell">
 
                         <span
-                            class="
-                                status
-                                ${statusClass(status)}
-                            "
+                            class="status ${statusClass(status)}"
                         >
                             ${statusText(status)}
                         </span>
@@ -1094,9 +1060,9 @@ function renderPatient(
 }
 
 
-/* =========================================================
-   STATUS
-========================================================= */
+/* =====================================================
+   STATUS TEXT
+===================================================== */
 
 function statusText(status) {
 
@@ -1138,41 +1104,31 @@ function statusClass(status) {
 }
 
 
-/* =========================================================
+/* =====================================================
    ADD APPOINTMENT
-========================================================= */
+===================================================== */
 
-async function addAppointment(
-    event
-) {
+async function addAppointment(event) {
 
     event.preventDefault();
 
 
     const time =
-        document
-            .getElementById(
-                "appointmentTime"
-            )
-            .value;
+        document.getElementById(
+            "appointmentTime"
+        ).value;
 
 
     const patientName =
-        document
-            .getElementById(
-                "patientName"
-            )
-            .value
-            .trim();
+        document.getElementById(
+            "patientName"
+        ).value.trim();
 
 
     const patientPhone =
-        document
-            .getElementById(
-                "patientPhone"
-            )
-            .value
-            .trim();
+        document.getElementById(
+            "patientPhone"
+        ).value.trim();
 
 
     if (!patientName) {
@@ -1182,24 +1138,26 @@ async function addAppointment(
 
     try {
 
-        const {
-            data: existing,
-            error: checkError
-        } =
+        const result =
             await supabaseClient
                 .from("appointments")
                 .select("id")
                 .eq(
                     "appointment_date",
-                    dateKey(
-                        currentDate
-                    )
+                    dateKey(currentDate)
                 )
                 .eq(
                     "appointment_time",
                     time
                 )
                 .limit(1);
+
+
+        const existing =
+            result.data;
+
+        const checkError =
+            result.error;
 
 
         if (checkError) {
@@ -1220,9 +1178,7 @@ async function addAppointment(
         }
 
 
-        const {
-            error
-        } =
+        const insertResult =
             await supabaseClient
                 .from("appointments")
                 .insert([
@@ -1248,27 +1204,24 @@ async function addAppointment(
                 ]);
 
 
-        if (error) {
-            throw error;
+        if (insertResult.error) {
+            throw insertResult.error;
         }
 
 
-        document
-            .getElementById(
-                "patientName"
-            )
-            .value = "";
+        document.getElementById(
+            "patientName"
+        ).value =
+            "";
 
 
-        document
-            .getElementById(
-                "patientPhone"
-            )
-            .value = "";
+        document.getElementById(
+            "patientPhone"
+        ).value =
+            "";
 
 
         await loadAppointments();
-
 
     } catch (error) {
 
@@ -1276,7 +1229,6 @@ async function addAppointment(
             "addAppointment error:",
             error
         );
-
 
         alert(
             error.message ||
@@ -1286,9 +1238,9 @@ async function addAppointment(
 }
 
 
-/* =========================================================
+/* =====================================================
    CHANGE STATUS
-========================================================= */
+===================================================== */
 
 async function changeStatus(
     id,
@@ -1297,14 +1249,11 @@ async function changeStatus(
 
     try {
 
-        const {
-            error
-        } =
+        const result =
             await supabaseClient
                 .from("appointments")
                 .update({
-                    status:
-                        status
+                    status: status
                 })
                 .eq(
                     "id",
@@ -1312,13 +1261,12 @@ async function changeStatus(
                 );
 
 
-        if (error) {
-            throw error;
+        if (result.error) {
+            throw result.error;
         }
 
 
         await loadAppointments();
-
 
     } catch (error) {
 
@@ -1326,7 +1274,6 @@ async function changeStatus(
             "changeStatus error:",
             error
         );
-
 
         alert(
             error.message ||
@@ -1336,13 +1283,11 @@ async function changeStatus(
 }
 
 
-/* =========================================================
+/* =====================================================
    DELETE
-========================================================= */
+===================================================== */
 
-async function deleteAppointment(
-    id
-) {
+async function deleteAppointment(id) {
 
     const confirmed =
         confirm(
@@ -1357,9 +1302,7 @@ async function deleteAppointment(
 
     try {
 
-        const {
-            error
-        } =
+        const result =
             await supabaseClient
                 .from("appointments")
                 .delete()
@@ -1369,13 +1312,12 @@ async function deleteAppointment(
                 );
 
 
-        if (error) {
-            throw error;
+        if (result.error) {
+            throw result.error;
         }
 
 
         await loadAppointments();
-
 
     } catch (error) {
 
@@ -1383,7 +1325,6 @@ async function deleteAppointment(
             "deleteAppointment error:",
             error
         );
-
 
         alert(
             error.message ||
@@ -1393,9 +1334,9 @@ async function deleteAppointment(
 }
 
 
-/* =========================================================
+/* =====================================================
    REALTIME
-========================================================= */
+===================================================== */
 
 function setupRealtime() {
 
@@ -1416,7 +1357,7 @@ function setupRealtime() {
                     schema: "public",
                     table: "appointments"
                 },
-                payload => {
+                function (payload) {
 
                     console.log(
                         "Realtime update:",
@@ -1427,7 +1368,7 @@ function setupRealtime() {
                 }
             )
             .subscribe(
-                status => {
+                function (status) {
 
                     console.log(
                         "Realtime status:",
@@ -1438,13 +1379,11 @@ function setupRealtime() {
 }
 
 
-/* =========================================================
+/* =====================================================
    HELPERS
-========================================================= */
+===================================================== */
 
-function normalizeTime(
-    value
-) {
+function normalizeTime(value) {
 
     if (!value) {
         return "";
@@ -1455,15 +1394,17 @@ function normalizeTime(
 }
 
 
-function getInitials(
-    name
-) {
+function getInitials(name) {
 
     const parts =
         String(name)
             .trim()
             .split(/\s+/)
-            .filter(Boolean);
+            .filter(
+                function (part) {
+                    return Boolean(part);
+                }
+            );
 
 
     if (parts.length === 0) {
@@ -1486,9 +1427,7 @@ function getInitials(
 }
 
 
-function escapeHtml(
-    value
-) {
+function escapeHtml(value) {
 
     return String(value)
         .replaceAll(
