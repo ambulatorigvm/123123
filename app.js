@@ -6,10 +6,11 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
 let currentUser = null;
 let currentDate = new Date();
@@ -17,12 +18,18 @@ let appointments = [];
 let realtimeChannel = null;
 
 
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
 
-    console.log("AMBULATORI GVM", APP_VERSION);
+        console.log(
+            "AMBULATORI GVM",
+            APP_VERSION
+        );
 
-    await checkSession();
-});
+        await checkSession();
+    }
+);
 
 
 async function checkSession() {
@@ -175,7 +182,9 @@ function showLogin() {
         '</div>';
 
     const form =
-        document.getElementById("loginForm");
+        document.getElementById(
+            "loginForm"
+        );
 
     if (form) {
 
@@ -206,9 +215,11 @@ async function login(event) {
             "loginError"
         );
 
-    errorBox.style.display = "none";
+    errorBox.style.display =
+        "none";
 
-    errorBox.textContent = "";
+    errorBox.textContent =
+        "";
 
     try {
 
@@ -328,36 +339,19 @@ function showApp() {
 
                 '<div class="date-navigation">' +
 
-                    '<button ' +
-                        'id="prevDay" ' +
-                        'class="date-arrow" ' +
-                        'type="button">' +
-
+                    '<button id="prevDay" class="date-arrow" type="button">' +
                         '‹' +
-
                     '</button>' +
 
-                    '<div ' +
-                        'id="selectedDate" ' +
-                        'class="selected-date">' +
+                    '<div id="selectedDate" class="selected-date">' +
                     '</div>' +
 
-                    '<button ' +
-                        'id="nextDay" ' +
-                        'class="date-arrow" ' +
-                        'type="button">' +
-
+                    '<button id="nextDay" class="date-arrow" type="button">' +
                         '›' +
-
                     '</button>' +
 
-                    '<button ' +
-                        'id="todayButton" ' +
-                        'class="today-button" ' +
-                        'type="button">' +
-
+                    '<button id="todayButton" class="today-button" type="button">' +
                         'Sot' +
-
                     '</button>' +
 
                 '</div>' +
@@ -368,9 +362,7 @@ function showApp() {
                         'Shto vizitë' +
                     '</h2>' +
 
-                    '<form ' +
-                        'id="appointmentForm" ' +
-                        'class="appointment-form">' +
+                    '<form id="appointmentForm" class="appointment-form">' +
 
                         '<div>' +
 
@@ -378,9 +370,7 @@ function showApp() {
                                 'Ora' +
                             '</label>' +
 
-                            '<select ' +
-                                'id="appointmentTime" ' +
-                                'required>' +
+                            '<select id="appointmentTime" required>' +
                             '</select>' +
 
                         '</div>' +
@@ -414,12 +404,8 @@ function showApp() {
 
                         '<div>' +
 
-                            '<button ' +
-                                'class="primary-button" ' +
-                                'type="submit">' +
-
+                            '<button class="primary-button" type="submit">' +
                                 'Shto vizitë' +
-
                             '</button>' +
 
                         '</div>' +
@@ -438,9 +424,7 @@ function showApp() {
 
                     '</div>' +
 
-                    '<div ' +
-                        'id="appointments" ' +
-                        'class="schedule-table-wrapper">' +
+                    '<div id="appointments" class="schedule-table-wrapper">' +
 
                         '<div class="loading">' +
                             'Po ngarkohet orari...' +
@@ -629,9 +613,11 @@ function populateTimeSelect() {
                     "option"
                 );
 
-            option.value = time;
+            option.value =
+                time;
 
-            option.textContent = time;
+            option.textContent =
+                time;
 
             select.appendChild(
                 option
@@ -761,12 +747,8 @@ function renderAppointments() {
 
                         '<td colspan="3">' +
 
-                            '<div ' +
-                                'class="empty-message" ' +
-                                'style="padding:10px;text-align:left;">' +
-
+                            '<div class="empty-message" style="padding:10px;text-align:left;">' +
                                 'Orari i lirë' +
-
                             '</div>' +
 
                         '</td>' +
@@ -817,30 +799,20 @@ function renderPatient(
     if (status === "planned") {
 
         actionButtons +=
-            '<button ' +
-                'type="button" ' +
-                'class="action-button arrived" ' +
-                'onclick="changeStatus(\'' +
-                    appointment.id +
-                    '\', \'arrived\')">' +
-
+            '<button type="button" class="action-button arrived" onclick="changeStatus(\'' +
+                appointment.id +
+                '\', \'arrived\')">' +
                 'Erdhi' +
-
             '</button>';
     }
 
     if (status === "arrived") {
 
         actionButtons +=
-            '<button ' +
-                'type="button" ' +
-                'class="action-button finished" ' +
-                'onclick="changeStatus(\'' +
-                    appointment.id +
-                    '\', \'finished\')">' +
-
+            '<button type="button" class="action-button finished" onclick="changeStatus(\'' +
+                appointment.id +
+                '\', \'finished\')">' +
                 'Përfundoi' +
-
             '</button>';
     }
 
@@ -850,28 +822,18 @@ function renderPatient(
     ) {
 
         actionButtons +=
-            '<button ' +
-                'type="button" ' +
-                'class="action-button cancel" ' +
-                'onclick="changeStatus(\'' +
-                    appointment.id +
-                    '\', \'cancelled\')">' +
-
+            '<button type="button" class="action-button cancel" onclick="changeStatus(\'' +
+                appointment.id +
+                '\', \'cancelled\')">' +
                 'Anulo' +
-
             '</button>';
     }
 
     actionButtons +=
-        '<button ' +
-            'type="button" ' +
-            'class="action-button delete" ' +
-            'onclick="deleteAppointment(\'' +
-                appointment.id +
-            '\')">' +
-
+        '<button type="button" class="action-button delete" onclick="deleteAppointment(\'' +
+            appointment.id +
+        '\')">' +
             'Fshi' +
-
         '</button>';
 
     let phoneHtml = "";
@@ -1272,24 +1234,9 @@ function getInitials(name) {
 function escapeHtml(value) {
 
     return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
