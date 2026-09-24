@@ -19,9 +19,9 @@ let appointments = [];
 let realtimeChannel = null;
 
 
-/* =========================================================
+/* =========================
    START
-========================================================= */
+========================= */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -37,9 +37,9 @@ document.addEventListener(
 );
 
 
-/* =========================================================
+/* =========================
    SESSION
-========================================================= */
+========================= */
 
 async function checkSession() {
 
@@ -111,9 +111,9 @@ async function checkSession() {
 }
 
 
-/* =========================================================
+/* =========================
    LOGIN
-========================================================= */
+========================= */
 
 function showLogin() {
 
@@ -273,10 +273,6 @@ async function login(event) {
 }
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
-
 async function logout() {
 
     try {
@@ -306,9 +302,9 @@ async function logout() {
 }
 
 
-/* =========================================================
+/* =========================
    MAIN APP
-========================================================= */
+========================= */
 
 function showApp() {
 
@@ -360,18 +356,29 @@ function showApp() {
 
                 '<div class="date-navigation">' +
 
-                    '<button id="prevDay" class="date-arrow" type="button">' +
+                    '<button ' +
+                        'id="prevDay" ' +
+                        'class="date-arrow" ' +
+                        'type="button">' +
                         '‹' +
                     '</button>' +
 
-                    '<div id="selectedDate" class="selected-date">' +
+                    '<div ' +
+                        'id="selectedDate" ' +
+                        'class="selected-date">' +
                     '</div>' +
 
-                    '<button id="nextDay" class="date-arrow" type="button">' +
+                    '<button ' +
+                        'id="nextDay" ' +
+                        'class="date-arrow" ' +
+                        'type="button">' +
                         '›' +
                     '</button>' +
 
-                    '<button id="todayButton" class="today-button" type="button">' +
+                    '<button ' +
+                        'id="todayButton" ' +
+                        'class="today-button" ' +
+                        'type="button">' +
                         'Sot' +
                     '</button>' +
 
@@ -383,7 +390,9 @@ function showApp() {
                         'Shto vizitë' +
                     '</h2>' +
 
-                    '<form id="appointmentForm" class="appointment-form">' +
+                    '<form ' +
+                        'id="appointmentForm" ' +
+                        'class="appointment-form">' +
 
                         '<div>' +
 
@@ -391,7 +400,9 @@ function showApp() {
                                 'Ora' +
                             '</label>' +
 
-                            '<select id="appointmentTime" required>' +
+                            '<select ' +
+                                'id="appointmentTime" ' +
+                                'required>' +
                             '</select>' +
 
                         '</div>' +
@@ -425,8 +436,12 @@ function showApp() {
 
                         '<div>' +
 
-                            '<button class="primary-button" type="submit">' +
+                            '<button ' +
+                                'class="primary-button" ' +
+                                'type="submit">' +
+
                                 'Shto vizitë' +
+
                             '</button>' +
 
                         '</div>' +
@@ -445,7 +460,9 @@ function showApp() {
 
                     '</div>' +
 
-                    '<div id="appointments" class="schedule-table-wrapper">' +
+                    '<div ' +
+                        'id="appointments" ' +
+                        'class="schedule-table-wrapper">' +
 
                         '<div class="loading">' +
                             'Po ngarkohet orari...' +
@@ -459,12 +476,14 @@ function showApp() {
 
         '</div>';
 
+
     document
         .getElementById("logoutButton")
         .addEventListener(
             "click",
             logout
         );
+
 
     document
         .getElementById("prevDay")
@@ -482,6 +501,7 @@ function showApp() {
             }
         );
 
+
     document
         .getElementById("nextDay")
         .addEventListener(
@@ -498,6 +518,7 @@ function showApp() {
             }
         );
 
+
     document
         .getElementById("todayButton")
         .addEventListener(
@@ -513,12 +534,14 @@ function showApp() {
             }
         );
 
+
     document
         .getElementById("appointmentForm")
         .addEventListener(
             "submit",
             addAppointment
         );
+
 
     populateTimeSelect();
 
@@ -528,9 +551,9 @@ function showApp() {
 }
 
 
-/* =========================================================
+/* =========================
    DATE
-========================================================= */
+========================= */
 
 function dateKey(date) {
 
@@ -595,18 +618,18 @@ function updateDateDisplay() {
 }
 
 
-/* =========================================================
+/* =========================
    ORARI - ÇDO 15 MINUTA
-========================================================= */
+========================= */
 
 function generateTimes() {
 
     const times = [];
 
     /*
-        Fillon 08:00
-        Mbaron 18:00
-        Intervali 15 minuta
+        Fillon: 08:00
+        Përfundon: 18:00
+        Intervali: 15 minuta
     */
 
     for (
@@ -676,9 +699,9 @@ function populateTimeSelect() {
 }
 
 
-/* =========================================================
+/* =========================
    LOAD APPOINTMENTS
-========================================================= */
+========================= */
 
 async function loadAppointments() {
 
@@ -721,11 +744,6 @@ async function loadAppointments() {
         appointments =
             result.data || [];
 
-        console.log(
-            "APPOINTMENTS:",
-            appointments
-        );
-
         renderAppointments();
 
     } catch (error) {
@@ -747,9 +765,9 @@ async function loadAppointments() {
 }
 
 
-/* =========================================================
-   RENDER APPOINTMENTS
-========================================================= */
+/* =========================
+   RENDER SCHEDULE
+========================= */
 
 function renderAppointments() {
 
@@ -780,15 +798,18 @@ function renderAppointments() {
         }
     );
 
+
     let html =
         '<table class="schedule-table">' +
             '<tbody>';
+
 
     times.forEach(
         function (time) {
 
             const appointment =
                 byTime[time];
+
 
             if (appointment) {
 
@@ -809,8 +830,12 @@ function renderAppointments() {
 
                         '<td colspan="3">' +
 
-                            '<div class="empty-message" style="padding:10px;text-align:left;">' +
+                            '<div ' +
+                                'class="empty-message" ' +
+                                'style="padding:10px;text-align:left;">' +
+
                                 'Orari i lirë' +
+
                             '</div>' +
 
                         '</td>' +
@@ -820,18 +845,20 @@ function renderAppointments() {
         }
     );
 
+
     html +=
             '</tbody>' +
         '</table>';
+
 
     container.innerHTML =
         html;
 }
 
 
-/* =========================================================
-   RENDER PATIENT
-========================================================= */
+/* =========================
+   PATIENT
+========================= */
 
 function renderPatient(
     appointment,
@@ -842,20 +869,13 @@ function renderPatient(
         appointment.status ||
         "planned";
 
-    /*
-        Emri merret nga patient_name.
-        Nëse është bosh, shfaqet "Pa emër".
-    */
-
-    const patientName =
-        appointment.patient_name ||
-        "";
 
     const safeName =
         escapeHtml(
-            patientName.trim() ||
+            appointment.patient_name ||
             "Pa emër"
         );
+
 
     const safePhone =
         escapeHtml(
@@ -863,33 +883,48 @@ function renderPatient(
             ""
         );
 
+
     const initials =
         getInitials(
-            patientName ||
+            appointment.patient_name ||
             "P"
         );
 
+
     let actionButtons = "";
+
 
     if (status === "planned") {
 
         actionButtons +=
-            '<button type="button" class="action-button arrived" onclick="changeStatus(\'' +
-                appointment.id +
-                '\', \'arrived\')">' +
+            '<button ' +
+                'type="button" ' +
+                'class="action-button arrived" ' +
+                'onclick="changeStatus(\'' +
+                    appointment.id +
+                    '\', \'arrived\')">' +
+
                 'Erdhi' +
+
             '</button>';
     }
+
 
     if (status === "arrived") {
 
         actionButtons +=
-            '<button type="button" class="action-button finished" onclick="changeStatus(\'' +
-                appointment.id +
-                '\', \'finished\')">' +
+            '<button ' +
+                'type="button" ' +
+                'class="action-button finished" ' +
+                'onclick="changeStatus(\'' +
+                    appointment.id +
+                    '\', \'finished\')">' +
+
                 'Përfundoi' +
+
             '</button>';
     }
+
 
     if (
         status !== "finished" &&
@@ -897,21 +932,34 @@ function renderPatient(
     ) {
 
         actionButtons +=
-            '<button type="button" class="action-button cancel" onclick="changeStatus(\'' +
-                appointment.id +
-                '\', \'cancelled\')">' +
+            '<button ' +
+                'type="button" ' +
+                'class="action-button cancel" ' +
+                'onclick="changeStatus(\'' +
+                    appointment.id +
+                    '\', \'cancelled\')">' +
+
                 'Anulo' +
+
             '</button>';
     }
 
+
     actionButtons +=
-        '<button type="button" class="action-button delete" onclick="deleteAppointment(\'' +
-            appointment.id +
-        '\')">' +
+        '<button ' +
+            'type="button" ' +
+            'class="action-button delete" ' +
+            'onclick="deleteAppointment(\'' +
+                appointment.id +
+            '\')">' +
+
             'Fshi' +
+
         '</button>';
 
+
     let phoneHtml = "";
+
 
     if (safePhone) {
 
@@ -920,6 +968,7 @@ function renderPatient(
                 safePhone +
             '</div>';
     }
+
 
     return (
 
@@ -982,9 +1031,9 @@ function renderPatient(
 }
 
 
-/* =========================================================
+/* =========================
    STATUS
-========================================================= */
+========================= */
 
 function statusText(status) {
 
@@ -1026,28 +1075,32 @@ function statusClass(status) {
 }
 
 
-/* =========================================================
+/* =========================
    ADD APPOINTMENT
-========================================================= */
+========================= */
 
 async function addAppointment(event) {
 
     event.preventDefault();
+
 
     const time =
         document.getElementById(
             "appointmentTime"
         ).value;
 
+
     const patientName =
         document.getElementById(
             "patientName"
         ).value.trim();
 
+
     const patientPhone =
         document.getElementById(
             "patientPhone"
         ).value.trim();
+
 
     if (!patientName) {
 
@@ -1058,20 +1111,8 @@ async function addAppointment(event) {
         return;
     }
 
-    if (!time) {
-
-        alert(
-            "Zgjidhni orarin."
-        );
-
-        return;
-    }
 
     try {
-
-        /*
-            Kontrollojmë nëse orari është i zënë.
-        */
 
         const existingResult =
             await supabaseClient
@@ -1087,10 +1128,12 @@ async function addAppointment(event) {
                 )
                 .limit(1);
 
+
         if (existingResult.error) {
 
             throw existingResult.error;
         }
+
 
         if (
             existingResult.data &&
@@ -1101,14 +1144,9 @@ async function addAppointment(event) {
                 "Ky orar është tashmë i zënë."
             );
 
-            await loadAppointments();
-
             return;
         }
 
-        /*
-            Shtojmë vizitën.
-        */
 
         const insertResult =
             await supabaseClient
@@ -1133,26 +1171,22 @@ async function addAppointment(event) {
                     }
                 ]);
 
+
         if (insertResult.error) {
 
             throw insertResult.error;
         }
 
-        /*
-            Pastrojmë formularin.
-        */
 
         document.getElementById(
             "patientName"
         ).value = "";
 
+
         document.getElementById(
             "patientPhone"
         ).value = "";
 
-        /*
-            Rifreskojmë orarin.
-        */
 
         await loadAppointments();
 
@@ -1171,9 +1205,9 @@ async function addAppointment(event) {
 }
 
 
-/* =========================================================
+/* =========================
    CHANGE STATUS
-========================================================= */
+========================= */
 
 async function changeStatus(
     id,
@@ -1193,10 +1227,12 @@ async function changeStatus(
                     id
                 );
 
+
         if (result.error) {
 
             throw result.error;
         }
+
 
         await loadAppointments();
 
@@ -1215,9 +1251,9 @@ async function changeStatus(
 }
 
 
-/* =========================================================
+/* =========================
    DELETE
-========================================================= */
+========================= */
 
 async function deleteAppointment(id) {
 
@@ -1226,9 +1262,11 @@ async function deleteAppointment(id) {
             "A dëshironi ta fshini këtë vizitë?"
         );
 
+
     if (!confirmed) {
         return;
     }
+
 
     try {
 
@@ -1241,10 +1279,12 @@ async function deleteAppointment(id) {
                     id
                 );
 
+
         if (result.error) {
 
             throw result.error;
         }
+
 
         await loadAppointments();
 
@@ -1263,15 +1303,16 @@ async function deleteAppointment(id) {
 }
 
 
-/* =========================================================
+/* =========================
    REALTIME
-========================================================= */
+========================= */
 
 function setupRealtime() {
 
     if (realtimeChannel) {
         return;
     }
+
 
     realtimeChannel =
         supabaseClient
@@ -1307,9 +1348,9 @@ function setupRealtime() {
 }
 
 
-/* =========================================================
-   TIME
-========================================================= */
+/* =========================
+   HELPERS
+========================= */
 
 function normalizeTime(value) {
 
@@ -1324,10 +1365,6 @@ function normalizeTime(value) {
 }
 
 
-/* =========================================================
-   INITIALS
-========================================================= */
-
 function getInitials(name) {
 
     const parts =
@@ -1340,9 +1377,11 @@ function getInitials(name) {
                 }
             );
 
+
     if (parts.length === 0) {
         return "P";
     }
+
 
     if (parts.length === 1) {
 
@@ -1354,16 +1393,13 @@ function getInitials(name) {
             .toUpperCase();
     }
 
+
     return (
         parts[0].charAt(0) +
         parts[1].charAt(0)
     ).toUpperCase();
 }
 
-
-/* =========================================================
-   SECURITY / HTML
-========================================================= */
 
 function escapeHtml(value) {
 
