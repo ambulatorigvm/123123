@@ -1,5 +1,4 @@
-```javascript
-const APP_VERSION = "GVM-20260924-12";
+const APP_VERSION = "GVM-20260924-13";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -65,6 +64,7 @@ function showFatalError(message) {
     app.innerHTML = `
         <div class="fatal-error">
             <div class="fatal-box">
+
                 <div style="
                     font-size:48px;
                     margin-bottom:15px;
@@ -77,6 +77,7 @@ function showFatalError(message) {
                 <p>
                     Kontrollo Console me F12 nëse problemi vazhdon.
                 </p>
+
             </div>
         </div>
     `;
@@ -122,7 +123,6 @@ async function checkSession() {
             showLogin();
 
         }
-
 
         supabaseClient.auth.onAuthStateChange(
             async (event, session) => {
@@ -251,12 +251,10 @@ function showLogin() {
         </div>
     `;
 
-
     const form =
         document.getElementById(
             "loginForm"
         );
-
 
     if (form) {
 
@@ -296,7 +294,6 @@ async function login() {
             "loginError"
         );
 
-
     if (
         !emailElement ||
         !passwordElement
@@ -304,13 +301,11 @@ async function login() {
         return;
     }
 
-
     const email =
         emailElement.value.trim();
 
     const password =
         passwordElement.value;
-
 
     if (!email || !password) {
 
@@ -327,7 +322,6 @@ async function login() {
         return;
     }
 
-
     try {
 
         if (errorElement) {
@@ -336,7 +330,6 @@ async function login() {
                 "none";
 
         }
-
 
         const {
             data,
@@ -348,14 +341,12 @@ async function login() {
 
         });
 
-
         if (error) {
 
             console.error(
                 "LOGIN ERROR:",
                 error
             );
-
 
             if (errorElement) {
 
@@ -371,10 +362,8 @@ async function login() {
             return;
         }
 
-
         currentUser =
             data.user || null;
-
 
         if (currentUser) {
 
@@ -388,7 +377,6 @@ async function login() {
             "LOGIN EXCEPTION:",
             error
         );
-
 
         if (errorElement) {
 
@@ -423,7 +411,6 @@ async function logout() {
 
         }
 
-
         await supabaseClient.auth.signOut();
 
     } catch (error) {
@@ -447,7 +434,6 @@ function showApp() {
         document.getElementById("app");
 
     if (!app) return;
-
 
     app.innerHTML = `
 
@@ -475,7 +461,6 @@ function showApp() {
 
                 </div>
 
-
                 <div class="header-actions">
 
                     <div class="online-indicator">
@@ -502,14 +487,12 @@ function showApp() {
 
         </header>
 
-
         <main class="main-container">
 
             <div
                 id="appMessage"
                 class="app-message"
             ></div>
-
 
             <div class="page-title">
 
@@ -525,7 +508,6 @@ function showApp() {
 
                 </div>
 
-
                 <div class="date-controls">
 
                     <button
@@ -537,12 +519,10 @@ function showApp() {
                         ←
                     </button>
 
-
                     <div
                         id="currentDate"
                         class="current-date"
                     ></div>
-
 
                     <button
                         id="nextDay"
@@ -552,7 +532,6 @@ function showApp() {
                     >
                         →
                     </button>
-
 
                     <button
                         id="todayButton"
@@ -565,7 +544,6 @@ function showApp() {
                 </div>
 
             </div>
-
 
             <section class="dashboard-summary">
 
@@ -589,7 +567,6 @@ function showApp() {
 
                 </div>
 
-
                 <div class="summary-card">
 
                     <div class="summary-icon">
@@ -610,7 +587,6 @@ function showApp() {
 
                 </div>
 
-
                 <div class="summary-card">
 
                     <div class="summary-icon">
@@ -630,7 +606,6 @@ function showApp() {
                     </div>
 
                 </div>
-
 
                 <div class="summary-card">
 
@@ -654,7 +629,6 @@ function showApp() {
 
             </section>
 
-
             <section class="appointment-card">
 
                 <div class="card-heading">
@@ -677,7 +651,6 @@ function showApp() {
 
                 </div>
 
-
                 <form
                     id="appointmentForm"
                     class="appointment-form"
@@ -698,7 +671,6 @@ function showApp() {
 
                     </div>
 
-
                     <div class="form-group">
 
                         <label for="patientPhone">
@@ -712,7 +684,6 @@ function showApp() {
                         >
 
                     </div>
-
 
                     <div class="form-group">
 
@@ -728,7 +699,6 @@ function showApp() {
 
                     </div>
 
-
                     <div class="form-group">
 
                         <label for="appointmentNote">
@@ -743,7 +713,6 @@ function showApp() {
 
                     </div>
 
-
                     <button
                         class="add-button"
                         type="submit"
@@ -755,7 +724,6 @@ function showApp() {
                 </form>
 
             </section>
-
 
             <section class="schedule-card">
 
@@ -773,7 +741,6 @@ function showApp() {
 
                     </div>
 
-
                     <div class="schedule-header-right">
 
                         <div class="working-hours">
@@ -790,7 +757,6 @@ function showApp() {
                     </div>
 
                 </div>
-
 
                 <div class="schedule-table-wrapper">
 
@@ -828,7 +794,6 @@ function showApp() {
 
                         </thead>
 
-
                         <tbody
                             id="scheduleBody"
                         >
@@ -839,8 +804,11 @@ function showApp() {
                                     colspan="6"
                                     class="loading-cell"
                                 >
+
                                     <div class="loading-spinner"></div>
+
                                     Po ngarkohet orari...
+
                                 </td>
 
                             </tr>
@@ -856,12 +824,10 @@ function showApp() {
         </main>
     `;
 
-
     const userEmail =
         document.getElementById(
             "userEmail"
         );
-
 
     if (userEmail && currentUser) {
 
@@ -870,12 +836,10 @@ function showApp() {
 
     }
 
-
     const logoutButton =
         document.getElementById(
             "logoutButton"
         );
-
 
     if (logoutButton) {
 
@@ -886,12 +850,10 @@ function showApp() {
 
     }
 
-
     const previousDay =
         document.getElementById(
             "previousDay"
         );
-
 
     if (previousDay) {
 
@@ -911,12 +873,10 @@ function showApp() {
 
     }
 
-
     const nextDay =
         document.getElementById(
             "nextDay"
         );
-
 
     if (nextDay) {
 
@@ -936,12 +896,10 @@ function showApp() {
 
     }
 
-
     const todayButton =
         document.getElementById(
             "todayButton"
         );
-
 
     if (todayButton) {
 
@@ -960,12 +918,10 @@ function showApp() {
 
     }
 
-
     const appointmentForm =
         document.getElementById(
             "appointmentForm"
         );
-
 
     if (appointmentForm) {
 
@@ -981,7 +937,6 @@ function showApp() {
         );
 
     }
-
 
     updateDateDisplay();
 
@@ -1068,7 +1023,6 @@ function generateTimes() {
     const endMinutes =
         18 * 60;
 
-
     for (
         let minutes = startMinutes;
         minutes <= endMinutes;
@@ -1083,7 +1037,6 @@ function generateTimes() {
         const minute =
             minutes % 60;
 
-
         const h =
             String(hour)
                 .padStart(2, "0");
@@ -1092,13 +1045,11 @@ function generateTimes() {
             String(minute)
                 .padStart(2, "0");
 
-
         times.push(
             `${h}:${m}`
         );
 
     }
-
 
     return times;
 }
@@ -1117,9 +1068,7 @@ function populateTimeSelect() {
 
     if (!select) return;
 
-
     select.innerHTML = "";
-
 
     const placeholder =
         document.createElement(
@@ -1139,10 +1088,8 @@ function populateTimeSelect() {
         placeholder
     );
 
-
     const times =
         generateTimes();
-
 
     times.forEach(
         function (time) {
@@ -1181,7 +1128,6 @@ async function loadAppointments() {
 
     if (!body) return;
 
-
     body.innerHTML = `
         <tr>
             <td
@@ -1194,10 +1140,8 @@ async function loadAppointments() {
         </tr>
     `;
 
-
     const selectedDate =
         dateKey(currentDate);
-
 
     try {
 
@@ -1218,7 +1162,6 @@ async function loadAppointments() {
                 }
             );
 
-
         if (error) {
 
             console.error(
@@ -1226,13 +1169,11 @@ async function loadAppointments() {
                 error
             );
 
-
             showMessage(
                 "Gabim gjatë ngarkimit të vizitave: " +
                 error.message,
                 "error"
             );
-
 
             appointments = [];
 
@@ -1241,13 +1182,10 @@ async function loadAppointments() {
             return;
         }
 
-
         appointments =
             data || [];
 
-
         renderAppointments();
-
 
     } catch (error) {
 
@@ -1256,12 +1194,10 @@ async function loadAppointments() {
             error
         );
 
-
         showMessage(
             "Gabim gjatë ngarkimit të orarit.",
             "error"
         );
-
 
         appointments = [];
 
@@ -1285,18 +1221,14 @@ function renderAppointments() {
 
     if (!body) return;
 
-
     body.innerHTML = "";
 
-
     updateDashboardCounters();
-
 
     const scheduleInfo =
         document.getElementById(
             "scheduleInfo"
         );
-
 
     if (scheduleInfo) {
 
@@ -1309,14 +1241,11 @@ function renderAppointments() {
 
     }
 
-
     const times =
         generateTimes();
 
-
     let hasAppointments =
         false;
-
 
     times.forEach(
         function (time) {
@@ -1332,7 +1261,6 @@ function renderAppointments() {
                     }
                 );
 
-
             if (
                 matchingAppointments.length === 0
             ) {
@@ -1342,39 +1270,39 @@ function renderAppointments() {
                         "tr"
                     );
 
-
                 tr.className =
                     "empty-time-row";
-
 
                 tr.innerHTML = `
 
                     <td class="time-cell">
+
                         <div class="time-label">
                             ${escapeHtml(time)}
                         </div>
+
                     </td>
 
                     <td colspan="5">
 
                         <div class="free-slot">
+
                             <span class="free-dot"></span>
+
                             Orar i lirë
+
                         </div>
 
                     </td>
 
                 `;
 
-
                 body.appendChild(tr);
 
                 return;
             }
 
-
             hasAppointments = true;
-
 
             matchingAppointments.forEach(
                 function (appointment, index) {
@@ -1392,7 +1320,6 @@ function renderAppointments() {
 
         }
     );
-
 
     if (!hasAppointments) {
 
@@ -1448,34 +1375,27 @@ function renderAppointmentRow(
             "tr"
         );
 
-
     tr.className =
         "appointment-row";
-
 
     const name =
         appointment.patient_name ||
         "Pa emër";
 
-
     const phone =
         appointment.patient_phone ||
         "—";
-
 
     const note =
         appointment.note ||
         "—";
 
-
     const status =
         appointment.status ||
         "planned";
 
-
     const initials =
         getInitials(name);
-
 
     tr.innerHTML = `
 
@@ -1494,7 +1414,6 @@ function renderAppointmentRow(
             </div>
 
         </td>
-
 
         <td class="patient-cell">
 
@@ -1520,7 +1439,6 @@ function renderAppointmentRow(
 
         </td>
 
-
         <td class="phone-cell">
 
             ${
@@ -1543,7 +1461,6 @@ function renderAppointmentRow(
 
         </td>
 
-
         <td class="note-cell">
 
             ${
@@ -1565,7 +1482,6 @@ function renderAppointmentRow(
 
         </td>
 
-
         <td class="status-cell">
 
             <span
@@ -1581,7 +1497,6 @@ function renderAppointmentRow(
             </span>
 
         </td>
-
 
         <td class="actions-cell">
 
@@ -1602,7 +1517,6 @@ function renderAppointmentRow(
                         : ""
                 }
 
-
                 ${
                     status !== "finished"
                         ? `
@@ -1617,7 +1531,6 @@ function renderAppointmentRow(
                         `
                         : ""
                 }
-
 
                 ${
                     status !== "cancelled"
@@ -1634,7 +1547,6 @@ function renderAppointmentRow(
                         : ""
                 }
 
-
                 <button
                     type="button"
                     class="action-button action-delete"
@@ -1650,12 +1562,10 @@ function renderAppointmentRow(
 
     `;
 
-
     const buttons =
         tr.querySelectorAll(
             "[data-action]"
         );
-
 
     buttons.forEach(
         function (button) {
@@ -1666,7 +1576,6 @@ function renderAppointmentRow(
 
                     const action =
                         button.dataset.action;
-
 
                     if (
                         action === "delete"
@@ -1680,7 +1589,6 @@ function renderAppointmentRow(
 
                     }
 
-
                     await changeStatus(
                         appointment.id,
                         action
@@ -1691,7 +1599,6 @@ function renderAppointmentRow(
 
         }
     );
-
 
     return tr;
 }
@@ -1723,10 +1630,8 @@ function updateDashboardCounters() {
             "arrivedAppointments"
         );
 
-
     const totalCount =
         appointments.length;
-
 
     const plannedCount =
         appointments.filter(
@@ -1740,7 +1645,6 @@ function updateDashboardCounters() {
             }
         ).length;
 
-
     const finishedCount =
         appointments.filter(
             function (appointment) {
@@ -1752,7 +1656,6 @@ function updateDashboardCounters() {
 
             }
         ).length;
-
 
     const arrivedCount =
         appointments.filter(
@@ -1766,24 +1669,20 @@ function updateDashboardCounters() {
             }
         ).length;
 
-
     if (total) {
         total.textContent =
             totalCount;
     }
-
 
     if (planned) {
         planned.textContent =
             plannedCount;
     }
 
-
     if (finished) {
         finished.textContent =
             finishedCount;
     }
-
 
     if (arrived) {
         arrived.textContent =
@@ -1871,7 +1770,6 @@ async function addAppointment() {
             "appointmentNote"
         );
 
-
     if (
         !nameElement ||
         !timeElement
@@ -1879,26 +1777,21 @@ async function addAppointment() {
         return;
     }
 
-
     const patientName =
         nameElement.value.trim();
-
 
     const patientPhone =
         phoneElement
             ? phoneElement.value.trim()
             : "";
 
-
     const appointmentTime =
         timeElement.value;
-
 
     const note =
         noteElement
             ? noteElement.value.trim()
             : "";
-
 
     if (!patientName) {
 
@@ -1910,7 +1803,6 @@ async function addAppointment() {
         return;
     }
 
-
     if (!appointmentTime) {
 
         showMessage(
@@ -1921,10 +1813,8 @@ async function addAppointment() {
         return;
     }
 
-
     const selectedDate =
         dateKey(currentDate);
-
 
     try {
 
@@ -1956,14 +1846,12 @@ async function addAppointment() {
             ])
             .select();
 
-
         if (error) {
 
             console.error(
                 "ADD APPOINTMENT ERROR:",
                 error
             );
-
 
             showMessage(
                 "Vizita nuk u shtua: " +
@@ -1973,7 +1861,6 @@ async function addAppointment() {
 
             return;
         }
-
 
         if (
             data &&
@@ -1986,22 +1873,17 @@ async function addAppointment() {
 
         }
 
-
         nameElement.value = "";
-
 
         if (phoneElement) {
             phoneElement.value = "";
         }
 
-
         if (noteElement) {
             noteElement.value = "";
         }
 
-
         timeElement.selectedIndex = 0;
-
 
         appointments.sort(
             function (a, b) {
@@ -2017,15 +1899,12 @@ async function addAppointment() {
             }
         );
 
-
         renderAppointments();
-
 
         showMessage(
             "Vizita u shtua me sukses.",
             "success"
         );
-
 
     } catch (error) {
 
@@ -2033,7 +1912,6 @@ async function addAppointment() {
             "ADD APPOINTMENT EXCEPTION:",
             error
         );
-
 
         showMessage(
             "Gabim gjatë shtimit të vizitës.",
@@ -2068,14 +1946,12 @@ async function changeStatus(
                 id
             );
 
-
         if (error) {
 
             console.error(
                 "CHANGE STATUS ERROR:",
                 error
             );
-
 
             showMessage(
                 "Statusi nuk u ndryshua: " +
@@ -2085,7 +1961,6 @@ async function changeStatus(
 
             return;
         }
-
 
         appointments =
             appointments.map(
@@ -2107,15 +1982,12 @@ async function changeStatus(
                 }
             );
 
-
         renderAppointments();
-
 
         showMessage(
             "Statusi u ndryshua.",
             "success"
         );
-
 
     } catch (error) {
 
@@ -2123,7 +1995,6 @@ async function changeStatus(
             "CHANGE STATUS EXCEPTION:",
             error
         );
-
 
         showMessage(
             "Gabim gjatë ndryshimit të statusit.",
@@ -2146,9 +2017,7 @@ async function deleteAppointment(id) {
             "A je i sigurt që dëshiron ta fshish këtë vizitë?"
         );
 
-
     if (!confirmed) return;
-
 
     try {
 
@@ -2162,14 +2031,12 @@ async function deleteAppointment(id) {
                 id
             );
 
-
         if (error) {
 
             console.error(
                 "DELETE APPOINTMENT ERROR:",
                 error
             );
-
 
             showMessage(
                 "Vizita nuk u fshi: " +
@@ -2179,7 +2046,6 @@ async function deleteAppointment(id) {
 
             return;
         }
-
 
         appointments =
             appointments.filter(
@@ -2192,15 +2058,12 @@ async function deleteAppointment(id) {
                 }
             );
 
-
         renderAppointments();
-
 
         showMessage(
             "Vizita u fshi.",
             "success"
         );
-
 
     } catch (error) {
 
@@ -2208,7 +2071,6 @@ async function deleteAppointment(id) {
             "DELETE EXCEPTION:",
             error
         );
-
 
         showMessage(
             "Gabim gjatë fshirjes.",
@@ -2236,7 +2098,6 @@ function setupRealtime() {
                 );
 
         }
-
 
         realtimeChannel =
             supabaseClient
@@ -2271,7 +2132,6 @@ function setupRealtime() {
 
                     }
                 );
-
 
     } catch (error) {
 
@@ -2312,13 +2172,11 @@ function getInitials(name) {
 
     if (!name) return "";
 
-
     const parts =
         name
             .trim()
             .split(/\s+/)
             .filter(Boolean);
-
 
     if (
         parts.length === 1
@@ -2332,7 +2190,6 @@ function getInitials(name) {
             .toUpperCase();
 
     }
-
 
     return (
         parts[0][0] +
@@ -2418,9 +2275,7 @@ function showMessage(
             "appMessage"
         );
 
-
     if (!element) return;
-
 
     element.className =
         "app-message " +
@@ -2429,10 +2284,8 @@ function showMessage(
             "success"
         );
 
-
     element.textContent =
         message;
-
 
     setTimeout(
         function () {
@@ -2455,4 +2308,3 @@ function showMessage(
     );
 
 }
-```
