@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-21";
+const APP_VERSION = "GVM-20260924-22";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -855,12 +855,14 @@ async function showPatientsView() {
 
 async function loadPatients() {
     const body = document.getElementById("patientsBody");
+    const countElement = document.getElementById("patientsCount");
+
     if (body) {
         body.innerHTML = `
             <tr>
                 <td colspan="7" class="loading-cell">
                     <div class="loading-spinner"></div>
-                    Po ngarkohen pacientët...
+                    Po ngarkohen pacientët... 0
                 </td>
             </tr>
         `;
@@ -868,15 +870,19 @@ async function loadPatients() {
 
     try {
         var allPatients = [];
-        var pageSize = 1000;
-        var from = 0;
+        var batchSize = 500;
+        var lastCardNumber = 0;
+        var batchNumber = 0;
 
         while (true) {
+            batchNumber++;
+
             const { data, error } = await supabaseClient
                 .from("patients")
                 .select("*")
-                .order("full_name", { ascending: true })
-                .range(from, from + pageSize - 1);
+                .gt("card_number", lastCardNumber)
+                .order("card_number", { ascending: true })
+                .limit(batchSize);
 
             if (error) {
                 console.error("LOAD PATIENTS ERROR:", error);
@@ -893,32 +899,71 @@ async function loadPatients() {
             }
 
             var rows = data || [];
-            allPatients = allPatients.concat(rows);
 
-            if (rows.length < pageSize) {
+            if (rows.length === 0) {
                 break;
             }
 
-            from += pageSize;
+            allPatients = allPatients.concat(rows);
+
+            var lastRow = rows[rows.length - 1];
+            var nextCardNumber = Number(lastRow.card_number);
+
+            if (!isFinite(nextCardNumber) || nextCardNumber <= lastCardNumber) {
+                console.error("Invalid card_number pagination value:", lastRow);
+                break;
+            }
+
+            lastCardNumber = nextCardNumber;
+
+            if (countElement) {
+                countElement.textContent =
+                    allPatients.length + " pacientë — duke ngarkuar...";
+            }
+
+            if (body) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="loading-cell">
+                            <div class="loading-spinner"></div>
+                            Po ngarkohen pacientët... ${allPatients.length}
+                        </td>
+                    </tr>
+                `;
+            }
+
+            if (rows.length < batchSize) {
+                break;
+            }
+
+            if (batchNumber > 1000) {
+                console.error("Patient pagination safety limit reached.");
+                break;
+            }
         }
 
         patients = allPatients;
-        console.log("Patients loaded:", patients.length);
+
+        console.log("====================================");
+        console.log("TOTAL PATIENTS LOADED:", patients.length);
+        console.log("LAST CARD NUMBER:", lastCardNumber);
+        console.log("====================================");
+
         renderPatients();
+
     } catch (error) {
         console.error("LOAD PATIENTS EXCEPTION:", error);
         if (body) {
             body.innerHTML = `
                 <tr>
                     <td colspan="7" class="empty-day-cell">
-                        Gabim gjatë ngarkimit të pacientëve.
+                        Gabim gjatë ngarkimit të pacientëve: ${escapeHtml(error.message || String(error))}
                     </td>
                 </tr>
             `;
         }
     }
 }
-
 function formatCardNumber(value) {
     if (value === null || value === undefined || value === "") {
         return "-";
