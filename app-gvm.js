@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-18";
+const APP_VERSION = "GVM-20260924-20";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -6,318 +6,133 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
 
-let supabaseClient = null;
-let currentUser = null;
-let currentDate = new Date();
+var supabaseClient = null;
+var currentUser = null;
+var currentDate = new Date();
 
-let appointments = [];
-let patients = [];
+var appointments = [];
+var patients = [];
 
-let realtimeChannel = null;
-let patientsRealtimeChannel = null;
+var editingAppointmentId = null;
+var editingPatientId = null;
+var selectedAppointmentPatientId = null;
 
-let currentView = "appointments";
-let patientSearchTerm = "";
-let editingPatientId = null;
-let editingAppointmentId = null;
+var appointmentsChannel = null;
+var patientsChannel = null;
+
+console.log("AMBULATORI GVM " + APP_VERSION);
+
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+function initSupabase() {
+    if (!window.supabase) {
+        console.error("Supabase CDN nuk u ngarkua.");
+        showFatalError(
+            "Supabase nuk u ngarkua. Kontrollo lidhjen me internetin."
+        );
+        return false;
+    }
+
+    try {
+        supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        return true;
+    } catch (error) {
+        console.error("Supabase init error:", error);
+        showFatalError("Gabim gjatë inicializimit të sistemit.");
+        return false;
+    }
+}
+
 
 /* =========================================================
    START
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("=================================");
-    console.log("AMBULATORI GVM");
-    console.log("VERSION:", APP_VERSION);
-    console.log("=================================");
+    injectStyles();
 
-    startAmbulatoriGVM();
-});
-
-
-async function startAmbulatoriGVM() {
-    try {
-        if (!window.supabase) {
-            showFatalError(
-                "Supabase nuk u ngarkua. Kontrollo index.html dhe CDN."
-            );
-            return;
-        }
-
-        supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
-
-        console.log("Supabase initialized.");
-
-        await checkSession();
-
-    } catch (error) {
-        console.error("START ERROR:", error);
-
-        showFatalError(
-            error && error.message
-                ? error.message
-                : "Gabim gjatë nisjes së sistemit."
-        );
-    }
-}
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function escapeHtml(value) {
-    if (value === null || value === undefined) {
-        return "";
-    }
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return year + "-" + month + "-" + day;
-}
-
-
-function displayDate(date) {
-    return date.toLocaleDateString("sq-AL", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-    });
-}
-
-
-function normalizeDate(date) {
-    return new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-    );
-}
-
-
-function showMessage(message, type) {
-    const element = document.getElementById("appMessage");
-
-    if (!element) {
+    if (!initSupabase()) {
         return;
     }
 
-    element.textContent = message;
-    element.className = "app-message " + (type || "success");
+    checkSession();
+});
 
-    element.style.display = "block";
-
-    setTimeout(function () {
-        if (element) {
-            element.style.display = "none";
-        }
-    }, 4000);
-}
-
-
-function getStatusLabel(status) {
-    if (status === "completed") {
-        return "Përfunduar";
-    }
-
-    if (status === "cancelled") {
-        return "Anuluar";
-    }
-
-    if (status === "waiting") {
-        return "Në pritje";
-    }
-
-    return "Planifikuar";
-}
-
-
-function getStatusClass(status) {
-    if (status === "completed") {
-        return "status-completed";
-    }
-
-    if (status === "cancelled") {
-        return "status-cancelled";
-    }
-
-    if (status === "waiting") {
-        return "status-waiting";
-    }
-
-    return "status-planned";
-}
-
-
-/* =========================================================
-   FATAL ERROR
-========================================================= */
-
-function showFatalError(message) {
-    let app = document.getElementById("app");
-
-    if (!app) {
-        app = document.createElement("div");
-        app.id = "app";
-        document.body.appendChild(app);
-    }
-
-    app.innerHTML = `
-        <div style="
-            min-height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            padding:25px;
-            box-sizing:border-box;
-            background:#f4f8fa;
-            font-family:Arial,sans-serif;
-        ">
-            <div style="
-                max-width:650px;
-                width:100%;
-                background:#fff;
-                border-radius:18px;
-                padding:35px;
-                box-shadow:0 15px 45px rgba(0,0,0,.10);
-                border:1px solid #e0eaed;
-                text-align:center;
-            ">
-                <div style="
-                    font-size:55px;
-                    margin-bottom:15px;
-                ">🏥</div>
-
-                <h2 style="
-                    margin:0 0 15px;
-                    color:#263c43;
-                ">
-                    AMBULATORI GVM
-                </h2>
-
-                <p style="
-                    color:#b42318;
-                    font-weight:700;
-                    line-height:1.6;
-                ">
-                    ${escapeHtml(message)}
-                </p>
-
-                <p style="
-                    color:#718188;
-                    font-size:13px;
-                ">
-                    Hap F12 → Console për të parë gabimin teknik.
-                </p>
-
-                <button
-                    type="button"
-                    onclick="location.reload()"
-                    style="
-                        margin-top:10px;
-                        border:0;
-                        background:#0f766e;
-                        color:white;
-                        padding:12px 20px;
-                        border-radius:9px;
-                        cursor:pointer;
-                        font-weight:800;
-                    "
-                >
-                    Rifresko faqen
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-
-/* =========================================================
-   SESSION
-========================================================= */
 
 async function checkSession() {
-    try {
-        console.log("Checking session...");
+    console.log("Checking session...");
 
-        const result =
-            await supabaseClient.auth.getSession();
+    try {
+        var result = await supabaseClient.auth.getSession();
 
         if (result.error) {
-            console.error(
-                "GET SESSION ERROR:",
-                result.error
-            );
-
+            console.error("Session error:", result.error);
             showLogin();
             return;
         }
 
-        currentUser =
-            result.data &&
-            result.data.session
-                ? result.data.session.user
-                : null;
+        var session = result.data.session;
 
-        if (currentUser) {
+        if (session && session.user) {
+            currentUser = session.user;
+
             console.log(
                 "Existing session:",
                 currentUser.email
             );
 
-            await showApp();
+            await startApplication();
         } else {
-            console.log("No active session.");
             showLogin();
         }
 
         supabaseClient.auth.onAuthStateChange(
-            async function (event, session) {
+            async function (event, sessionData) {
                 console.log("Auth event:", event);
 
-                currentUser =
-                    session
-                        ? session.user
-                        : null;
+                if (
+                    event === "SIGNED_IN" &&
+                    sessionData &&
+                    sessionData.user
+                ) {
+                    currentUser = sessionData.user;
+                    await startApplication();
+                }
 
-                if (currentUser) {
-                    console.log(
-                        "Authenticated:",
-                        currentUser.email
-                    );
-
-                    await showApp();
-                } else {
-                    cleanupRealtime();
+                if (event === "SIGNED_OUT") {
+                    currentUser = null;
+                    stopRealtime();
                     showLogin();
                 }
             }
         );
-
     } catch (error) {
-        console.error(
-            "CHECK SESSION ERROR:",
-            error
-        );
-
+        console.error("CHECK SESSION ERROR:", error);
         showLogin();
     }
+}
+
+
+/* =========================================================
+   APPLICATION START
+========================================================= */
+
+async function startApplication() {
+    buildApplication();
+
+    await loadAppointments();
+    await loadPatients();
+
+    setupRealtime();
+
+    showAppointments();
 }
 
 
@@ -326,1178 +141,244 @@ async function checkSession() {
 ========================================================= */
 
 function showLogin() {
-    cleanupRealtime();
-
-    const app =
-        document.getElementById("app");
+    var app = document.getElementById("app");
 
     if (!app) {
-        showFatalError(
-            "Elementi #app mungon në index.html."
-        );
         return;
     }
 
-    app.innerHTML = `
-        <div class="gvm-login-page">
+    app.innerHTML =
+        '<div class="login-page">' +
+            '<div class="login-box">' +
+                '<div class="login-logo">GVM</div>' +
+                '<h1>AMBULATORI GVM</h1>' +
+                '<p class="login-subtitle">Sistemi i menaxhimit të ambulancës</p>' +
 
-            <div class="gvm-login-box">
+                '<form id="loginForm">' +
 
-                <div class="gvm-login-logo">
-                    GVM
-                </div>
+                    '<label>Email</label>' +
+                    '<input id="loginEmail" type="email" autocomplete="username" required placeholder="Email">' +
 
-                <div class="gvm-login-icon">
-                    🏥
-                </div>
+                    '<label>Fjalëkalimi</label>' +
+                    '<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Fjalëkalimi">' +
 
-                <h1>
-                    AMBULATORI GVM
-                </h1>
+                    '<button class="primary-button full-button" type="submit">' +
+                        'Hyr në sistem' +
+                    '</button>' +
 
-                <p class="gvm-login-subtitle">
-                    Sistemi i menaxhimit të pacientëve dhe vizitave
-                </p>
+                    '<div id="loginMessage" class="login-message"></div>' +
 
-                <form id="loginForm">
+                '</form>' +
+            '</div>' +
+        '</div>';
 
-                    <label>
-                        Email
-                    </label>
-
-                    <input
-                        id="loginEmail"
-                        type="email"
-                        autocomplete="username"
-                        placeholder="Shkruaj email"
-                        required
-                    >
-
-                    <label>
-                        Fjalëkalimi
-                    </label>
-
-                    <input
-                        id="loginPassword"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="Shkruaj fjalëkalimin"
-                        required
-                    >
-
-                    <button
-                        type="submit"
-                        class="gvm-login-button"
-                    >
-                        Hyr në sistem
-                    </button>
-
-                    <div
-                        id="loginError"
-                        class="gvm-login-error"
-                    ></div>
-
-                </form>
-
-            </div>
-
-        </div>
-    `;
-
-    injectStyles();
-
-    const form =
-        document.getElementById("loginForm");
+    var form = document.getElementById("loginForm");
 
     if (form) {
-        form.addEventListener(
-            "submit",
-            async function (event) {
-                event.preventDefault();
-                await login();
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            var email =
+                document.getElementById("loginEmail").value.trim();
+
+            var password =
+                document.getElementById("loginPassword").value;
+
+            var message =
+                document.getElementById("loginMessage");
+
+            message.textContent = "Po kontrollohen të dhënat...";
+            message.className = "login-message";
+
+            try {
+                var result =
+                    await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                if (result.error) {
+                    console.error(result.error);
+
+                    message.textContent =
+                        "Email ose fjalëkalim i pasaktë.";
+
+                    message.className =
+                        "login-message error";
+
+                    return;
+                }
+
+                currentUser = result.data.user;
+
+                await startApplication();
+
+            } catch (error) {
+                console.error(error);
+
+                message.textContent =
+                    "Ndodhi një gabim gjatë hyrjes.";
+
+                message.className =
+                    "login-message error";
             }
-        );
+        });
     }
 }
 
 
-async function login() {
-    const emailElement =
-        document.getElementById("loginEmail");
+/* =========================================================
+   MAIN APPLICATION
+========================================================= */
 
-    const passwordElement =
-        document.getElementById("loginPassword");
+function buildApplication() {
+    var app = document.getElementById("app");
 
-    const errorElement =
-        document.getElementById("loginError");
-
-    if (!emailElement || !passwordElement) {
+    if (!app) {
         return;
     }
 
-    const email =
-        emailElement.value.trim();
+    app.innerHTML =
+        '<div class="app-shell">' +
 
-    const password =
-        passwordElement.value;
+            '<header class="top-header">' +
 
-    if (!email || !password) {
-        if (errorElement) {
-            errorElement.style.display = "block";
-            errorElement.textContent =
-                "Plotëso email dhe fjalëkalimin.";
-        }
+                '<div class="brand-area">' +
+                    '<div class="brand-logo">GVM</div>' +
+                    '<div>' +
+                        '<div class="brand-title">AMBULATORI GVM</div>' +
+                        '<div class="brand-version">' +
+                            APP_VERSION +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
 
-        return;
+                '<div class="user-area">' +
+                    '<span id="currentUserEmail"></span>' +
+                    '<button id="logoutButton" class="logout-button">' +
+                        'Dil' +
+                    '</button>' +
+                '</div>' +
+
+            '</header>' +
+
+            '<nav class="main-nav">' +
+
+                '<button id="navAppointments" class="nav-button active">' +
+                    '📅 Vizitat' +
+                '</button>' +
+
+                '<button id="navPatients" class="nav-button">' +
+                    '👤 Pacientët' +
+                '</button>' +
+
+            '</nav>' +
+
+            '<main id="mainContent" class="main-content">' +
+                '<div class="loading-box">Po ngarkohet sistemi...</div>' +
+            '</main>' +
+
+        '</div>';
+
+    var emailElement =
+        document.getElementById("currentUserEmail");
+
+    if (emailElement && currentUser) {
+        emailElement.textContent =
+            currentUser.email || "";
     }
 
-    try {
-        if (errorElement) {
-            errorElement.style.display = "none";
-            errorElement.textContent = "";
-        }
+    var logoutButton =
+        document.getElementById("logoutButton");
 
-        const result =
-            await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
+    if (logoutButton) {
+        logoutButton.addEventListener(
+            "click",
+            logoutUser
+        );
+    }
 
-        if (result.error) {
-            console.error(
-                "LOGIN ERROR:",
-                result.error
-            );
-
-            if (errorElement) {
-                errorElement.style.display = "block";
-                errorElement.textContent =
-                    result.error.message ||
-                    "Email ose fjalëkalim i gabuar.";
+    document
+        .getElementById("navAppointments")
+        .addEventListener(
+            "click",
+            function () {
+                setActiveNav("appointments");
+                showAppointments();
             }
-
-            return;
-        }
-
-        currentUser =
-            result.data.user || null;
-
-        if (currentUser) {
-            await showApp();
-        }
-
-    } catch (error) {
-        console.error(
-            "LOGIN EXCEPTION:",
-            error
         );
 
-        if (errorElement) {
-            errorElement.style.display = "block";
-            errorElement.textContent =
-                "Ndodhi një gabim gjatë hyrjes.";
-        }
+    document
+        .getElementById("navPatients")
+        .addEventListener(
+            "click",
+            function () {
+                setActiveNav("patients");
+                showPatients();
+            }
+        );
+}
+
+
+function setActiveNav(section) {
+    var appointmentsButton =
+        document.getElementById("navAppointments");
+
+    var patientsButton =
+        document.getElementById("navPatients");
+
+    if (appointmentsButton) {
+        appointmentsButton.classList.remove("active");
+    }
+
+    if (patientsButton) {
+        patientsButton.classList.remove("active");
+    }
+
+    if (section === "appointments" && appointmentsButton) {
+        appointmentsButton.classList.add("active");
+    }
+
+    if (section === "patients" && patientsButton) {
+        patientsButton.classList.add("active");
     }
 }
 
 
-async function logout() {
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutUser() {
     try {
-        cleanupRealtime();
+        stopRealtime();
 
         await supabaseClient.auth.signOut();
 
         currentUser = null;
 
         showLogin();
-
     } catch (error) {
-        console.error(
-            "LOGOUT ERROR:",
-            error
-        );
+        console.error("Logout error:", error);
     }
 }
 
 
 /* =========================================================
-   REALTIME CLEANUP
+   APPOINTMENTS LOAD
 ========================================================= */
-
-function cleanupRealtime() {
-    if (realtimeChannel && supabaseClient) {
-        try {
-            supabaseClient.removeChannel(
-                realtimeChannel
-            );
-        } catch (error) {
-            console.error(
-                "REMOVE APPOINTMENT CHANNEL ERROR:",
-                error
-            );
-        }
-
-        realtimeChannel = null;
-    }
-
-    if (
-        patientsRealtimeChannel &&
-        supabaseClient
-    ) {
-        try {
-            supabaseClient.removeChannel(
-                patientsRealtimeChannel
-            );
-        } catch (error) {
-            console.error(
-                "REMOVE PATIENT CHANNEL ERROR:",
-                error
-            );
-        }
-
-        patientsRealtimeChannel = null;
-    }
-}
-
-
-/* =========================================================
-   MAIN APP
-========================================================= */
-
-async function showApp() {
-    const app =
-        document.getElementById("app");
-
-    if (!app) {
-        showFatalError(
-            "Elementi #app mungon nga index.html."
-        );
-        return;
-    }
-
-    injectStyles();
-
-    app.innerHTML = `
-        <header class="gvm-header">
-
-            <div class="gvm-header-inner">
-
-                <div class="gvm-brand">
-
-                    <div class="gvm-brand-icon">
-                        GVM
-                    </div>
-
-                    <div>
-                        <h1>
-                            AMBULATORI GVM
-                        </h1>
-
-                        <small>
-                            Menaxhimi i pacientëve dhe vizitave
-                        </small>
-                    </div>
-
-                </div>
-
-                <div class="gvm-header-actions">
-
-                    <div class="gvm-online">
-                        <span></span>
-                        Online
-                    </div>
-
-                    <span
-                        id="userEmail"
-                        class="gvm-user-email"
-                    ></span>
-
-                    <button
-                        id="logoutButton"
-                        class="gvm-logout"
-                        type="button"
-                    >
-                        Dil
-                    </button>
-
-                </div>
-
-            </div>
-
-        </header>
-
-
-        <main class="gvm-main">
-
-            <div
-                id="appMessage"
-                class="app-message"
-            ></div>
-
-
-            <nav class="gvm-navigation">
-
-                <button
-                    id="navAppointments"
-                    class="gvm-nav-button active"
-                    type="button"
-                >
-                    📅 Vizitat
-                </button>
-
-                <button
-                    id="navPatients"
-                    class="gvm-nav-button"
-                    type="button"
-                >
-                    👤 Pacientët
-                </button>
-
-            </nav>
-
-
-            <section id="appointmentsView">
-
-                <div class="gvm-page-heading">
-
-                    <div>
-                        <div class="gvm-kicker">
-                            PANELI I AMBULATORIT
-                        </div>
-
-                        <h2>
-                            Orari i vizitave
-                        </h2>
-                    </div>
-
-                    <div class="gvm-date-controls">
-
-                        <button
-                            id="previousDay"
-                            class="gvm-date-button"
-                            type="button"
-                        >
-                            ←
-                        </button>
-
-                        <div
-                            id="currentDateLabel"
-                            class="gvm-current-date"
-                        ></div>
-
-                        <button
-                            id="nextDay"
-                            class="gvm-date-button"
-                            type="button"
-                        >
-                            →
-                        </button>
-
-                        <button
-                            id="todayButton"
-                            class="gvm-today-button"
-                            type="button"
-                        >
-                            Sot
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="gvm-dashboard">
-
-                    <div class="gvm-card">
-                        <span>Vizita totale</span>
-                        <strong id="totalAppointments">0</strong>
-                    </div>
-
-                    <div class="gvm-card">
-                        <span>Në pritje</span>
-                        <strong id="waitingAppointments">0</strong>
-                    </div>
-
-                    <div class="gvm-card">
-                        <span>Përfunduar</span>
-                        <strong id="completedAppointments">0</strong>
-                    </div>
-
-                    <div class="gvm-card">
-                        <span>Anuluar</span>
-                        <strong id="cancelledAppointments">0</strong>
-                    </div>
-
-                </div>
-
-
-                <div class="gvm-grid">
-
-                    <div class="gvm-panel">
-
-                        <div class="gvm-panel-header">
-                            <div>
-                                <h3>
-                                    Shto vizitë
-                                </h3>
-
-                                <p>
-                                    Regjistro një vizitë të re
-                                </p>
-                            </div>
-                        </div>
-
-                        <form id="appointmentForm">
-
-                            <input
-                                type="hidden"
-                                id="appointmentId"
-                            >
-
-                            <div class="gvm-form-group">
-
-                                <label>
-                                    Emri i pacientit
-                                </label>
-
-                                <input
-                                    id="appointmentPatient"
-                                    type="text"
-                                    placeholder="Emri dhe mbiemri"
-                                    required
-                                >
-
-                            </div>
-
-
-                            <div class="gvm-form-group">
-
-                                <label>
-                                    Telefoni
-                                </label>
-
-                                <input
-                                    id="appointmentPhone"
-                                    type="text"
-                                    placeholder="Numri i telefonit"
-                                >
-
-                            </div>
-
-
-                            <div class="gvm-form-row">
-
-                                <div class="gvm-form-group">
-
-                                    <label>
-                                        Ora
-                                    </label>
-
-                                    <input
-                                        id="appointmentTime"
-                                        type="time"
-                                        required
-                                    >
-
-                                </div>
-
-                                <div class="gvm-form-group">
-
-                                    <label>
-                                        Statusi
-                                    </label>
-
-                                    <select id="appointmentStatus">
-                                        <option value="planned">
-                                            Planifikuar
-                                        </option>
-
-                                        <option value="waiting">
-                                            Në pritje
-                                        </option>
-
-                                        <option value="completed">
-                                            Përfunduar
-                                        </option>
-
-                                        <option value="cancelled">
-                                            Anuluar
-                                        </option>
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="gvm-form-group">
-
-                                <label>
-                                    Shënim
-                                </label>
-
-                                <textarea
-                                    id="appointmentNote"
-                                    rows="4"
-                                    placeholder="Shënim për vizitën..."
-                                ></textarea>
-
-                            </div>
-
-
-                            <div class="gvm-form-actions">
-
-                                <button
-                                    type="submit"
-                                    class="gvm-primary-button"
-                                    id="saveAppointmentButton"
-                                >
-                                    ➕ Shto vizitën
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="gvm-secondary-button"
-                                    id="cancelAppointmentEdit"
-                                    style="display:none;"
-                                >
-                                    Anulo ndryshimin
-                                </button>
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
-
-                    <div class="gvm-panel">
-
-                        <div class="gvm-panel-header">
-
-                            <div>
-                                <h3>
-                                    Orari i ditës
-                                </h3>
-
-                                <p id="scheduleSubtitle">
-                                    Vizitat e planifikuara
-                                </p>
-                            </div>
-
-                        </div>
-
-                        <div
-                            id="scheduleContainer"
-                            class="gvm-schedule"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section
-                id="patientsView"
-                style="display:none;"
-            >
-
-                <div class="gvm-page-heading">
-
-                    <div>
-                        <div class="gvm-kicker">
-                            REGJISTRI MJEKËSOR
-                        </div>
-
-                        <h2>
-                            Pacientët
-                        </h2>
-                    </div>
-
-                    <button
-                        id="addPatientButton"
-                        class="gvm-primary-button"
-                        type="button"
-                    >
-                        ➕ Pacient i ri
-                    </button>
-
-                </div>
-
-
-                <div class="gvm-patient-toolbar">
-
-                    <input
-                        id="patientSearch"
-                        type="search"
-                        placeholder="🔎 Kërko pacient..."
-                    >
-
-                    <div
-                        id="patientCount"
-                        class="gvm-patient-count"
-                    >
-                        0 pacientë
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="patientsContainer"
-                    class="gvm-patients-container"
-                ></div>
-
-            </section>
-
-        </main>
-
-
-        <div
-            id="patientModal"
-            class="gvm-modal"
-            style="display:none;"
-        >
-
-            <div class="gvm-modal-box">
-
-                <div class="gvm-modal-header">
-
-                    <div>
-                        <h3 id="patientModalTitle">
-                            Pacient i ri
-                        </h3>
-
-                        <p>
-                            Të dhënat e pacientit
-                        </p>
-                    </div>
-
-                    <button
-                        id="closePatientModal"
-                        class="gvm-close-button"
-                        type="button"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <form id="patientForm">
-
-                    <input
-                        type="hidden"
-                        id="patientId"
-                    >
-
-                    <div class="gvm-form-group">
-                        <label>Emri dhe mbiemri *</label>
-
-                        <input
-                            id="patientFullName"
-                            type="text"
-                            required
-                        >
-                    </div>
-
-
-                    <div class="gvm-form-row">
-
-                        <div class="gvm-form-group">
-                            <label>Telefoni</label>
-
-                            <input
-                                id="patientPhone"
-                                type="text"
-                            >
-                        </div>
-
-                        <div class="gvm-form-group">
-                            <label>Datëlindja</label>
-
-                            <input
-                                id="patientBirthDate"
-                                type="date"
-                            >
-                        </div>
-
-                    </div>
-
-
-                    <div class="gvm-form-group">
-                        <label>Nr. personal</label>
-
-                        <input
-                            id="patientPersonalId"
-                            type="text"
-                        >
-                    </div>
-
-
-                    <div class="gvm-form-group">
-                        <label>Adresa</label>
-
-                        <input
-                            id="patientAddress"
-                            type="text"
-                        >
-                    </div>
-
-
-                    <div class="gvm-form-group">
-                        <label>Shënime</label>
-
-                        <textarea
-                            id="patientNotes"
-                            rows="5"
-                        ></textarea>
-                    </div>
-
-
-                    <div class="gvm-form-actions">
-
-                        <button
-                            type="submit"
-                            class="gvm-primary-button"
-                        >
-                            Ruaj pacientin
-                        </button>
-
-                        <button
-                            type="button"
-                            id="cancelPatientButton"
-                            class="gvm-secondary-button"
-                        >
-                            Anulo
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
-
-
-        <div
-            id="patientViewModal"
-            class="gvm-modal"
-            style="display:none;"
-        >
-
-            <div class="gvm-modal-box gvm-patient-view-box">
-
-                <div class="gvm-modal-header">
-
-                    <div>
-                        <h3 id="patientViewName">
-                            Pacienti
-                        </h3>
-
-                        <p>
-                            Kartela e pacientit
-                        </p>
-                    </div>
-
-                    <button
-                        id="closePatientViewModal"
-                        class="gvm-close-button"
-                        type="button"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-                <div
-                    id="patientDetails"
-                    class="gvm-patient-details"
-                ></div>
-
-                <div class="gvm-history-title">
-                    Historiku i vizitave
-                </div>
-
-                <div
-                    id="patientHistory"
-                    class="gvm-patient-history"
-                ></div>
-
-            </div>
-
-        </div>
-    `;
-
-    const userEmail =
-        document.getElementById("userEmail");
-
-    if (userEmail && currentUser) {
-        userEmail.textContent =
-            currentUser.email || "";
-    }
-
-    bindAppEvents();
-
-    await loadAllData();
-
-    setupRealtime();
-
-    switchView(currentView);
-}
-
-
-/* =========================================================
-   EVENTS
-========================================================= */
-
-function bindAppEvents() {
-    const logoutButton =
-        document.getElementById("logoutButton");
-
-    if (logoutButton) {
-        logoutButton.addEventListener(
-            "click",
-            logout
-        );
-    }
-
-
-    const navAppointments =
-        document.getElementById("navAppointments");
-
-    if (navAppointments) {
-        navAppointments.addEventListener(
-            "click",
-            function () {
-                switchView("appointments");
-            }
-        );
-    }
-
-
-    const navPatients =
-        document.getElementById("navPatients");
-
-    if (navPatients) {
-        navPatients.addEventListener(
-            "click",
-            function () {
-                switchView("patients");
-            }
-        );
-    }
-
-
-    const previousDay =
-        document.getElementById("previousDay");
-
-    if (previousDay) {
-        previousDay.addEventListener(
-            "click",
-            function () {
-                currentDate.setDate(
-                    currentDate.getDate() - 1
-                );
-
-                renderAppointments();
-            }
-        );
-    }
-
-
-    const nextDay =
-        document.getElementById("nextDay");
-
-    if (nextDay) {
-        nextDay.addEventListener(
-            "click",
-            function () {
-                currentDate.setDate(
-                    currentDate.getDate() + 1
-                );
-
-                renderAppointments();
-            }
-        );
-    }
-
-
-    const todayButton =
-        document.getElementById("todayButton");
-
-    if (todayButton) {
-        todayButton.addEventListener(
-            "click",
-            function () {
-                currentDate = new Date();
-                renderAppointments();
-            }
-        );
-    }
-
-
-    const appointmentForm =
-        document.getElementById("appointmentForm");
-
-    if (appointmentForm) {
-        appointmentForm.addEventListener(
-            "submit",
-            async function (event) {
-                event.preventDefault();
-                await saveAppointment();
-            }
-        );
-    }
-
-
-    const cancelAppointmentEdit =
-        document.getElementById(
-            "cancelAppointmentEdit"
-        );
-
-    if (cancelAppointmentEdit) {
-        cancelAppointmentEdit.addEventListener(
-            "click",
-            resetAppointmentForm
-        );
-    }
-
-
-    const addPatientButton =
-        document.getElementById(
-            "addPatientButton"
-        );
-
-    if (addPatientButton) {
-        addPatientButton.addEventListener(
-            "click",
-            function () {
-                openPatientModal();
-            }
-        );
-    }
-
-
-    const patientForm =
-        document.getElementById("patientForm");
-
-    if (patientForm) {
-        patientForm.addEventListener(
-            "submit",
-            async function (event) {
-                event.preventDefault();
-                await savePatient();
-            }
-        );
-    }
-
-
-    const closePatientModal =
-        document.getElementById(
-            "closePatientModal"
-        );
-
-    if (closePatientModal) {
-        closePatientModal.addEventListener(
-            "click",
-            closePatientEditor
-        );
-    }
-
-
-    const cancelPatientButton =
-        document.getElementById(
-            "cancelPatientButton"
-        );
-
-    if (cancelPatientButton) {
-        cancelPatientButton.addEventListener(
-            "click",
-            closePatientEditor
-        );
-    }
-
-
-    const closePatientViewModal =
-        document.getElementById(
-            "closePatientViewModal"
-        );
-
-    if (closePatientViewModal) {
-        closePatientViewModal.addEventListener(
-            "click",
-            closePatientView
-        );
-    }
-
-
-    const patientSearch =
-        document.getElementById("patientSearch");
-
-    if (patientSearch) {
-        patientSearch.addEventListener(
-            "input",
-            function () {
-                patientSearchTerm =
-                    patientSearch.value
-                        .trim()
-                        .toLowerCase();
-
-                renderPatients();
-            }
-        );
-    }
-
-
-    const patientModal =
-        document.getElementById("patientModal");
-
-    if (patientModal) {
-        patientModal.addEventListener(
-            "click",
-            function (event) {
-                if (event.target === patientModal) {
-                    closePatientEditor();
-                }
-            }
-        );
-    }
-
-
-    const patientViewModal =
-        document.getElementById(
-            "patientViewModal"
-        );
-
-    if (patientViewModal) {
-        patientViewModal.addEventListener(
-            "click",
-            function (event) {
-                if (
-                    event.target ===
-                    patientViewModal
-                ) {
-                    closePatientView();
-                }
-            }
-        );
-    }
-}
-
-
-/* =========================================================
-   VIEW
-========================================================= */
-
-function switchView(view) {
-    currentView = view;
-
-    const appointmentsView =
-        document.getElementById(
-            "appointmentsView"
-        );
-
-    const patientsView =
-        document.getElementById(
-            "patientsView"
-        );
-
-    const navAppointments =
-        document.getElementById(
-            "navAppointments"
-        );
-
-    const navPatients =
-        document.getElementById(
-            "navPatients"
-        );
-
-    if (view === "patients") {
-        if (appointmentsView) {
-            appointmentsView.style.display =
-                "none";
-        }
-
-        if (patientsView) {
-            patientsView.style.display =
-                "block";
-        }
-
-        if (navAppointments) {
-            navAppointments.classList.remove(
-                "active"
-            );
-        }
-
-        if (navPatients) {
-            navPatients.classList.add(
-                "active"
-            );
-        }
-
-        renderPatients();
-
-    } else {
-        if (appointmentsView) {
-            appointmentsView.style.display =
-                "block";
-        }
-
-        if (patientsView) {
-            patientsView.style.display =
-                "none";
-        }
-
-        if (navAppointments) {
-            navAppointments.classList.add(
-                "active"
-            );
-        }
-
-        if (navPatients) {
-            navPatients.classList.remove(
-                "active"
-            );
-        }
-
-        renderAppointments();
-    }
-}
-
-
-/* =========================================================
-   LOAD DATA
-========================================================= */
-
-async function loadAllData() {
-    await Promise.all([
-        loadAppointments(),
-        loadPatients()
-    ]);
-
-    renderAppointments();
-    renderPatients();
-}
-
 
 async function loadAppointments() {
     try {
-        const result =
-            await supabaseClient
-                .from("appointments")
-                .select("*")
-                .order(
-                    "appointment_date",
-                    { ascending: true }
-                )
-                .order(
-                    "appointment_time",
-                    { ascending: true }
-                );
+        var result = await supabaseClient
+            .from("appointments")
+            .select("*")
+            .order("appointment_date", {
+                ascending: true
+            })
+            .order("appointment_time", {
+                ascending: true
+            });
 
         if (result.error) {
             console.error(
@@ -1505,18 +386,12 @@ async function loadAppointments() {
                 result.error
             );
 
-            showMessage(
-                "Nuk u ngarkuan vizitat: " +
-                result.error.message,
-                "error"
-            );
-
             appointments = [];
+
             return;
         }
 
-        appointments =
-            result.data || [];
+        appointments = result.data || [];
 
         console.log(
             "Appointments loaded:",
@@ -1528,22 +403,22 @@ async function loadAppointments() {
             "LOAD APPOINTMENTS EXCEPTION:",
             error
         );
-
-        appointments = [];
     }
 }
 
 
+/* =========================================================
+   PATIENTS LOAD
+========================================================= */
+
 async function loadPatients() {
     try {
-        const result =
-            await supabaseClient
-                .from("patients")
-                .select("*")
-                .order(
-                    "full_name",
-                    { ascending: true }
-                );
+        var result = await supabaseClient
+            .from("patients")
+            .select("*")
+            .order("full_name", {
+                ascending: true
+            });
 
         if (result.error) {
             console.error(
@@ -1551,18 +426,12 @@ async function loadPatients() {
                 result.error
             );
 
-            showMessage(
-                "Nuk u ngarkuan pacientët: " +
-                result.error.message,
-                "error"
-            );
-
             patients = [];
+
             return;
         }
 
-        patients =
-            result.data || [];
+        patients = result.data || [];
 
         console.log(
             "Patients loaded:",
@@ -1574,350 +443,819 @@ async function loadPatients() {
             "LOAD PATIENTS EXCEPTION:",
             error
         );
-
-        patients = [];
     }
 }
 
 
 /* =========================================================
-   REALTIME
+   APPOINTMENTS PAGE
 ========================================================= */
 
-function setupRealtime() {
-    cleanupRealtime();
+function showAppointments() {
+    setActiveNav("appointments");
 
-    if (!supabaseClient) {
+    var content =
+        document.getElementById("mainContent");
+
+    if (!content) {
         return;
     }
 
-    realtimeChannel =
-        supabaseClient
-            .channel(
-                "gvm-appointments-" +
-                Date.now()
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "appointments"
-                },
-                async function () {
-                    console.log(
-                        "Realtime appointment update"
-                    );
+    var dateString =
+        getDateString(currentDate);
 
-                    await loadAppointments();
-                    renderAppointments();
-                    renderPatients();
-                }
-            )
-            .subscribe(
-                function (status) {
-                    console.log(
-                        "Appointments realtime:",
-                        status
-                    );
-                }
-            );
+    var todayAppointments =
+        appointments.filter(function (item) {
+            return item.appointment_date === dateString;
+        });
 
+    var confirmedCount =
+        todayAppointments.filter(function (item) {
+            return item.status === "confirmed";
+        }).length;
 
-    patientsRealtimeChannel =
-        supabaseClient
-            .channel(
-                "gvm-patients-" +
-                Date.now()
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "patients"
-                },
-                async function () {
-                    console.log(
-                        "Realtime patient update"
-                    );
+    var pendingCount =
+        todayAppointments.filter(function (item) {
+            return !item.status ||
+                item.status === "pending";
+        }).length;
 
-                    await loadPatients();
-                    renderPatients();
-                }
-            )
-            .subscribe(
-                function (status) {
-                    console.log(
-                        "Patients realtime:",
-                        status
-                    );
-                }
-            );
+    var completedCount =
+        todayAppointments.filter(function (item) {
+            return item.status === "completed";
+        }).length;
+
+    var html = "";
+
+    html += '<section class="page-section">';
+
+    html +=
+        '<div class="page-header">' +
+            '<div>' +
+                '<h1>Vizitat</h1>' +
+                '<p>Menaxhimi i vizitave ditore</p>' +
+            '</div>' +
+
+            '<button id="newAppointmentButton" class="primary-button">' +
+                '+ Vizitë e re' +
+            '</button>' +
+        '</div>';
+
+    html +=
+        '<div class="date-toolbar">' +
+
+            '<button id="previousDayButton" class="date-button">' +
+                '‹' +
+            '</button>' +
+
+            '<div class="current-date">' +
+                formatDateAlbanian(currentDate) +
+            '</div>' +
+
+            '<button id="nextDayButton" class="date-button">' +
+                '›' +
+            '</button>' +
+
+            '<button id="todayButton" class="secondary-button">' +
+                'Sot' +
+            '</button>' +
+
+        '</div>';
+
+    html +=
+        '<div class="stats-grid">' +
+
+            '<div class="stat-card">' +
+                '<div class="stat-label">Të gjitha</div>' +
+                '<div class="stat-value">' +
+                    todayAppointments.length +
+                '</div>' +
+            '</div>' +
+
+            '<div class="stat-card">' +
+                '<div class="stat-label">Në pritje</div>' +
+                '<div class="stat-value">' +
+                    pendingCount +
+                '</div>' +
+            '</div>' +
+
+            '<div class="stat-card">' +
+                '<div class="stat-label">Konfirmuara</div>' +
+                '<div class="stat-value">' +
+                    confirmedCount +
+                '</div>' +
+            '</div>' +
+
+            '<div class="stat-card">' +
+                '<div class="stat-label">Përfunduara</div>' +
+                '<div class="stat-value">' +
+                    completedCount +
+                '</div>' +
+            '</div>' +
+
+        '</div>';
+
+    html +=
+        '<div class="appointments-card">' +
+            '<div class="section-title">Orari ditor</div>' +
+            '<div id="appointmentsList">' +
+                renderAppointmentsList(todayAppointments) +
+            '</div>' +
+        '</div>';
+
+    html += '</section>';
+
+    content.innerHTML = html;
+
+    document
+        .getElementById("newAppointmentButton")
+        .addEventListener(
+            "click",
+            function () {
+                openAppointmentForm();
+            }
+        );
+
+    document
+        .getElementById("previousDayButton")
+        .addEventListener(
+            "click",
+            function () {
+                currentDate.setDate(
+                    currentDate.getDate() - 1
+                );
+
+                showAppointments();
+            }
+        );
+
+    document
+        .getElementById("nextDayButton")
+        .addEventListener(
+            "click",
+            function () {
+                currentDate.setDate(
+                    currentDate.getDate() + 1
+                );
+
+                showAppointments();
+            }
+        );
+
+    document
+        .getElementById("todayButton")
+        .addEventListener(
+            "click",
+            function () {
+                currentDate = new Date();
+
+                showAppointments();
+            }
+        );
 }
 
 
-/* =========================================================
-   APPOINTMENTS RENDER
-========================================================= */
-
-function renderAppointments() {
-    const dateString =
-        formatDate(currentDate);
-
-    const dateLabel =
-        document.getElementById(
-            "currentDateLabel"
+function renderAppointmentsList(list) {
+    if (!list || list.length === 0) {
+        return (
+            '<div class="empty-state">' +
+                '<div class="empty-icon">📅</div>' +
+                '<h3>Nuk ka vizita për këtë ditë</h3>' +
+                '<p>Kliko "Vizitë e re" për të shtuar një vizitë.</p>' +
+            '</div>'
         );
-
-    if (dateLabel) {
-        dateLabel.textContent =
-            displayDate(currentDate);
     }
 
+    var html = "";
 
-    const subtitle =
-        document.getElementById(
-            "scheduleSubtitle"
-        );
+    list.forEach(function (appointment) {
+        var patient =
+            getPatientById(appointment.patient_id);
 
-    if (subtitle) {
-        subtitle.textContent =
-            displayDate(currentDate);
-    }
+        var name =
+            patient
+                ? patient.full_name
+                : (appointment.patient_name || "Pacient pa emër");
 
+        var phone =
+            patient
+                ? (patient.phone || "")
+                : (appointment.patient_phone || "");
 
-    const dayAppointments =
-        appointments
-            .filter(function (item) {
-                return (
-                    String(
-                        item.appointment_date || ""
-                    ).substring(0, 10) ===
-                    dateString
-                );
-            })
-            .sort(function (a, b) {
-                const timeA =
-                    String(
-                        a.appointment_time || ""
-                    );
+        var status =
+            appointment.status || "pending";
 
-                const timeB =
-                    String(
-                        b.appointment_time || ""
-                    );
+        html +=
+            '<div class="appointment-row">' +
 
-                return timeA.localeCompare(
-                    timeB
+                '<div class="appointment-time">' +
+                    escapeHtml(
+                        appointment.appointment_time || "--:--"
+                    ) +
+                '</div>' +
+
+                '<div class="appointment-main">' +
+
+                    '<div class="appointment-name">' +
+                        escapeHtml(name) +
+                    '</div>' +
+
+                    '<div class="appointment-info">' +
+                        (phone
+                            ? escapeHtml(phone)
+                            : "Pa telefon") +
+
+                        (
+                            appointment.note
+                                ? " • " +
+                                  escapeHtml(
+                                      appointment.note
+                                  )
+                                : ""
+                        ) +
+
+                    '</div>' +
+
+                '</div>' +
+
+                '<div class="appointment-status status-' +
+                    escapeHtml(status) +
+                '">' +
+                    getStatusLabel(status) +
+                '</div>' +
+
+                '<div class="appointment-actions">' +
+
+                    '<button class="small-button" data-edit-appointment="' +
+                        escapeHtml(String(appointment.id)) +
+                    '">' +
+                        'Ndrysho' +
+                    '</button>' +
+
+                    '<button class="small-button danger" data-delete-appointment="' +
+                        escapeHtml(String(appointment.id)) +
+                    '">' +
+                        'Fshi' +
+                    '</button>' +
+
+                '</div>' +
+
+            '</div>';
+    });
+
+    setTimeout(function () {
+        document
+            .querySelectorAll("[data-edit-appointment]")
+            .forEach(function (button) {
+                button.addEventListener(
+                    "click",
+                    function () {
+                        openAppointmentForm(
+                            button.getAttribute(
+                                "data-edit-appointment"
+                            )
+                        );
+                    }
                 );
             });
 
-
-    const total =
-        document.getElementById(
-            "totalAppointments"
-        );
-
-    const waiting =
-        document.getElementById(
-            "waitingAppointments"
-        );
-
-    const completed =
-        document.getElementById(
-            "completedAppointments"
-        );
-
-    const cancelled =
-        document.getElementById(
-            "cancelledAppointments"
-        );
-
-
-    if (total) {
-        total.textContent =
-            dayAppointments.length;
-    }
-
-    if (waiting) {
-        waiting.textContent =
-            dayAppointments.filter(
-                function (item) {
-                    return item.status === "waiting";
-                }
-            ).length;
-    }
-
-    if (completed) {
-        completed.textContent =
-            dayAppointments.filter(
-                function (item) {
-                    return item.status === "completed";
-                }
-            ).length;
-    }
-
-    if (cancelled) {
-        cancelled.textContent =
-            dayAppointments.filter(
-                function (item) {
-                    return item.status === "cancelled";
-                }
-            ).length;
-    }
-
-
-    renderSchedule(dayAppointments);
-}
-
-
-function renderSchedule(dayAppointments) {
-    const container =
-        document.getElementById(
-            "scheduleContainer"
-        );
-
-    if (!container) {
-        return;
-    }
-
-
-    if (!dayAppointments.length) {
-        container.innerHTML = `
-            <div class="gvm-empty">
-                <div class="gvm-empty-icon">📅</div>
-                <strong>Nuk ka vizita për këtë ditë.</strong>
-                <span>Shto një vizitë nga formulari.</span>
-            </div>
-        `;
-
-        return;
-    }
-
-
-    let html = "";
-
-    dayAppointments.forEach(
-        function (appointment) {
-
-            html += `
-                <div class="gvm-appointment-row">
-
-                    <div class="gvm-appointment-time">
-                        ${escapeHtml(
-                            formatTime(
-                                appointment.appointment_time
+        document
+            .querySelectorAll("[data-delete-appointment]")
+            .forEach(function (button) {
+                button.addEventListener(
+                    "click",
+                    function () {
+                        deleteAppointment(
+                            button.getAttribute(
+                                "data-delete-appointment"
                             )
-                        )}
-                    </div>
+                        );
+                    }
+                );
+            });
+    }, 0);
 
-                    <div class="gvm-appointment-main">
+    return html;
+}
 
-                        <strong>
-                            ${escapeHtml(
-                                appointment.patient_name
-                            )}
-                        </strong>
 
-                        <div class="gvm-appointment-meta">
+/* =========================================================
+   APPOINTMENT FORM
+========================================================= */
 
-                            ${
-                                appointment.patient_phone
-                                    ? "📞 " +
-                                      escapeHtml(
-                                          appointment.patient_phone
-                                      )
-                                    : ""
-                            }
+function openAppointmentForm(id) {
+    editingAppointmentId =
+        id ? String(id) : null;
 
-                            ${
-                                appointment.note
-                                    ? " · " +
-                                      escapeHtml(
-                                          appointment.note
-                                      )
-                                    : ""
-                            }
+    selectedAppointmentPatientId = null;
 
-                        </div>
+    var appointment =
+        editingAppointmentId
+            ? appointments.find(function (item) {
+                return String(item.id) ===
+                    editingAppointmentId;
+            })
+            : null;
 
-                    </div>
+    if (appointment && appointment.patient_id) {
+        selectedAppointmentPatientId =
+            String(appointment.patient_id);
+    }
 
-                    <div>
-                        <span class="
-                            gvm-status
-                            ${getStatusClass(
-                                appointment.status
-                            )}
-                        ">
-                            ${getStatusLabel(
-                                appointment.status
-                            )}
-                        </span>
-                    </div>
+    var modal =
+        document.createElement("div");
 
-                    <div class="gvm-appointment-actions">
+    modal.id = "appointmentModal";
+    modal.className = "modal-overlay";
 
-                        <button
-                            type="button"
-                            class="gvm-small-button"
-                            onclick="editAppointment('${escapeJsAttribute(
-                                appointment.id
-                            )}')"
-                        >
-                            ✏️
-                        </button>
+    var selectedPatient =
+        appointment && appointment.patient_id
+            ? getPatientById(appointment.patient_id)
+            : null;
 
-                        <button
-                            type="button"
-                            class="gvm-small-button"
-                            onclick="completeAppointment('${escapeJsAttribute(
-                                appointment.id
-                            )}')"
-                        >
-                            ✓
-                        </button>
+    var initialName =
+        selectedPatient
+            ? selectedPatient.full_name
+            : (
+                appointment
+                    ? (appointment.patient_name || "")
+                    : ""
+            );
 
-                        <button
-                            type="button"
-                            class="gvm-small-button danger"
-                            onclick="deleteAppointment('${escapeJsAttribute(
-                                appointment.id
-                            )}')"
-                        >
-                            🗑️
-                        </button>
+    var html = "";
 
-                    </div>
+    html += '<div class="modal-box large-modal">';
 
-                </div>
-            `;
+    html +=
+        '<div class="modal-header">' +
+            '<div>' +
+                '<h2>' +
+                    (
+                        editingAppointmentId
+                            ? "Ndrysho vizitën"
+                            : "Vizitë e re"
+                    ) +
+                '</h2>' +
+                '<p>Zgjidh pacientin dhe cakto vizitën.</p>' +
+            '</div>' +
+
+            '<button id="closeAppointmentModal" class="close-button">×</button>' +
+        '</div>';
+
+    html += '<div class="modal-body">';
+
+    html += '<div class="form-section">';
+
+    html += '<div class="form-section-title">Pacienti</div>';
+
+    html +=
+        '<label>Kërko pacientin</label>' +
+
+        '<div class="patient-search-wrapper">' +
+
+            '<input id="appointmentPatientSearch" ' +
+                'class="form-input" ' +
+                'type="text" ' +
+                'autocomplete="off" ' +
+                'placeholder="Shkruaj emrin e pacientit..." ' +
+                'value="' +
+                    escapeAttribute(initialName) +
+                '">' +
+
+            '<div id="patientSearchResults" class="patient-search-results"></div>' +
+
+        '</div>';
+
+    html +=
+        '<input id="appointmentPatientId" type="hidden" value="' +
+            (
+                selectedAppointmentPatientId
+                    ? escapeAttribute(
+                        selectedAppointmentPatientId
+                    )
+                    : ""
+            ) +
+        '">';
+
+    html +=
+        '<div id="selectedPatientCard">' +
+            renderSelectedPatientCard(selectedPatient) +
+        '</div>';
+
+    html += '</div>';
+
+    html += '<div class="form-grid">';
+
+    html +=
+        '<div>' +
+            '<label>Data</label>' +
+            '<input id="appointmentDate" class="form-input" type="date" value="' +
+                escapeAttribute(
+                    appointment
+                        ? appointment.appointment_date
+                        : getDateString(currentDate)
+                ) +
+            '">' +
+        '</div>';
+
+    html +=
+        '<div>' +
+            '<label>Ora</label>' +
+            '<input id="appointmentTime" class="form-input" type="time" value="' +
+                escapeAttribute(
+                    appointment
+                        ? appointment.appointment_time
+                        : "08:00"
+                ) +
+            '">' +
+        '</div>';
+
+    html += '</div>';
+
+    html +=
+        '<div>' +
+            '<label>Statusi</label>' +
+            '<select id="appointmentStatus" class="form-input">' +
+
+                '<option value="pending"' +
+                    (
+                        !appointment ||
+                        appointment.status === "pending"
+                            ? " selected"
+                            : ""
+                    ) +
+                '>Në pritje</option>' +
+
+                '<option value="confirmed"' +
+                    (
+                        appointment &&
+                        appointment.status === "confirmed"
+                            ? " selected"
+                            : ""
+                    ) +
+                '>Konfirmuar</option>' +
+
+                '<option value="completed"' +
+                    (
+                        appointment &&
+                        appointment.status === "completed"
+                            ? " selected"
+                            : ""
+                    ) +
+                '>Përfunduar</option>' +
+
+                '<option value="cancelled"' +
+                    (
+                        appointment &&
+                        appointment.status === "cancelled"
+                            ? " selected"
+                            : ""
+                    ) +
+                '>Anuluar</option>' +
+
+            '</select>' +
+        '</div>';
+
+    html +=
+        '<div>' +
+            '<label>Shënim</label>' +
+            '<textarea id="appointmentNote" class="form-input textarea" rows="3" placeholder="Shënim për vizitën...">' +
+                escapeHtml(
+                    appointment
+                        ? (appointment.note || "")
+                        : ""
+                ) +
+            '</textarea>' +
+        '</div>';
+
+    html += '</div>';
+
+    html +=
+        '<div class="modal-footer">' +
+
+            '<button id="cancelAppointmentButton" class="secondary-button">' +
+                'Anulo' +
+            '</button>' +
+
+            '<button id="saveAppointmentButton" class="primary-button">' +
+                (
+                    editingAppointmentId
+                        ? "Ruaj ndryshimet"
+                        : "Ruaj vizitën"
+                ) +
+            '</button>' +
+
+        '</div>';
+
+    html += '</div>';
+
+    modal.innerHTML = html;
+
+    document.body.appendChild(modal);
+
+    document
+        .getElementById("closeAppointmentModal")
+        .addEventListener(
+            "click",
+            closeAppointmentModal
+        );
+
+    document
+        .getElementById("cancelAppointmentButton")
+        .addEventListener(
+            "click",
+            closeAppointmentModal
+        );
+
+    document
+        .getElementById("saveAppointmentButton")
+        .addEventListener(
+            "click",
+            saveAppointment
+        );
+
+    var searchInput =
+        document.getElementById(
+            "appointmentPatientSearch"
+        );
+
+    if (searchInput) {
+        searchInput.addEventListener(
+            "input",
+            function () {
+                selectedAppointmentPatientId = null;
+
+                document.getElementById(
+                    "appointmentPatientId"
+                ).value = "";
+
+                renderPatientSearchResults(
+                    searchInput.value
+                );
+            }
+        );
+
+        searchInput.addEventListener(
+            "focus",
+            function () {
+                renderPatientSearchResults(
+                    searchInput.value
+                );
+            }
+        );
+    }
+}
+
+
+function renderPatientSearchResults(searchText) {
+    var results =
+        document.getElementById(
+            "patientSearchResults"
+        );
+
+    if (!results) {
+        return;
+    }
+
+    var text =
+        String(searchText || "")
+            .trim()
+            .toLowerCase();
+
+    var filtered = patients.filter(
+        function (patient) {
+            if (!text) {
+                return true;
+            }
+
+            var name =
+                String(
+                    patient.full_name || ""
+                ).toLowerCase();
+
+            var phone =
+                String(
+                    patient.phone || ""
+                ).toLowerCase();
+
+            var personalId =
+                String(
+                    patient.personal_id || ""
+                ).toLowerCase();
+
+            return (
+                name.indexOf(text) !== -1 ||
+                phone.indexOf(text) !== -1 ||
+                personalId.indexOf(text) !== -1
+            );
         }
+    ).slice(0, 10);
+
+    if (filtered.length === 0) {
+        results.innerHTML =
+            '<div class="search-empty">' +
+                'Nuk u gjet pacient.' +
+            '</div>';
+
+        return;
+    }
+
+    var html = "";
+
+    filtered.forEach(function (patient) {
+        html +=
+            '<button type="button" class="patient-search-item" data-patient-search-id="' +
+                escapeAttribute(
+                    String(patient.id)
+                ) +
+            '">' +
+
+                '<div class="search-patient-name">' +
+                    escapeHtml(
+                        patient.full_name || ""
+                    ) +
+                '</div>' +
+
+                '<div class="search-patient-info">' +
+
+                    (
+                        patient.birth_date
+                            ? "Datëlindja: " +
+                              escapeHtml(
+                                  formatBirthDate(
+                                      patient.birth_date
+                                  )
+                              )
+                            : ""
+                    ) +
+
+                    (
+                        patient.phone
+                            ? " • " +
+                              escapeHtml(
+                                  patient.phone
+                              )
+                            : ""
+                    ) +
+
+                '</div>' +
+
+            '</button>';
+    });
+
+    results.innerHTML = html;
+
+    results
+        .querySelectorAll(
+            "[data-patient-search-id]"
+        )
+        .forEach(function (button) {
+            button.addEventListener(
+                "click",
+                function () {
+                    selectAppointmentPatient(
+                        button.getAttribute(
+                            "data-patient-search-id"
+                        )
+                    );
+                }
+            );
+        });
+}
+
+
+function selectAppointmentPatient(id) {
+    var patient =
+        getPatientById(id);
+
+    if (!patient) {
+        return;
+    }
+
+    selectedAppointmentPatientId =
+        String(patient.id);
+
+    var hidden =
+        document.getElementById(
+            "appointmentPatientId"
+        );
+
+    if (hidden) {
+        hidden.value =
+            String(patient.id);
+    }
+
+    var searchInput =
+        document.getElementById(
+            "appointmentPatientSearch"
+        );
+
+    if (searchInput) {
+        searchInput.value =
+            patient.full_name || "";
+    }
+
+    var results =
+        document.getElementById(
+            "patientSearchResults"
+        );
+
+    if (results) {
+        results.innerHTML = "";
+    }
+
+    var card =
+        document.getElementById(
+            "selectedPatientCard"
+        );
+
+    if (card) {
+        card.innerHTML =
+            renderSelectedPatientCard(
+                patient
+            );
+    }
+}
+
+
+function renderSelectedPatientCard(patient) {
+    if (!patient) {
+        return (
+            '<div class="patient-not-selected">' +
+                '<div class="patient-not-selected-icon">👤</div>' +
+                '<div>' +
+                    '<strong>Zgjidh një pacient</strong>' +
+                    '<p>Shkruaj emrin më sipër dhe zgjidh pacientin nga lista.</p>' +
+                '</div>' +
+            '</div>'
+        );
+    }
+
+    return (
+        '<div class="selected-patient-card">' +
+
+            '<div class="selected-patient-avatar">' +
+                getInitials(
+                    patient.full_name
+                ) +
+            '</div>' +
+
+            '<div class="selected-patient-details">' +
+
+                '<div class="selected-patient-name">' +
+                    escapeHtml(
+                        patient.full_name || ""
+                    ) +
+                '</div>' +
+
+                '<div class="selected-patient-grid">' +
+
+                    '<div>' +
+                        '<span>Datëlindja</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.birth_date
+                                    ? formatBirthDate(
+                                        patient.birth_date
+                                    )
+                                    : "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                    '<div>' +
+                        '<span>Telefon</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.phone || "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                    '<div>' +
+                        '<span>ID personale</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.personal_id || "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                    '<div>' +
+                        '<span>Gjinia</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.gender || "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                '</div>' +
+
+            '</div>' +
+
+        '</div>'
     );
-
-
-    container.innerHTML = html;
-}
-
-
-function formatTime(value) {
-    if (!value) {
-        return "";
-    }
-
-    return String(value).substring(0, 5);
-}
-
-
-function escapeJsAttribute(value) {
-    if (value === null || value === undefined) {
-        return "";
-    }
-
-    return String(value)
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'");
 }
 
 
@@ -1926,99 +1264,103 @@ function escapeJsAttribute(value) {
 ========================================================= */
 
 async function saveAppointment() {
-    const patientName =
+    var patientId =
         document.getElementById(
-            "appointmentPatient"
-        );
+            "appointmentPatientId"
+        ).value.trim();
 
-    const patientPhone =
+    var patientName =
         document.getElementById(
-            "appointmentPhone"
-        );
+            "appointmentPatientSearch"
+        ).value.trim();
 
-    const appointmentTime =
+    var date =
+        document.getElementById(
+            "appointmentDate"
+        ).value;
+
+    var time =
         document.getElementById(
             "appointmentTime"
-        );
+        ).value;
 
-    const appointmentStatus =
+    var status =
         document.getElementById(
             "appointmentStatus"
-        );
+        ).value;
 
-    const appointmentNote =
+    var note =
         document.getElementById(
             "appointmentNote"
-        );
+        ).value.trim();
 
-    if (!patientName || !appointmentTime) {
+    if (!patientId) {
+        alert(
+            "Duhet të zgjedhësh një pacient nga lista."
+        );
         return;
     }
 
-
-    const name =
-        patientName.value.trim();
-
-    const phone =
-        patientPhone
-            ? patientPhone.value.trim()
-            : "";
-
-    const time =
-        appointmentTime.value;
-
-    const status =
-        appointmentStatus
-            ? appointmentStatus.value
-            : "planned";
-
-    const note =
-        appointmentNote
-            ? appointmentNote.value.trim()
-            : "";
-
-
-    if (!name || !time) {
-        showMessage(
-            "Plotëso emrin e pacientit dhe orën.",
-            "error"
+    if (!patientName) {
+        alert(
+            "Duhet të zgjedhësh pacientin."
         );
-
         return;
     }
 
+    if (!date) {
+        alert("Zgjidh datën e vizitës.");
+        return;
+    }
 
-    const payload = {
-        patient_name: name,
-        patient_phone: phone,
-        appointment_date: formatDate(
-            currentDate
-        ),
+    if (!time) {
+        alert("Zgjidh orën e vizitës.");
+        return;
+    }
+
+    var patient =
+        getPatientById(patientId);
+
+    var data = {
+        patient_id: patientId,
+        patient_name: patient
+            ? patient.full_name
+            : patientName,
+        patient_phone: patient
+            ? (patient.phone || "")
+            : "",
+        appointment_date: date,
         appointment_time: time,
         note: note,
         status: status
     };
 
+    var button =
+        document.getElementById(
+            "saveAppointmentButton"
+        );
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Po ruhet...";
+    }
 
     try {
-        let result;
+        var result;
 
         if (editingAppointmentId) {
-            result =
-                await supabaseClient
-                    .from("appointments")
-                    .update(payload)
-                    .eq(
-                        "id",
-                        editingAppointmentId
-                    );
+            result = await supabaseClient
+                .from("appointments")
+                .update(data)
+                .eq(
+                    "id",
+                    editingAppointmentId
+                );
         } else {
-            result =
-                await supabaseClient
-                    .from("appointments")
-                    .insert([payload]);
+            result = await supabaseClient
+                .from("appointments")
+                .insert([data]);
         }
-
 
         if (result.error) {
             console.error(
@@ -2026,29 +1368,30 @@ async function saveAppointment() {
                 result.error
             );
 
-            showMessage(
-                "Gabim: " +
-                result.error.message,
-                "error"
+            alert(
+                "Vizita nuk u ruajt.\n\n" +
+                result.error.message
             );
+
+            if (button) {
+                button.disabled = false;
+                button.textContent =
+                    editingAppointmentId
+                        ? "Ruaj ndryshimet"
+                        : "Ruaj vizitën";
+            }
 
             return;
         }
 
-
-        showMessage(
-            editingAppointmentId
-                ? "Vizita u ndryshua me sukses."
-                : "Vizita u shtua me sukses.",
-            "success"
-        );
-
-
-        resetAppointmentForm();
+        closeAppointmentModal();
 
         await loadAppointments();
 
-        renderAppointments();
+        currentDate =
+            parseDate(date);
+
+        showAppointments();
 
     } catch (error) {
         console.error(
@@ -2056,213 +1399,13 @@ async function saveAppointment() {
             error
         );
 
-        showMessage(
-            "Gabim gjatë ruajtjes së vizitës.",
-            "error"
-        );
-    }
-}
-
-
-/* =========================================================
-   EDIT APPOINTMENT
-========================================================= */
-
-function editAppointment(id) {
-    const appointment =
-        appointments.find(
-            function (item) {
-                return String(item.id) === String(id);
-            }
+        alert(
+            "Ndodhi një gabim gjatë ruajtjes."
         );
 
-    if (!appointment) {
-        return;
-    }
-
-
-    editingAppointmentId =
-        appointment.id;
-
-
-    const patient =
-        document.getElementById(
-            "appointmentPatient"
-        );
-
-    const phone =
-        document.getElementById(
-            "appointmentPhone"
-        );
-
-    const time =
-        document.getElementById(
-            "appointmentTime"
-        );
-
-    const status =
-        document.getElementById(
-            "appointmentStatus"
-        );
-
-    const note =
-        document.getElementById(
-            "appointmentNote"
-        );
-
-    if (patient) {
-        patient.value =
-            appointment.patient_name || "";
-    }
-
-    if (phone) {
-        phone.value =
-            appointment.patient_phone || "";
-    }
-
-    if (time) {
-        time.value =
-            formatTime(
-                appointment.appointment_time
-            );
-    }
-
-    if (status) {
-        status.value =
-            appointment.status || "planned";
-    }
-
-    if (note) {
-        note.value =
-            appointment.note || "";
-    }
-
-
-    const button =
-        document.getElementById(
-            "saveAppointmentButton"
-        );
-
-    if (button) {
-        button.textContent =
-            "💾 Ruaj ndryshimet";
-    }
-
-
-    const cancel =
-        document.getElementById(
-            "cancelAppointmentEdit"
-        );
-
-    if (cancel) {
-        cancel.style.display =
-            "inline-flex";
-    }
-
-
-    const form =
-        document.getElementById(
-            "appointmentForm"
-        );
-
-    if (form) {
-        form.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-    }
-}
-
-
-function resetAppointmentForm() {
-    editingAppointmentId = null;
-
-    const form =
-        document.getElementById(
-            "appointmentForm"
-        );
-
-    if (form) {
-        form.reset();
-    }
-
-
-    const status =
-        document.getElementById(
-            "appointmentStatus"
-        );
-
-    if (status) {
-        status.value = "planned";
-    }
-
-
-    const button =
-        document.getElementById(
-            "saveAppointmentButton"
-        );
-
-    if (button) {
-        button.textContent =
-            "➕ Shto vizitën";
-    }
-
-
-    const cancel =
-        document.getElementById(
-            "cancelAppointmentEdit"
-        );
-
-    if (cancel) {
-        cancel.style.display =
-            "none";
-    }
-}
-
-
-/* =========================================================
-   COMPLETE APPOINTMENT
-========================================================= */
-
-async function completeAppointment(id) {
-    try {
-        const result =
-            await supabaseClient
-                .from("appointments")
-                .update({
-                    status: "completed"
-                })
-                .eq("id", id);
-
-        if (result.error) {
-            showMessage(
-                "Gabim: " +
-                result.error.message,
-                "error"
-            );
-
-            return;
+        if (button) {
+            button.disabled = false;
         }
-
-        await loadAppointments();
-
-        renderAppointments();
-
-        showMessage(
-            "Vizita u shënua si e përfunduar.",
-            "success"
-        );
-
-    } catch (error) {
-        console.error(
-            "COMPLETE APPOINTMENT ERROR:",
-            error
-        );
-
-        showMessage(
-            "Gabim gjatë ndryshimit të statusit.",
-            "error"
-        );
     }
 }
 
@@ -2272,18 +1415,41 @@ async function completeAppointment(id) {
 ========================================================= */
 
 async function deleteAppointment(id) {
-    const confirmed =
+    var appointment =
+        appointments.find(function (item) {
+            return String(item.id) === String(id);
+        });
+
+    if (!appointment) {
+        return;
+    }
+
+    var patient =
+        getPatientById(
+            appointment.patient_id
+        );
+
+    var name =
+        patient
+            ? patient.full_name
+            : (
+                appointment.patient_name ||
+                "pacientin"
+            );
+
+    var confirmed =
         window.confirm(
-            "A dëshiron ta fshish këtë vizitë?"
+            "A dëshiron të fshish vizitën e " +
+            name +
+            "?"
         );
 
     if (!confirmed) {
         return;
     }
 
-
     try {
-        const result =
+        var result =
             await supabaseClient
                 .from("appointments")
                 .delete()
@@ -2295,381 +1461,572 @@ async function deleteAppointment(id) {
                 result.error
             );
 
-            showMessage(
-                "Gabim: " +
-                result.error.message,
-                "error"
+            alert(
+                "Vizita nuk u fshi.\n\n" +
+                result.error.message
             );
 
             return;
         }
 
-
         await loadAppointments();
 
-        renderAppointments();
-
-        showMessage(
-            "Vizita u fshi.",
-            "success"
-        );
+        showAppointments();
 
     } catch (error) {
-        console.error(
-            "DELETE APPOINTMENT EXCEPTION:",
-            error
-        );
+        console.error(error);
 
-        showMessage(
-            "Gabim gjatë fshirjes së vizitës.",
-            "error"
+        alert(
+            "Ndodhi një gabim gjatë fshirjes."
         );
     }
 }
 
 
-/* =========================================================
-   PATIENTS
-========================================================= */
-
-function renderPatients() {
-    const container =
+function closeAppointmentModal() {
+    var modal =
         document.getElementById(
-            "patientsContainer"
-        );
-
-    if (!container) {
-        return;
-    }
-
-
-    const search =
-        patientSearchTerm;
-
-
-    const filtered =
-        patients.filter(
-            function (patient) {
-
-                if (!search) {
-                    return true;
-                }
-
-                const text =
-                    (
-                        String(
-                            patient.full_name || ""
-                        ) +
-                        " " +
-                        String(
-                            patient.phone || ""
-                        ) +
-                        " " +
-                        String(
-                            patient.personal_id || ""
-                        )
-                    ).toLowerCase();
-
-                return text.includes(search);
-            }
-        );
-
-
-    const count =
-        document.getElementById(
-            "patientCount"
-        );
-
-    if (count) {
-        count.textContent =
-            filtered.length +
-            (
-                filtered.length === 1
-                    ? " pacient"
-                    : " pacientë"
-            );
-    }
-
-
-    if (!filtered.length) {
-        container.innerHTML = `
-            <div class="gvm-empty">
-                <div class="gvm-empty-icon">👤</div>
-                <strong>
-                    ${
-                        search
-                            ? "Nuk u gjet asnjë pacient."
-                            : "Nuk ka ende pacientë."
-                    }
-                </strong>
-                <span>
-                    Shto pacientin e parë.
-                </span>
-            </div>
-        `;
-
-        return;
-    }
-
-
-    let html = "";
-
-    filtered.forEach(
-        function (patient) {
-
-            html += `
-                <div class="gvm-patient-card">
-
-                    <div class="gvm-patient-avatar">
-                        ${getInitials(
-                            patient.full_name
-                        )}
-                    </div>
-
-                    <div class="gvm-patient-info">
-
-                        <strong>
-                            ${escapeHtml(
-                                patient.full_name
-                            )}
-                        </strong>
-
-                        <span>
-                            ${
-                                patient.phone
-                                    ? "📞 " +
-                                      escapeHtml(
-                                          patient.phone
-                                      )
-                                    : "Pa telefon"
-                            }
-                        </span>
-
-                        <span>
-                            ${
-                                patient.birth_date
-                                    ? "🎂 " +
-                                      escapeHtml(
-                                          patient.birth_date
-                                      )
-                                    : ""
-                            }
-                        </span>
-
-                    </div>
-
-                    <div class="gvm-patient-actions">
-
-                        <button
-                            type="button"
-                            class="gvm-small-button"
-                            onclick="viewPatient('${escapeJsAttribute(
-                                patient.id
-                            )}')"
-                        >
-                            👁️
-                        </button>
-
-                        <button
-                            type="button"
-                            class="gvm-small-button"
-                            onclick="editPatient('${escapeJsAttribute(
-                                patient.id
-                            )}')"
-                        >
-                            ✏️
-                        </button>
-
-                        <button
-                            type="button"
-                            class="gvm-small-button danger"
-                            onclick="deletePatient('${escapeJsAttribute(
-                                patient.id
-                            )}')"
-                        >
-                            🗑️
-                        </button>
-
-                    </div>
-
-                </div>
-            `;
-        }
-    );
-
-
-    container.innerHTML = html;
-}
-
-
-function getInitials(name) {
-    const parts =
-        String(name || "")
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-
-    if (!parts.length) {
-        return "P";
-    }
-
-    if (parts.length === 1) {
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-    }
-
-    return (
-        parts[0][0] +
-        parts[parts.length - 1][0]
-    ).toUpperCase();
-}
-
-
-/* =========================================================
-   PATIENT MODAL
-========================================================= */
-
-function openPatientModal(patient) {
-    editingPatientId =
-        patient && patient.id
-            ? patient.id
-            : null;
-
-
-    const modal =
-        document.getElementById(
-            "patientModal"
-        );
-
-    if (!modal) {
-        return;
-    }
-
-
-    const title =
-        document.getElementById(
-            "patientModalTitle"
-        );
-
-    if (title) {
-        title.textContent =
-            editingPatientId
-                ? "Ndrysho pacientin"
-                : "Pacient i ri";
-    }
-
-
-    const id =
-        document.getElementById("patientId");
-
-    const name =
-        document.getElementById(
-            "patientFullName"
-        );
-
-    const phone =
-        document.getElementById(
-            "patientPhone"
-        );
-
-    const birthDate =
-        document.getElementById(
-            "patientBirthDate"
-        );
-
-    const personalId =
-        document.getElementById(
-            "patientPersonalId"
-        );
-
-    const address =
-        document.getElementById(
-            "patientAddress"
-        );
-
-    const notes =
-        document.getElementById(
-            "patientNotes"
-        );
-
-
-    if (id) {
-        id.value =
-            patient && patient.id
-                ? patient.id
-                : "";
-    }
-
-    if (name) {
-        name.value =
-            patient && patient.full_name
-                ? patient.full_name
-                : "";
-    }
-
-    if (phone) {
-        phone.value =
-            patient && patient.phone
-                ? patient.phone
-                : "";
-    }
-
-    if (birthDate) {
-        birthDate.value =
-            patient && patient.birth_date
-                ? String(
-                    patient.birth_date
-                ).substring(0, 10)
-                : "";
-    }
-
-    if (personalId) {
-        personalId.value =
-            patient && patient.personal_id
-                ? patient.personal_id
-                : "";
-    }
-
-    if (address) {
-        address.value =
-            patient && patient.address
-                ? patient.address
-                : "";
-    }
-
-    if (notes) {
-        notes.value =
-            patient && patient.notes
-                ? patient.notes
-                : "";
-    }
-
-
-    modal.style.display = "flex";
-}
-
-
-function closePatientEditor() {
-    const modal =
-        document.getElementById(
-            "patientModal"
+            "appointmentModal"
         );
 
     if (modal) {
-        modal.style.display = "none";
+        modal.remove();
     }
 
-    editingPatientId = null;
+    editingAppointmentId = null;
+    selectedAppointmentPatientId = null;
+}
 
-    const form =
+
+/* =========================================================
+   PATIENTS PAGE
+========================================================= */
+
+function showPatients() {
+    setActiveNav("patients");
+
+    var content =
         document.getElementById(
-            "patientForm"
+            "mainContent"
         );
 
-    if (form) {
-        form.reset();
+    if (!content) {
+        return;
     }
+
+    var html = "";
+
+    html += '<section class="page-section">';
+
+    html +=
+        '<div class="page-header">' +
+
+            '<div>' +
+                '<h1>Pacientët</h1>' +
+                '<p>Kartela dhe të dhënat e pacientëve</p>' +
+            '</div>' +
+
+            '<button id="newPatientButton" class="primary-button">' +
+                '+ Pacient i ri' +
+            '</button>' +
+
+        '</div>';
+
+    html +=
+        '<div class="patient-toolbar">' +
+
+            '<input id="patientListSearch" ' +
+                'class="form-input" ' +
+                'type="text" ' +
+                'placeholder="Kërko me emër, telefon ose ID..."' +
+            '>' +
+
+        '</div>';
+
+    html +=
+        '<div id="patientsList" class="patients-grid">' +
+            renderPatientsList(patients) +
+        '</div>';
+
+    html += '</section>';
+
+    content.innerHTML = html;
+
+    document
+        .getElementById("newPatientButton")
+        .addEventListener(
+            "click",
+            function () {
+                openPatientEditor();
+            }
+        );
+
+    document
+        .getElementById("patientListSearch")
+        .addEventListener(
+            "input",
+            function () {
+                renderFilteredPatients(
+                    this.value
+                );
+            }
+        );
+}
+
+
+function renderFilteredPatients(text) {
+    var value =
+        String(text || "")
+            .trim()
+            .toLowerCase();
+
+    var filtered =
+        patients.filter(
+            function (patient) {
+
+                var name =
+                    String(
+                        patient.full_name || ""
+                    ).toLowerCase();
+
+                var phone =
+                    String(
+                        patient.phone || ""
+                    ).toLowerCase();
+
+                var personalId =
+                    String(
+                        patient.personal_id || ""
+                    ).toLowerCase();
+
+                return (
+                    !value ||
+                    name.indexOf(value) !== -1 ||
+                    phone.indexOf(value) !== -1 ||
+                    personalId.indexOf(value) !== -1
+                );
+            }
+        );
+
+    var container =
+        document.getElementById(
+            "patientsList"
+        );
+
+    if (container) {
+        container.innerHTML =
+            renderPatientsList(filtered);
+    }
+}
+
+
+function renderPatientsList(list) {
+    if (!list || list.length === 0) {
+        return (
+            '<div class="empty-state full-width">' +
+                '<div class="empty-icon">👤</div>' +
+                '<h3>Nuk u gjet asnjë pacient</h3>' +
+                '<p>Shto një pacient të ri.</p>' +
+            '</div>'
+        );
+    }
+
+    var html = "";
+
+    list.forEach(function (patient) {
+
+        html +=
+            '<div class="patient-card">' +
+
+                '<div class="patient-card-top">' +
+
+                    '<div class="patient-avatar">' +
+                        getInitials(
+                            patient.full_name
+                        ) +
+                    '</div>' +
+
+                    '<div class="patient-card-name">' +
+                        escapeHtml(
+                            patient.full_name || ""
+                        ) +
+                    '</div>' +
+
+                '</div>' +
+
+                '<div class="patient-card-data">' +
+
+                    '<div>' +
+                        '<span>Datëlindja</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.birth_date
+                                    ? formatBirthDate(
+                                        patient.birth_date
+                                    )
+                                    : "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                    '<div>' +
+                        '<span>Telefon</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.phone || "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                    '<div>' +
+                        '<span>ID personale</span>' +
+                        '<strong>' +
+                            escapeHtml(
+                                patient.personal_id || "-"
+                            ) +
+                        '</strong>' +
+                    '</div>' +
+
+                '</div>' +
+
+                '<div class="patient-card-actions">' +
+
+                    '<button class="small-button primary-small" data-view-patient="' +
+                        escapeAttribute(
+                            String(patient.id)
+                        ) +
+                    '">' +
+                        'Hap kartelën' +
+                    '</button>' +
+
+                    '<button class="small-button" data-edit-patient="' +
+                        escapeAttribute(
+                            String(patient.id)
+                        ) +
+                    '">' +
+                        'Ndrysho' +
+                    '</button>' +
+
+                    '<button class="small-button danger" data-delete-patient="' +
+                        escapeAttribute(
+                            String(patient.id)
+                        ) +
+                    '">' +
+                        'Fshi' +
+                    '</button>' +
+
+                '</div>' +
+
+            '</div>';
+    });
+
+    setTimeout(function () {
+
+        document
+            .querySelectorAll(
+                "[data-view-patient]"
+            )
+            .forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+                        viewPatient(
+                            button.getAttribute(
+                                "data-view-patient"
+                            )
+                        );
+                    }
+                );
+            });
+
+        document
+            .querySelectorAll(
+                "[data-edit-patient]"
+            )
+            .forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+                        openPatientEditor(
+                            button.getAttribute(
+                                "data-edit-patient"
+                            )
+                        );
+                    }
+                );
+            });
+
+        document
+            .querySelectorAll(
+                "[data-delete-patient]"
+            )
+            .forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+                        deletePatient(
+                            button.getAttribute(
+                                "data-delete-patient"
+                            )
+                        );
+                    }
+                );
+            });
+
+    }, 0);
+
+    return html;
+}
+
+
+/* =========================================================
+   PATIENT EDITOR
+========================================================= */
+
+function openPatientEditor(id) {
+    editingPatientId =
+        id ? String(id) : null;
+
+    var patient =
+        editingPatientId
+            ? getPatientById(editingPatientId)
+            : null;
+
+    var modal =
+        document.createElement("div");
+
+    modal.id = "patientModal";
+    modal.className = "modal-overlay";
+
+    var html = "";
+
+    html += '<div class="modal-box patient-modal">';
+
+    html +=
+        '<div class="modal-header">' +
+
+            '<div>' +
+                '<h2>' +
+                    (
+                        patient
+                            ? "Ndrysho pacientin"
+                            : "Pacient i ri"
+                    ) +
+                '</h2>' +
+
+                '<p>Plotëso të dhënat e kartelës.</p>' +
+            '</div>' +
+
+            '<button id="closePatientModal" class="close-button">×</button>' +
+
+        '</div>';
+
+    html += '<div class="modal-body">';
+
+    html +=
+        '<div class="form-grid">' +
+
+            '<div class="form-full">' +
+                '<label>Emri dhe mbiemri *</label>' +
+                '<input id="patientFullName" class="form-input" type="text" value="' +
+                    escapeAttribute(
+                        patient
+                            ? patient.full_name || ""
+                            : ""
+                    ) +
+                '">' +
+            '</div>' +
+
+            '<div>' +
+                '<label>Datëlindja</label>' +
+                '<input id="patientBirthDate" class="form-input" type="date" value="' +
+                    escapeAttribute(
+                        patient
+                            ? patient.birth_date || ""
+                            : ""
+                    ) +
+                '">' +
+            '</div>' +
+
+            '<div>' +
+                '<label>Gjinia</label>' +
+                '<select id="patientGender" class="form-input">' +
+
+                    '<option value="">Zgjidh</option>' +
+
+                    '<option value="Mashkull"' +
+                        (
+                            patient &&
+                            patient.gender === "Mashkull"
+                                ? " selected"
+                                : ""
+                        ) +
+                    '>Mashkull</option>' +
+
+                    '<option value="Femër"' +
+                        (
+                            patient &&
+                            patient.gender === "Femër"
+                                ? " selected"
+                                : ""
+                        ) +
+                    '>Femër</option>' +
+
+                '</select>' +
+            '</div>' +
+
+            '<div>' +
+                '<label>Telefon</label>' +
+                '<input id="patientPhone" class="form-input" type="text" value="' +
+                    escapeAttribute(
+                        patient
+                            ? patient.phone || ""
+                            : ""
+                    ) +
+                '">' +
+            '</div>' +
+
+            '<div>' +
+                '<label>ID personale</label>' +
+                '<input id="patientPersonalId" class="form-input" type="text" value="' +
+                    escapeAttribute(
+                        patient
+                            ? patient.personal_id || ""
+                            : ""
+                    ) +
+                '">' +
+            '</div>' +
+
+            '<div class="form-full">' +
+                '<label>Adresa</label>' +
+                '<input id="patientAddress" class="form-input" type="text" value="' +
+                    escapeAttribute(
+                        patient
+                            ? patient.address || ""
+                            : ""
+                    ) +
+                '">' +
+            '</div>' +
+
+        '</div>';
+
+    html += '<div class="medical-section">';
+
+    html +=
+        '<div class="form-section-title">' +
+            'Të dhëna mjekësore' +
+        '</div>';
+
+    html +=
+        '<div class="form-grid">' +
+
+            '<div class="form-full">' +
+                '<label>Alergjitë</label>' +
+                '<textarea id="patientAllergies" class="form-input textarea" rows="2">' +
+                    escapeHtml(
+                        patient
+                            ? patient.allergies || ""
+                            : ""
+                    ) +
+                '</textarea>' +
+            '</div>' +
+
+            '<div class="form-full">' +
+                '<label>Medikamentet</label>' +
+                '<textarea id="patientMedications" class="form-input textarea" rows="2">' +
+                    escapeHtml(
+                        patient
+                            ? patient.medications || ""
+                            : ""
+                    ) +
+                '</textarea>' +
+            '</div>' +
+
+            '<div class="form-full">' +
+                '<label>Diagnozat</label>' +
+                '<textarea id="patientDiagnoses" class="form-input textarea" rows="2">' +
+                    escapeHtml(
+                        patient
+                            ? patient.diagnoses || ""
+                            : ""
+                    ) +
+                '</textarea>' +
+            '</div>' +
+
+            '<div class="form-full">' +
+                '<label>Historiku mjekësor</label>' +
+                '<textarea id="patientMedicalHistory" class="form-input textarea" rows="3">' +
+                    escapeHtml(
+                        patient
+                            ? patient.medical_history || ""
+                            : ""
+                    ) +
+                '</textarea>' +
+            '</div>' +
+
+            '<div class="form-full">' +
+                '<label>Shënime</label>' +
+                '<textarea id="patientNotes" class="form-input textarea" rows="3">' +
+                    escapeHtml(
+                        patient
+                            ? patient.notes || ""
+                            : ""
+                    ) +
+                '</textarea>' +
+            '</div>' +
+
+        '</div>';
+
+    html += '</div>';
+
+    html += '</div>';
+
+    html +=
+        '<div class="modal-footer">' +
+
+            '<button id="cancelPatientButton" class="secondary-button">' +
+                'Anulo' +
+            '</button>' +
+
+            '<button id="savePatientButton" class="primary-button">' +
+                (
+                    patient
+                        ? "Ruaj ndryshimet"
+                        : "Krijo pacientin"
+                ) +
+            '</button>' +
+
+        '</div>';
+
+    html += '</div>';
+
+    modal.innerHTML = html;
+
+    document.body.appendChild(modal);
+
+    document
+        .getElementById("closePatientModal")
+        .addEventListener(
+            "click",
+            closePatientEditor
+        );
+
+    document
+        .getElementById("cancelPatientButton")
+        .addEventListener(
+            "click",
+            closePatientEditor
+        );
+
+    document
+        .getElementById("savePatientButton")
+        .addEventListener(
+            "click",
+            savePatient
+        );
 }
 
 
@@ -2678,94 +2035,97 @@ function closePatientEditor() {
 ========================================================= */
 
 async function savePatient() {
-    const name =
+    var fullName =
         document.getElementById(
             "patientFullName"
-        );
-
-    const phone =
-        document.getElementById(
-            "patientPhone"
-        );
-
-    const birthDate =
-        document.getElementById(
-            "patientBirthDate"
-        );
-
-    const personalId =
-        document.getElementById(
-            "patientPersonalId"
-        );
-
-    const address =
-        document.getElementById(
-            "patientAddress"
-        );
-
-    const notes =
-        document.getElementById(
-            "patientNotes"
-        );
-
-
-    if (!name) {
-        return;
-    }
-
-
-    const fullName =
-        name.value.trim();
-
+        ).value.trim();
 
     if (!fullName) {
-        showMessage(
-            "Emri i pacientit është i detyrueshëm.",
-            "error"
+        alert(
+            "Emri dhe mbiemri janë të detyrueshëm."
         );
-
         return;
     }
 
-
-    const payload = {
+    var data = {
         full_name: fullName,
-        phone:
-            phone
-                ? phone.value.trim()
-                : "",
+
         birth_date:
-            birthDate &&
-            birthDate.value
-                ? birthDate.value
-                : null,
+            document.getElementById(
+                "patientBirthDate"
+            ).value || null,
+
+        gender:
+            document.getElementById(
+                "patientGender"
+            ).value || null,
+
+        phone:
+            document.getElementById(
+                "patientPhone"
+            ).value.trim(),
+
         personal_id:
-            personalId
-                ? personalId.value.trim()
-                : "",
+            document.getElementById(
+                "patientPersonalId"
+            ).value.trim(),
+
         address:
-            address
-                ? address.value.trim()
-                : "",
+            document.getElementById(
+                "patientAddress"
+            ).value.trim(),
+
+        allergies:
+            document.getElementById(
+                "patientAllergies"
+            ).value.trim(),
+
+        medications:
+            document.getElementById(
+                "patientMedications"
+            ).value.trim(),
+
+        diagnoses:
+            document.getElementById(
+                "patientDiagnoses"
+            ).value.trim(),
+
+        medical_history:
+            document.getElementById(
+                "patientMedicalHistory"
+            ).value.trim(),
+
         notes:
-            notes
-                ? notes.value.trim()
-                : ""
+            document.getElementById(
+                "patientNotes"
+            ).value.trim(),
+
+        updated_at:
+            new Date().toISOString()
     };
 
+    var button =
+        document.getElementById(
+            "savePatientButton"
+        );
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Po ruhet...";
+    }
+
+    var wasEditing =
+        !!editingPatientId;
 
     try {
-        let result;
+        var result;
 
         if (editingPatientId) {
-
-            payload.updated_at =
-                new Date().toISOString();
 
             result =
                 await supabaseClient
                     .from("patients")
-                    .update(payload)
+                    .update(data)
                     .eq(
                         "id",
                         editingPatientId
@@ -2776,9 +2136,9 @@ async function savePatient() {
             result =
                 await supabaseClient
                     .from("patients")
-                    .insert([payload]);
-        }
+                    .insert([data]);
 
+        }
 
         if (result.error) {
             console.error(
@@ -2786,30 +2146,33 @@ async function savePatient() {
                 result.error
             );
 
-            showMessage(
-                "Gabim: " +
-                result.error.message,
-                "error"
+            alert(
+                "Pacienti nuk u ruajt.\n\n" +
+                result.error.message
             );
+
+            if (button) {
+                button.disabled = false;
+                button.textContent =
+                    wasEditing
+                        ? "Ruaj ndryshimet"
+                        : "Krijo pacientin";
+            }
 
             return;
         }
-
 
         closePatientEditor();
 
         await loadPatients();
 
-        renderPatients();
+        showPatients();
 
-        showMessage(
-            editingPatientId
-                ? "Pacienti u ndryshua me sukses."
-                : "Pacienti u shtua me sukses.",
-            "success"
+        alert(
+            wasEditing
+                ? "Pacienti u përditësua."
+                : "Pacienti u krijua me sukses."
         );
-
-        editingPatientId = null;
 
     } catch (error) {
         console.error(
@@ -2817,110 +2180,28 @@ async function savePatient() {
             error
         );
 
-        showMessage(
-            "Gabim gjatë ruajtjes së pacientit.",
-            "error"
-        );
-    }
-}
-
-
-/* =========================================================
-   EDIT PATIENT
-========================================================= */
-
-function editPatient(id) {
-    const patient =
-        patients.find(
-            function (item) {
-                return String(item.id) === String(id);
-            }
+        alert(
+            "Ndodhi një gabim gjatë ruajtjes."
         );
 
-    if (!patient) {
-        return;
-    }
-
-    openPatientModal(patient);
-}
-
-
-/* =========================================================
-   DELETE PATIENT
-========================================================= */
-
-async function deletePatient(id) {
-    const patient =
-        patients.find(
-            function (item) {
-                return String(item.id) === String(id);
-            }
-        );
-
-
-    const name =
-        patient
-            ? patient.full_name
-            : "këtë pacient";
-
-
-    const confirmed =
-        window.confirm(
-            "A dëshiron ta fshish pacientin " +
-            name +
-            "?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-        const result =
-            await supabaseClient
-                .from("patients")
-                .delete()
-                .eq("id", id);
-
-
-        if (result.error) {
-            console.error(
-                "DELETE PATIENT ERROR:",
-                result.error
-            );
-
-            showMessage(
-                "Gabim: " +
-                result.error.message,
-                "error"
-            );
-
-            return;
+        if (button) {
+            button.disabled = false;
         }
-
-
-        await loadPatients();
-
-        renderPatients();
-
-        showMessage(
-            "Pacienti u fshi.",
-            "success"
-        );
-
-    } catch (error) {
-        console.error(
-            "DELETE PATIENT EXCEPTION:",
-            error
-        );
-
-        showMessage(
-            "Gabim gjatë fshirjes së pacientit.",
-            "error"
-        );
     }
+}
+
+
+function closePatientEditor() {
+    var modal =
+        document.getElementById(
+            "patientModal"
+        );
+
+    if (modal) {
+        modal.remove();
+    }
+
+    editingPatientId = null;
 }
 
 
@@ -2929,149 +2210,80 @@ async function deletePatient(id) {
 ========================================================= */
 
 async function viewPatient(id) {
-    const patient =
-        patients.find(
-            function (item) {
-                return String(item.id) === String(id);
-            }
-        );
-
+    var patient =
+        getPatientById(id);
 
     if (!patient) {
+        alert(
+            "Pacienti nuk u gjet."
+        );
         return;
     }
 
+    var modal =
+        document.createElement("div");
 
-    const modal =
-        document.getElementById(
-            "patientViewModal"
-        );
+    modal.id = "patientViewModal";
+    modal.className = "modal-overlay";
 
-    const name =
-        document.getElementById(
-            "patientViewName"
-        );
+    modal.innerHTML =
+        '<div class="modal-box patient-view-modal">' +
 
-    const details =
-        document.getElementById(
-            "patientDetails"
-        );
+            '<div class="modal-header">' +
 
-    const history =
-        document.getElementById(
-            "patientHistory"
-        );
+                '<div>' +
+                    '<h2>Kartela e pacientit</h2>' +
+                    '<p>' +
+                        escapeHtml(
+                            patient.full_name || ""
+                        ) +
+                    '</p>' +
+                '</div>' +
 
+                '<button id="closePatientView" class="close-button">×</button>' +
 
-    if (!modal) {
-        return;
-    }
+            '</div>' +
 
+            '<div id="patientViewContent" class="modal-body">' +
+                '<div class="loading-box">' +
+                    'Po ngarkohet kartela...' +
+                '</div>' +
+            '</div>' +
 
-    if (name) {
-        name.textContent =
-            patient.full_name || "Pacienti";
-    }
+        '</div>';
 
+    document.body.appendChild(modal);
 
-    if (details) {
-        details.innerHTML = `
-            <div class="gvm-detail-grid">
-
-                <div>
-                    <span>Telefon</span>
-                    <strong>
-                        ${
-                            escapeHtml(
-                                patient.phone || "—"
-                            )
-                        }
-                    </strong>
-                </div>
-
-                <div>
-                    <span>Datëlindja</span>
-                    <strong>
-                        ${
-                            escapeHtml(
-                                patient.birth_date || "—"
-                            )
-                        }
-                    </strong>
-                </div>
-
-                <div>
-                    <span>Nr. personal</span>
-                    <strong>
-                        ${
-                            escapeHtml(
-                                patient.personal_id || "—"
-                            )
-                        }
-                    </strong>
-                </div>
-
-                <div>
-                    <span>Adresa</span>
-                    <strong>
-                        ${
-                            escapeHtml(
-                                patient.address || "—"
-                            )
-                        }
-                    </strong>
-                </div>
-
-            </div>
-
-            ${
-                patient.notes
-                    ? `
-                        <div class="gvm-notes-box">
-                            <strong>Shënime</strong>
-                            <p>
-                                ${escapeHtml(
-                                    patient.notes
-                                )}
-                            </p>
-                        </div>
-                    `
-                    : ""
+    document
+        .getElementById("closePatientView")
+        .addEventListener(
+            "click",
+            function () {
+                modal.remove();
             }
-        `;
-    }
-
-
-    if (history) {
-        history.innerHTML = `
-            <div class="gvm-loading-small">
-                Po ngarkohet historiku...
-            </div>
-        `;
-    }
-
-
-    modal.style.display = "flex";
-
+        );
 
     try {
-        const result =
+        var result =
             await supabaseClient
                 .from("appointments")
                 .select("*")
                 .eq(
-                    "patient_name",
-                    patient.full_name
+                    "patient_id",
+                    patient.id
                 )
                 .order(
                     "appointment_date",
-                    { ascending: false }
+                    {
+                        ascending: false
+                    }
                 )
                 .order(
                     "appointment_time",
-                    { ascending: false }
+                    {
+                        ascending: false
+                    }
                 );
-
 
         if (result.error) {
             console.error(
@@ -3079,120 +2291,701 @@ async function viewPatient(id) {
                 result.error
             );
 
-            if (history) {
-                history.innerHTML = `
-                    <div class="gvm-empty">
-                        Nuk u ngarkua historiku.
-                    </div>
-                `;
-            }
+            renderPatientView(
+                patient,
+                []
+            );
 
             return;
         }
 
-
-        const records =
-            result.data || [];
-
-
-        if (!records.length) {
-            if (history) {
-                history.innerHTML = `
-                    <div class="gvm-empty">
-                        <div class="gvm-empty-icon">📋</div>
-                        <strong>
-                            Nuk ka ende vizita.
-                        </strong>
-                    </div>
-                `;
-            }
-
-            return;
-        }
-
-
-        let html = "";
-
-        records.forEach(
-            function (record) {
-                html += `
-                    <div class="gvm-history-item">
-
-                        <div>
-                            <strong>
-                                ${escapeHtml(
-                                    record.appointment_date || ""
-                                )}
-                            </strong>
-
-                            <span>
-                                ${escapeHtml(
-                                    formatTime(
-                                        record.appointment_time
-                                    )
-                                )}
-                            </span>
-                        </div>
-
-                        <span class="
-                            gvm-status
-                            ${getStatusClass(
-                                record.status
-                            )}
-                        ">
-                            ${getStatusLabel(
-                                record.status
-                            )}
-                        </span>
-
-                        ${
-                            record.note
-                                ? `
-                                    <p>
-                                        ${escapeHtml(
-                                            record.note
-                                        )}
-                                    </p>
-                                `
-                                : ""
-                        }
-
-                    </div>
-                `;
-            }
+        renderPatientView(
+            patient,
+            result.data || []
         );
-
-
-        if (history) {
-            history.innerHTML = html;
-        }
 
     } catch (error) {
-        console.error(
-            "PATIENT HISTORY EXCEPTION:",
-            error
-        );
+        console.error(error);
 
-        if (history) {
-            history.innerHTML = `
-                <div class="gvm-empty">
-                    Gabim gjatë ngarkimit të historikut.
-                </div>
-            `;
-        }
+        renderPatientView(
+            patient,
+            []
+        );
     }
 }
 
 
-function closePatientView() {
-    const modal =
+function renderPatientView(patient, history) {
+    var container =
         document.getElementById(
-            "patientViewModal"
+            "patientViewContent"
         );
 
-    if (modal) {
-        modal.style.display = "none";
+    if (!container) {
+        return;
     }
+
+    var html = "";
+
+    html +=
+        '<div class="patient-profile-header">' +
+
+            '<div class="large-patient-avatar">' +
+                getInitials(
+                    patient.full_name
+                ) +
+            '</div>' +
+
+            '<div>' +
+                '<h2>' +
+                    escapeHtml(
+                        patient.full_name || ""
+                    ) +
+                '</h2>' +
+
+                '<div class="patient-id-display">' +
+                    'Patient ID: ' +
+                    escapeHtml(
+                        String(patient.id)
+                    ) +
+                '</div>' +
+
+            '</div>' +
+
+        '</div>';
+
+    html += '<div class="profile-section">';
+
+    html +=
+        '<div class="profile-section-title">' +
+            'Të dhënat personale' +
+        '</div>';
+
+    html +=
+        '<div class="profile-grid">' +
+
+            profileItem(
+                "Datëlindja",
+                patient.birth_date
+                    ? formatBirthDate(
+                        patient.birth_date
+                    )
+                    : "-"
+            ) +
+
+            profileItem(
+                "Gjinia",
+                patient.gender || "-"
+            ) +
+
+            profileItem(
+                "Telefon",
+                patient.phone || "-"
+            ) +
+
+            profileItem(
+                "ID personale",
+                patient.personal_id || "-"
+            ) +
+
+            profileItem(
+                "Adresa",
+                patient.address || "-"
+            ) +
+
+        '</div>';
+
+    html += '</div>';
+
+    html += '<div class="profile-section">';
+
+    html +=
+        '<div class="profile-section-title">' +
+            'Të dhëna mjekësore' +
+        '</div>';
+
+    html +=
+        '<div class="medical-profile-grid">' +
+
+            medicalProfileItem(
+                "Alergjitë",
+                patient.allergies
+            ) +
+
+            medicalProfileItem(
+                "Medikamentet",
+                patient.medications
+            ) +
+
+            medicalProfileItem(
+                "Diagnozat",
+                patient.diagnoses
+            ) +
+
+            medicalProfileItem(
+                "Historiku mjekësor",
+                patient.medical_history
+            ) +
+
+            medicalProfileItem(
+                "Shënime",
+                patient.notes
+            ) +
+
+        '</div>';
+
+    html += '</div>';
+
+    html += '<div class="profile-section">';
+
+    html +=
+        '<div class="profile-section-title">' +
+            'Historiku i vizitave (' +
+            history.length +
+            ')' +
+        '</div>';
+
+    if (!history.length) {
+
+        html +=
+            '<div class="history-empty">' +
+                'Nuk ka ende vizita të lidhura me këtë pacient.' +
+            '</div>';
+
+    } else {
+
+        html += '<div class="history-list">';
+
+        history.forEach(function (item) {
+
+            html +=
+                '<div class="history-row">' +
+
+                    '<div class="history-date">' +
+                        formatDateAlbanian(
+                            parseDate(
+                                item.appointment_date
+                            )
+                        ) +
+                    '</div>' +
+
+                    '<div class="history-time">' +
+                        escapeHtml(
+                            item.appointment_time || ""
+                        ) +
+                    '</div>' +
+
+                    '<div class="history-status">' +
+                        getStatusLabel(
+                            item.status
+                        ) +
+                    '</div>' +
+
+                    '<div class="history-note">' +
+                        escapeHtml(
+                            item.note || ""
+                        ) +
+                    '</div>' +
+
+                '</div>';
+        });
+
+        html += '</div>';
+    }
+
+    html += '</div>';
+
+    html +=
+        '<div class="profile-actions">' +
+
+            '<button id="editPatientFromCard" class="primary-button">' +
+                'Ndrysho kartelën' +
+            '</button>' +
+
+            '<button id="closePatientCardButton" class="secondary-button">' +
+                'Mbyll' +
+            '</button>' +
+
+        '</div>';
+
+    container.innerHTML = html;
+
+    document
+        .getElementById("editPatientFromCard")
+        .addEventListener(
+            "click",
+            function () {
+
+                var modal =
+                    document.getElementById(
+                        "patientViewModal"
+                    );
+
+                if (modal) {
+                    modal.remove();
+                }
+
+                openPatientEditor(
+                    patient.id
+                );
+            }
+        );
+
+    document
+        .getElementById("closePatientCardButton")
+        .addEventListener(
+            "click",
+            function () {
+
+                var modal =
+                    document.getElementById(
+                        "patientViewModal"
+                    );
+
+                if (modal) {
+                    modal.remove();
+                }
+            }
+        );
+}
+
+
+function profileItem(label, value) {
+    return (
+        '<div class="profile-item">' +
+            '<span>' +
+                escapeHtml(label) +
+            '</span>' +
+            '<strong>' +
+                escapeHtml(
+                    String(value || "-")
+                ) +
+            '</strong>' +
+        '</div>'
+    );
+}
+
+
+function medicalProfileItem(label, value) {
+    return (
+        '<div class="medical-profile-item">' +
+            '<div class="medical-profile-label">' +
+                escapeHtml(label) +
+            '</div>' +
+            '<div class="medical-profile-value">' +
+                escapeHtml(
+                    value || "-"
+                ).replace(/\n/g, "<br>") +
+            '</div>' +
+        '</div>'
+    );
+}
+
+
+/* =========================================================
+   DELETE PATIENT
+========================================================= */
+
+async function deletePatient(id) {
+    var patient =
+        getPatientById(id);
+
+    if (!patient) {
+        return;
+    }
+
+    var linkedAppointments =
+        appointments.filter(
+            function (appointment) {
+                return String(
+                    appointment.patient_id
+                ) === String(id);
+            }
+        );
+
+    if (linkedAppointments.length > 0) {
+        alert(
+            "Ky pacient ka " +
+            linkedAppointments.length +
+            " vizita të lidhura.\n\n" +
+            "Për siguri, pacienti nuk mund të fshihet pa hequr/lidhur më parë vizitat."
+        );
+
+        return;
+    }
+
+    var confirmed =
+        window.confirm(
+            "A dëshiron të fshish pacientin " +
+            patient.full_name +
+            "?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        var result =
+            await supabaseClient
+                .from("patients")
+                .delete()
+                .eq("id", id);
+
+        if (result.error) {
+            console.error(
+                "DELETE PATIENT ERROR:",
+                result.error
+            );
+
+            alert(
+                "Pacienti nuk u fshi.\n\n" +
+                result.error.message
+            );
+
+            return;
+        }
+
+        await loadPatients();
+
+        showPatients();
+
+    } catch (error) {
+        console.error(error);
+
+        alert(
+            "Ndodhi një gabim gjatë fshirjes."
+        );
+    }
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function setupRealtime() {
+    stopRealtime();
+
+    try {
+
+        appointmentsChannel =
+            supabaseClient
+                .channel(
+                    "gvm-appointments-realtime"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "appointments"
+                    },
+                    async function (payload) {
+
+                        console.log(
+                            "Appointments realtime:",
+                            payload.eventType
+                        );
+
+                        await loadAppointments();
+
+                        var activeNav =
+                            document.querySelector(
+                                ".nav-button.active"
+                            );
+
+                        if (
+                            activeNav &&
+                            activeNav.id ===
+                            "navAppointments"
+                        ) {
+                            showAppointments();
+                        }
+                    }
+                )
+                .subscribe(function (status) {
+
+                    console.log(
+                        "Appointments realtime:",
+                        status
+                    );
+                });
+
+
+        patientsChannel =
+            supabaseClient
+                .channel(
+                    "gvm-patients-realtime"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "patients"
+                    },
+                    async function (payload) {
+
+                        console.log(
+                            "Patients realtime:",
+                            payload.eventType
+                        );
+
+                        await loadPatients();
+
+                        var activeNav =
+                            document.querySelector(
+                                ".nav-button.active"
+                            );
+
+                        if (
+                            activeNav &&
+                            activeNav.id ===
+                            "navPatients"
+                        ) {
+                            showPatients();
+                        }
+                    }
+                )
+                .subscribe(function (status) {
+
+                    console.log(
+                        "Patients realtime:",
+                        status
+                    );
+                });
+
+    } catch (error) {
+        console.error(
+            "REALTIME ERROR:",
+            error
+        );
+    }
+}
+
+
+function stopRealtime() {
+    try {
+
+        if (appointmentsChannel) {
+            supabaseClient.removeChannel(
+                appointmentsChannel
+            );
+
+            appointmentsChannel = null;
+        }
+
+        if (patientsChannel) {
+            supabaseClient.removeChannel(
+                patientsChannel
+            );
+
+            patientsChannel = null;
+        }
+
+    } catch (error) {
+        console.error(
+            "STOP REALTIME ERROR:",
+            error
+        );
+    }
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getPatientById(id) {
+    if (id === null || id === undefined || id === "") {
+        return null;
+    }
+
+    return patients.find(
+        function (patient) {
+            return String(patient.id) === String(id);
+        }
+    ) || null;
+}
+
+
+function getDateString(date) {
+    var year =
+        date.getFullYear();
+
+    var month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    var day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+}
+
+
+function parseDate(dateString) {
+    if (!dateString) {
+        return new Date();
+    }
+
+    var parts =
+        String(dateString).split("-");
+
+    if (parts.length !== 3) {
+        return new Date(dateString);
+    }
+
+    return new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+    );
+}
+
+
+function formatDateAlbanian(date) {
+    var days = [
+        "E diel",
+        "E hënë",
+        "E martë",
+        "E mërkurë",
+        "E enjte",
+        "E premte",
+        "E shtunë"
+    ];
+
+    var months = [
+        "janar",
+        "shkurt",
+        "mars",
+        "prill",
+        "maj",
+        "qershor",
+        "korrik",
+        "gusht",
+        "shtator",
+        "tetor",
+        "nëntor",
+        "dhjetor"
+    ];
+
+    return (
+        days[date.getDay()] +
+        ", " +
+        date.getDate() +
+        " " +
+        months[date.getMonth()] +
+        " " +
+        date.getFullYear()
+    );
+}
+
+
+function formatBirthDate(dateString) {
+    if (!dateString) {
+        return "";
+    }
+
+    var parts =
+        String(dateString).split("-");
+
+    if (parts.length !== 3) {
+        return String(dateString);
+    }
+
+    return (
+        parts[2] +
+        "/" +
+        parts[1] +
+        "/" +
+        parts[0]
+    );
+}
+
+
+function getStatusLabel(status) {
+    if (status === "confirmed") {
+        return "Konfirmuar";
+    }
+
+    if (status === "completed") {
+        return "Përfunduar";
+    }
+
+    if (status === "cancelled") {
+        return "Anuluar";
+    }
+
+    return "Në pritje";
+}
+
+
+function getInitials(name) {
+    var text =
+        String(name || "")
+            .trim();
+
+    if (!text) {
+        return "P";
+    }
+
+    var words =
+        text.split(/\s+/);
+
+    if (words.length === 1) {
+        return words[0]
+            .substring(0, 2)
+            .toUpperCase();
+    }
+
+    return (
+        words[0].charAt(0) +
+        words[words.length - 1].charAt(0)
+    ).toUpperCase();
+}
+
+
+function escapeHtml(value) {
+    return String(value === null || value === undefined ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function escapeAttribute(value) {
+    return escapeHtml(value);
+}
+
+
+function showFatalError(message) {
+    var app =
+        document.getElementById("app");
+
+    if (!app) {
+        return;
+    }
+
+    app.innerHTML =
+        '<div class="fatal-error">' +
+            '<h1>AMBULATORI GVM</h1>' +
+            '<p>' +
+                escapeHtml(message) +
+            '</p>' +
+        '</div>';
 }
 
 
@@ -3201,948 +2994,941 @@ function closePatientView() {
 ========================================================= */
 
 function injectStyles() {
-    if (document.getElementById("gvmDynamicStyles")) {
+    if (
+        document.getElementById(
+            "gvmInjectedStyles"
+        )
+    ) {
         return;
     }
 
-    const style =
+    var style =
         document.createElement("style");
 
     style.id =
-        "gvmDynamicStyles";
-
-    style.textContent = `
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-            background: #f4f8fa;
-            color: #263c43;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-
-        /* LOGIN */
-
-        .gvm-login-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 25px;
-            background:
-                linear-gradient(
-                    135deg,
-                    #e9f7f5,
-                    #f5f8fa
-                );
-        }
-
-        .gvm-login-box {
-            width: 100%;
-            max-width: 430px;
-            background: #fff;
-            padding: 38px;
-            border-radius: 22px;
-            box-shadow:
-                0 20px 60px
-                rgba(23, 55, 63, .12);
-            border: 1px solid #dce8eb;
-            text-align: center;
-        }
-
-        .gvm-login-logo {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto 15px;
-            border-radius: 20px;
-            background: #0f766e;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 22px;
-            box-shadow:
-                0 10px 25px
-                rgba(15, 118, 110, .25);
-        }
-
-        .gvm-login-icon {
-            font-size: 42px;
-            margin-bottom: 10px;
-        }
-
-        .gvm-login-box h1 {
-            margin: 0;
-            font-size: 25px;
-        }
-
-        .gvm-login-subtitle {
-            color: #718188;
-            margin: 8px 0 28px;
-        }
-
-        .gvm-login-box label {
-            display: block;
-            text-align: left;
-            margin: 14px 0 7px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .gvm-login-box input {
-            width: 100%;
-            padding: 13px 14px;
-            border: 1px solid #ccdadd;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        .gvm-login-box input:focus {
-            border-color: #0f766e;
-            box-shadow:
-                0 0 0 3px
-                rgba(15, 118, 110, .1);
-        }
-
-        .gvm-login-button {
-            width: 100%;
-            margin-top: 22px;
-            padding: 14px;
-            border: 0;
-            border-radius: 10px;
-            background: #0f766e;
-            color: white;
-            font-weight: 800;
-        }
-
-        .gvm-login-button:hover {
-            background: #0b5f59;
-        }
-
-        .gvm-login-error {
-            display: none;
-            margin-top: 15px;
-            color: #b42318;
-            background: #fff0ef;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 13px;
-        }
-
-
-        /* HEADER */
-
-        .gvm-header {
-            background: #fff;
-            border-bottom: 1px solid #dce8eb;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-
-        .gvm-header-inner {
-            max-width: 1400px;
-            margin: auto;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .gvm-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .gvm-brand-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 13px;
-            background: #0f766e;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-        }
-
-        .gvm-brand h1 {
-            margin: 0;
-            font-size: 19px;
-        }
-
-        .gvm-brand small {
-            color: #718188;
-        }
-
-        .gvm-header-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .gvm-online {
-            color: #16734f;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .gvm-online span {
-            width: 8px;
-            height: 8px;
-            background: #16a34a;
-            display: inline-block;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .gvm-user-email {
-            color: #596d73;
-            font-size: 13px;
-        }
-
-        .gvm-logout {
-            border: 1px solid #d6e1e4;
-            background: #fff;
-            color: #263c43;
-            padding: 9px 15px;
-            border-radius: 9px;
-            font-weight: 700;
-        }
-
-
-        /* MAIN */
-
-        .gvm-main {
-            max-width: 1400px;
-            margin: auto;
-            padding: 25px;
-        }
-
-        .gvm-navigation {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 25px;
-        }
-
-        .gvm-nav-button {
-            border: 1px solid #d8e4e7;
-            background: #fff;
-            padding: 11px 18px;
-            border-radius: 10px;
-            font-weight: 800;
-            color: #53676d;
-        }
-
-        .gvm-nav-button.active {
-            background: #0f766e;
-            color: white;
-            border-color: #0f766e;
-        }
-
-        .gvm-page-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 22px;
-        }
-
-        .gvm-kicker {
-            color: #0f766e;
-            font-size: 11px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .gvm-page-heading h2 {
-            margin: 0;
-            font-size: 29px;
-        }
-
-        .gvm-date-controls {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .gvm-date-button,
-        .gvm-today-button {
-            border: 1px solid #d5e1e4;
-            background: white;
-            border-radius: 9px;
-            padding: 10px 13px;
-            font-weight: 800;
-        }
-
-        .gvm-current-date {
-            min-width: 220px;
-            text-align: center;
-            font-weight: 800;
-            color: #40565d;
-        }
-
-        .gvm-today-button {
-            background: #e8f5f3;
-            color: #0f766e;
-        }
-
-
-        /* DASHBOARD */
-
-        .gvm-dashboard {
-            display: grid;
-            grid-template-columns:
-                repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .gvm-card {
-            background: #fff;
-            border: 1px solid #dce8eb;
-            border-radius: 14px;
-            padding: 18px;
-        }
-
-        .gvm-card span {
-            display: block;
-            color: #718188;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-
-        .gvm-card strong {
-            font-size: 27px;
-        }
-
-
-        /* GRID */
-
-        .gvm-grid {
-            display: grid;
-            grid-template-columns:
-                minmax(320px, .8fr)
-                minmax(500px, 1.6fr);
-            gap: 20px;
-        }
-
-        .gvm-panel {
-            background: #fff;
-            border: 1px solid #dce8eb;
-            border-radius: 16px;
-            padding: 20px;
-            min-width: 0;
-        }
-
-        .gvm-panel-header {
-            margin-bottom: 18px;
-        }
-
-        .gvm-panel-header h3 {
-            margin: 0 0 5px;
-        }
-
-        .gvm-panel-header p {
-            margin: 0;
-            color: #718188;
-            font-size: 13px;
-        }
-
-
-        /* FORMS */
-
-        .gvm-form-group {
-            margin-bottom: 15px;
-        }
-
-        .gvm-form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-weight: 800;
-            color: #40565d;
-        }
-
-        .gvm-form-group input,
-        .gvm-form-group select,
-        .gvm-form-group textarea {
-            width: 100%;
-            border: 1px solid #ccdadd;
-            border-radius: 9px;
-            padding: 11px 12px;
-            outline: none;
-            background: white;
-        }
-
-        .gvm-form-group textarea {
-            resize: vertical;
-        }
-
-        .gvm-form-group input:focus,
-        .gvm-form-group select:focus,
-        .gvm-form-group textarea:focus {
-            border-color: #0f766e;
-            box-shadow:
-                0 0 0 3px
-                rgba(15,118,110,.08);
-        }
-
-        .gvm-form-row {
-            display: grid;
-            grid-template-columns:
-                1fr 1fr;
-            gap: 12px;
-        }
-
-        .gvm-form-actions {
-            display: flex;
-            gap: 9px;
-            flex-wrap: wrap;
-        }
-
-        .gvm-primary-button {
-            border: 0;
-            background: #0f766e;
-            color: white;
-            padding: 11px 16px;
-            border-radius: 9px;
-            font-weight: 800;
-        }
-
-        .gvm-primary-button:hover {
-            background: #0b5f59;
-        }
-
-        .gvm-secondary-button {
-            border: 1px solid #d3dfe2;
-            background: white;
-            color: #435960;
-            padding: 11px 16px;
-            border-radius: 9px;
-            font-weight: 800;
-        }
-
-
-        /* SCHEDULE */
-
-        .gvm-schedule {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
-
-        .gvm-appointment-row {
-            display: grid;
-            grid-template-columns:
-                70px
-                minmax(180px, 1fr)
-                120px
-                auto;
-            align-items: center;
-            gap: 12px;
-            padding: 13px;
-            border: 1px solid #e0e9eb;
-            border-radius: 11px;
-            background: #fbfdfd;
-        }
-
-        .gvm-appointment-time {
-            font-weight: 900;
-            font-size: 16px;
-            color: #0f766e;
-        }
-
-        .gvm-appointment-main strong {
-            display: block;
-        }
-
-        .gvm-appointment-meta {
-            color: #718188;
-            font-size: 12px;
-            margin-top: 5px;
-            line-height: 1.5;
-        }
-
-        .gvm-status {
-            display: inline-block;
-            padding: 5px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 900;
-            white-space: nowrap;
-        }
-
-        .status-planned {
-            background: #e8f1ff;
-            color: #2457a6;
-        }
-
-        .status-waiting {
-            background: #fff5d8;
-            color: #936600;
-        }
-
-        .status-completed {
-            background: #e4f7ed;
-            color: #16734f;
-        }
-
-        .status-cancelled {
-            background: #ffe9e7;
-            color: #b42318;
-        }
-
-        .gvm-appointment-actions,
-        .gvm-patient-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .gvm-small-button {
-            border: 1px solid #d7e2e5;
-            background: white;
-            border-radius: 7px;
-            min-width: 31px;
-            height: 31px;
-            padding: 4px 7px;
-        }
-
-        .gvm-small-button.danger {
-            color: #b42318;
-        }
-
-
-        /* EMPTY */
-
-        .gvm-empty {
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: #718188;
-            text-align: center;
-        }
-
-        .gvm-empty strong {
-            color: #40565d;
-        }
-
-        .gvm-empty-icon {
-            font-size: 35px;
-        }
-
-        .gvm-loading-small {
-            padding: 25px;
-            text-align: center;
-            color: #718188;
-        }
-
-
-        /* PATIENTS */
-
-        .gvm-patient-toolbar {
-            background: white;
-            border: 1px solid #dce8eb;
-            border-radius: 13px;
-            padding: 13px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .gvm-patient-toolbar input {
-            flex: 1;
-            border: 1px solid #ccdadd;
-            border-radius: 9px;
-            padding: 11px 13px;
-            outline: none;
-        }
-
-        .gvm-patient-count {
-            color: #718188;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .gvm-patients-container {
-            display: grid;
-            grid-template-columns:
-                repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .gvm-patient-card {
-            background: white;
-            border: 1px solid #dce8eb;
-            border-radius: 14px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .gvm-patient-avatar {
-            width: 48px;
-            height: 48px;
-            flex: 0 0 48px;
-            border-radius: 50%;
-            background: #e5f4f2;
-            color: #0f766e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-        }
-
-        .gvm-patient-info {
-            min-width: 0;
-            flex: 1;
-        }
-
-        .gvm-patient-info strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .gvm-patient-info span {
-            display: block;
-            color: #718188;
-            font-size: 12px;
-            margin-top: 2px;
-        }
-
-
-        /* MODAL */
-
-        .gvm-modal {
-            position: fixed;
-            inset: 0;
-            background:
-                rgba(24, 43, 48, .55);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 100;
-            overflow-y: auto;
-        }
-
-        .gvm-modal-box {
-            width: 100%;
-            max-width: 650px;
-            background: white;
-            border-radius: 17px;
-            padding: 22px;
-            box-shadow:
-                0 25px 80px
-                rgba(0,0,0,.22);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .gvm-patient-view-box {
-            max-width: 800px;
-        }
-
-        .gvm-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .gvm-modal-header h3 {
-            margin: 0 0 5px;
-        }
-
-        .gvm-modal-header p {
-            margin: 0;
-            color: #718188;
-            font-size: 13px;
-        }
-
-        .gvm-close-button {
-            width: 35px;
-            height: 35px;
-            border: 0;
-            background: #f0f4f5;
-            border-radius: 9px;
-            font-size: 25px;
-            line-height: 1;
-            color: #52666c;
-        }
-
-        .gvm-detail-grid {
-            display: grid;
-            grid-template-columns:
-                1fr 1fr;
-            gap: 10px;
-        }
-
-        .gvm-detail-grid > div {
-            padding: 13px;
-            background: #f7fafb;
-            border-radius: 9px;
-        }
-
-        .gvm-detail-grid span {
-            display: block;
-            color: #718188;
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-
-        .gvm-detail-grid strong {
-            word-break: break-word;
-        }
-
-        .gvm-notes-box {
-            margin-top: 12px;
-            padding: 14px;
-            background: #f7fafb;
-            border-radius: 10px;
-        }
-
-        .gvm-notes-box p {
-            white-space: pre-wrap;
-            margin-bottom: 0;
-        }
-
-        .gvm-history-title {
-            margin-top: 25px;
-            margin-bottom: 12px;
-            font-weight: 900;
-            font-size: 17px;
-        }
-
-        .gvm-history-item {
-            border: 1px solid #dce8eb;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 8px;
-        }
-
-        .gvm-history-item > div {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .gvm-history-item > div span {
-            color: #0f766e;
-            font-weight: 800;
-        }
-
-        .gvm-history-item p {
-            margin: 8px 0 0;
-            color: #596d73;
-            white-space: pre-wrap;
-        }
-
-
-        /* MESSAGE */
-
-        .app-message {
-            display: none;
-            padding: 11px 14px;
-            border-radius: 9px;
-            margin-bottom: 15px;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .app-message.success {
-            background: #e6f6ee;
-            color: #16734f;
-        }
-
-        .app-message.error {
-            background: #fff0ef;
-            color: #b42318;
-        }
-
-
-        /* MOBILE */
-
-        @media (max-width: 900px) {
-
-            .gvm-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .gvm-dashboard {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .gvm-patients-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-
-        @media (max-width: 650px) {
-
-            .gvm-header-inner {
-                padding: 12px 15px;
-            }
-
-            .gvm-brand small {
-                display: none;
-            }
-
-            .gvm-brand h1 {
-                font-size: 15px;
-            }
-
-            .gvm-header-actions {
-                gap: 7px;
-            }
-
-            .gvm-user-email {
-                display: none;
-            }
-
-            .gvm-online {
-                display: none;
-            }
-
-            .gvm-main {
-                padding: 15px;
-            }
-
-            .gvm-page-heading {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .gvm-date-controls {
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .gvm-current-date {
-                min-width: 0;
-                flex: 1;
-            }
-
-            .gvm-dashboard {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .gvm-form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .gvm-appointment-row {
-                grid-template-columns:
-                    55px
-                    1fr;
-            }
-
-            .gvm-appointment-row > div:nth-child(3) {
-                grid-column: 2;
-            }
-
-            .gvm-appointment-actions {
-                grid-column: 2;
-            }
-
-            .gvm-patient-toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .gvm-patient-card {
-                align-items: flex-start;
-                flex-wrap: wrap;
-            }
-
-            .gvm-patient-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-
-            .gvm-detail-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .gvm-login-box {
-                padding: 25px 20px;
-            }
-        }
-
-    `;
+        "gvmInjectedStyles";
+
+    style.textContent =
+
+        "*{box-sizing:border-box}" +
+
+        "body{" +
+            "margin:0;" +
+            "font-family:Arial,Helvetica,sans-serif;" +
+            "background:#f4f7fb;" +
+            "color:#1f2937;" +
+        "}" +
+
+        "button,input,select,textarea{" +
+            "font:inherit" +
+        "}" +
+
+        ".app-shell{min-height:100vh}" +
+
+        ".top-header{" +
+            "height:72px;" +
+            "background:#ffffff;" +
+            "border-bottom:1px solid #e5e7eb;" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:space-between;" +
+            "padding:0 28px;" +
+        "}" +
+
+        ".brand-area{" +
+            "display:flex;" +
+            "align-items:center;" +
+            "gap:12px" +
+        "}" +
+
+        ".brand-logo{" +
+            "width:44px;" +
+            "height:44px;" +
+            "border-radius:12px;" +
+            "background:#0f766e;" +
+            "color:white;" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:center;" +
+            "font-weight:800;" +
+            "font-size:15px" +
+        "}" +
+
+        ".brand-title{" +
+            "font-size:18px;" +
+            "font-weight:800;" +
+            "color:#111827" +
+        "}" +
+
+        ".brand-version{" +
+            "font-size:10px;" +
+            "color:#9ca3af;" +
+            "margin-top:2px" +
+        "}" +
+
+        ".user-area{" +
+            "display:flex;" +
+            "align-items:center;" +
+            "gap:14px;" +
+            "font-size:13px;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".logout-button{" +
+            "border:1px solid #e5e7eb;" +
+            "background:white;" +
+            "border-radius:8px;" +
+            "padding:8px 14px;" +
+            "cursor:pointer" +
+        "}" +
+
+        ".main-nav{" +
+            "background:white;" +
+            "border-bottom:1px solid #e5e7eb;" +
+            "padding:0 28px;" +
+            "display:flex;" +
+            "gap:6px" +
+        "}" +
+
+        ".nav-button{" +
+            "border:0;" +
+            "background:transparent;" +
+            "padding:15px 20px;" +
+            "cursor:pointer;" +
+            "color:#6b7280;" +
+            "font-weight:600;" +
+            "border-bottom:3px solid transparent" +
+        "}" +
+
+        ".nav-button.active{" +
+            "color:#0f766e;" +
+            "border-bottom-color:#0f766e" +
+        "}" +
+
+        ".main-content{" +
+            "max-width:1400px;" +
+            "margin:0 auto;" +
+            "padding:28px" +
+        "}" +
+
+        ".page-header{" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:space-between;" +
+            "margin-bottom:24px" +
+        "}" +
+
+        ".page-header h1{" +
+            "margin:0;" +
+            "font-size:28px;" +
+            "color:#111827" +
+        "}" +
+
+        ".page-header p{" +
+            "margin:6px 0 0;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".primary-button{" +
+            "border:0;" +
+            "background:#0f766e;" +
+            "color:white;" +
+            "padding:11px 18px;" +
+            "border-radius:9px;" +
+            "font-weight:700;" +
+            "cursor:pointer" +
+        "}" +
+
+        ".primary-button:hover{" +
+            "background:#0b625b" +
+        "}" +
+
+        ".secondary-button{" +
+            "border:1px solid #d1d5db;" +
+            "background:white;" +
+            "color:#374151;" +
+            "padding:10px 16px;" +
+            "border-radius:9px;" +
+            "font-weight:600;" +
+            "cursor:pointer" +
+        "}" +
+
+        ".date-toolbar{" +
+            "display:flex;" +
+            "align-items:center;" +
+            "gap:8px;" +
+            "margin-bottom:20px" +
+        "}" +
+
+        ".date-button{" +
+            "width:40px;" +
+            "height:40px;" +
+            "border:1px solid #d1d5db;" +
+            "background:white;" +
+            "border-radius:8px;" +
+            "cursor:pointer;" +
+            "font-size:22px" +
+        "}" +
+
+        ".current-date{" +
+            "min-width:280px;" +
+            "text-align:center;" +
+            "font-weight:700;" +
+            "font-size:17px" +
+        "}" +
+
+        ".stats-grid{" +
+            "display:grid;" +
+            "grid-template-columns:repeat(4,1fr);" +
+            "gap:16px;" +
+            "margin-bottom:22px" +
+        "}" +
+
+        ".stat-card{" +
+            "background:white;" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:12px;" +
+            "padding:20px;" +
+            "box-shadow:0 2px 8px rgba(0,0,0,.03)" +
+        "}" +
+
+        ".stat-label{" +
+            "font-size:13px;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".stat-value{" +
+            "font-size:30px;" +
+            "font-weight:800;" +
+            "margin-top:6px;" +
+            "color:#111827" +
+        "}" +
+
+        ".appointments-card{" +
+            "background:white;" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:12px;" +
+            "overflow:hidden" +
+        "}" +
+
+        ".section-title{" +
+            "font-weight:800;" +
+            "font-size:17px;" +
+            "padding:18px 20px;" +
+            "border-bottom:1px solid #e5e7eb" +
+        "}" +
+
+        ".appointment-row{" +
+            "display:grid;" +
+            "grid-template-columns:80px 1fr auto auto;" +
+            "gap:18px;" +
+            "align-items:center;" +
+            "padding:18px 20px;" +
+            "border-bottom:1px solid #f0f2f5" +
+        "}" +
+
+        ".appointment-row:last-child{" +
+            "border-bottom:0" +
+        "}" +
+
+        ".appointment-time{" +
+            "font-size:17px;" +
+            "font-weight:800;" +
+            "color:#0f766e" +
+        "}" +
+
+        ".appointment-name{" +
+            "font-weight:800;" +
+            "font-size:15px" +
+        "}" +
+
+        ".appointment-info{" +
+            "font-size:12px;" +
+            "color:#6b7280;" +
+            "margin-top:4px" +
+        "}" +
+
+        ".appointment-status{" +
+            "padding:6px 10px;" +
+            "border-radius:20px;" +
+            "font-size:11px;" +
+            "font-weight:700;" +
+            "white-space:nowrap" +
+        "}" +
+
+        ".status-pending{" +
+            "background:#fff7ed;" +
+            "color:#c2410c" +
+        "}" +
+
+        ".status-confirmed{" +
+            "background:#ecfdf5;" +
+            "color:#047857" +
+        "}" +
+
+        ".status-completed{" +
+            "background:#eff6ff;" +
+            "color:#1d4ed8" +
+        "}" +
+
+        ".status-cancelled{" +
+            "background:#fef2f2;" +
+            "color:#b91c1c" +
+        "}" +
+
+        ".appointment-actions{" +
+            "display:flex;" +
+            "gap:6px" +
+        "}" +
+
+        ".small-button{" +
+            "border:1px solid #d1d5db;" +
+            "background:white;" +
+            "padding:7px 10px;" +
+            "border-radius:7px;" +
+            "font-size:12px;" +
+            "cursor:pointer" +
+        "}" +
+
+        ".small-button.danger{" +
+            "color:#b91c1c;" +
+            "border-color:#fecaca" +
+        "}" +
+
+        ".primary-small{" +
+            "background:#0f766e;" +
+            "color:white;" +
+            "border-color:#0f766e" +
+        "}" +
+
+        ".empty-state{" +
+            "text-align:center;" +
+            "padding:60px 20px;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".empty-state.full-width{" +
+            "grid-column:1/-1" +
+        "}" +
+
+        ".empty-icon{" +
+            "font-size:38px;" +
+            "margin-bottom:10px" +
+        "}" +
+
+        ".empty-state h3{" +
+            "color:#374151;" +
+            "margin:5px 0" +
+        "}" +
+
+        ".modal-overlay{" +
+            "position:fixed;" +
+            "z-index:1000;" +
+            "inset:0;" +
+            "background:rgba(15,23,42,.55);" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:center;" +
+            "padding:20px;" +
+            "overflow:auto" +
+        "}" +
+
+        ".modal-box{" +
+            "background:white;" +
+            "width:min(700px,100%);" +
+            "max-height:92vh;" +
+            "overflow:auto;" +
+            "border-radius:14px;" +
+            "box-shadow:0 20px 60px rgba(0,0,0,.25)" +
+        "}" +
+
+        ".large-modal{" +
+            "width:min(760px,100%)" +
+        "}" +
+
+        ".patient-modal{" +
+            "width:min(850px,100%)" +
+        "}" +
+
+        ".patient-view-modal{" +
+            "width:min(950px,100%)" +
+        "}" +
+
+        ".modal-header{" +
+            "display:flex;" +
+            "justify-content:space-between;" +
+            "align-items:flex-start;" +
+            "padding:22px 24px;" +
+            "border-bottom:1px solid #e5e7eb" +
+        "}" +
+
+        ".modal-header h2{" +
+            "margin:0;" +
+            "font-size:21px" +
+        "}" +
+
+        ".modal-header p{" +
+            "margin:5px 0 0;" +
+            "color:#6b7280;" +
+            "font-size:13px" +
+        "}" +
+
+        ".close-button{" +
+            "border:0;" +
+            "background:#f3f4f6;" +
+            "width:34px;" +
+            "height:34px;" +
+            "border-radius:8px;" +
+            "font-size:24px;" +
+            "cursor:pointer" +
+        "}" +
+
+        ".modal-body{" +
+            "padding:24px" +
+        "}" +
+
+        ".modal-footer{" +
+            "display:flex;" +
+            "justify-content:flex-end;" +
+            "gap:10px;" +
+            "padding:18px 24px;" +
+            "border-top:1px solid #e5e7eb" +
+        "}" +
+
+        "label{" +
+            "display:block;" +
+            "font-size:13px;" +
+            "font-weight:700;" +
+            "margin:0 0 6px;" +
+            "color:#374151" +
+        "}" +
+
+        ".form-input{" +
+            "width:100%;" +
+            "border:1px solid #d1d5db;" +
+            "border-radius:8px;" +
+            "padding:10px 12px;" +
+            "background:white;" +
+            "outline:none" +
+        "}" +
+
+        ".form-input:focus{" +
+            "border-color:#0f766e;" +
+            "box-shadow:0 0 0 3px rgba(15,118,110,.1)" +
+        "}" +
+
+        ".form-grid{" +
+            "display:grid;" +
+            "grid-template-columns:1fr 1fr;" +
+            "gap:16px;" +
+            "margin-bottom:18px" +
+        "}" +
+
+        ".form-full{" +
+            "grid-column:1/-1" +
+        "}" +
+
+        ".form-section{" +
+            "margin-bottom:20px" +
+        "}" +
+
+        ".form-section-title{" +
+            "font-size:15px;" +
+            "font-weight:800;" +
+            "margin-bottom:12px;" +
+            "color:#111827" +
+        "}" +
+
+        ".medical-section{" +
+            "border-top:1px solid #e5e7eb;" +
+            "padding-top:20px;" +
+            "margin-top:20px" +
+        "}" +
+
+        ".textarea{" +
+            "resize:vertical;" +
+            "line-height:1.5" +
+        "}" +
+
+        ".patient-search-wrapper{" +
+            "position:relative" +
+        "}" +
+
+        ".patient-search-results{" +
+            "position:absolute;" +
+            "z-index:20;" +
+            "left:0;" +
+            "right:0;" +
+            "top:100%;" +
+            "background:white;" +
+            "border:1px solid #d1d5db;" +
+            "border-top:0;" +
+            "border-radius:0 0 8px 8px;" +
+            "box-shadow:0 10px 25px rgba(0,0,0,.12);" +
+            "max-height:300px;" +
+            "overflow:auto" +
+        "}" +
+
+        ".patient-search-item{" +
+            "width:100%;" +
+            "border:0;" +
+            "border-bottom:1px solid #f0f2f5;" +
+            "background:white;" +
+            "padding:12px;" +
+            "text-align:left;" +
+            "cursor:pointer" +
+        "}" +
+
+        ".patient-search-item:hover{" +
+            "background:#f0fdfa" +
+        "}" +
+
+        ".search-patient-name{" +
+            "font-weight:800;" +
+            "color:#111827" +
+        "}" +
+
+        ".search-patient-info{" +
+            "font-size:12px;" +
+            "color:#6b7280;" +
+            "margin-top:3px" +
+        "}" +
+
+        ".search-empty{" +
+            "padding:14px;" +
+            "font-size:13px;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".patient-not-selected{" +
+            "margin-top:12px;" +
+            "border:1px dashed #d1d5db;" +
+            "border-radius:10px;" +
+            "padding:14px;" +
+            "display:flex;" +
+            "gap:12px;" +
+            "align-items:center;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".patient-not-selected-icon{" +
+            "font-size:25px" +
+        "}" +
+
+        ".patient-not-selected p{" +
+            "margin:3px 0 0;" +
+            "font-size:12px" +
+        "}" +
+
+        ".selected-patient-card{" +
+            "margin-top:12px;" +
+            "border:1px solid #99f6e4;" +
+            "background:#f0fdfa;" +
+            "border-radius:10px;" +
+            "padding:14px;" +
+            "display:flex;" +
+            "gap:14px" +
+        "}" +
+
+        ".selected-patient-avatar,.patient-avatar,.large-patient-avatar{" +
+            "flex-shrink:0;" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:center;" +
+            "font-weight:800;" +
+            "background:#ccfbf1;" +
+            "color:#0f766e;" +
+            "border-radius:50%" +
+        "}" +
+
+        ".selected-patient-avatar{" +
+            "width:48px;" +
+            "height:48px" +
+        "}" +
+
+        ".selected-patient-details{" +
+            "flex:1" +
+        "}" +
+
+        ".selected-patient-name{" +
+            "font-weight:800;" +
+            "font-size:16px" +
+        "}" +
+
+        ".selected-patient-grid{" +
+            "display:grid;" +
+            "grid-template-columns:repeat(4,1fr);" +
+            "gap:10px;" +
+            "margin-top:10px" +
+        "}" +
+
+        ".selected-patient-grid span,.patient-card-data span,.profile-item span{" +
+            "display:block;" +
+            "font-size:10px;" +
+            "color:#6b7280;" +
+            "margin-bottom:2px" +
+        "}" +
+
+        ".selected-patient-grid strong{" +
+            "font-size:12px" +
+        "}" +
+
+        ".patient-toolbar{" +
+            "margin-bottom:18px;" +
+            "max-width:600px" +
+        "}" +
+
+        ".patients-grid{" +
+            "display:grid;" +
+            "grid-template-columns:repeat(3,1fr);" +
+            "gap:16px" +
+        "}" +
+
+        ".patient-card{" +
+            "background:white;" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:12px;" +
+            "padding:18px;" +
+            "box-shadow:0 2px 8px rgba(0,0,0,.03)" +
+        "}" +
+
+        ".patient-card-top{" +
+            "display:flex;" +
+            "align-items:center;" +
+            "gap:12px;" +
+            "margin-bottom:16px" +
+        "}" +
+
+        ".patient-avatar{" +
+            "width:44px;" +
+            "height:44px" +
+        "}" +
+
+        ".patient-card-name{" +
+            "font-weight:800;" +
+            "font-size:16px" +
+        "}" +
+
+        ".patient-card-data{" +
+            "display:grid;" +
+            "grid-template-columns:1fr;" +
+            "gap:9px;" +
+            "padding:12px 0;" +
+            "border-top:1px solid #f0f2f5;" +
+            "border-bottom:1px solid #f0f2f5" +
+        "}" +
+
+        ".patient-card-data strong{" +
+            "font-size:13px" +
+        "}" +
+
+        ".patient-card-actions{" +
+            "display:flex;" +
+            "gap:6px;" +
+            "flex-wrap:wrap;" +
+            "margin-top:14px" +
+        "}" +
+
+        ".patient-profile-header{" +
+            "display:flex;" +
+            "align-items:center;" +
+            "gap:15px;" +
+            "margin-bottom:24px" +
+        "}" +
+
+        ".large-patient-avatar{" +
+            "width:70px;" +
+            "height:70px;" +
+            "font-size:20px" +
+        "}" +
+
+        ".patient-profile-header h2{" +
+            "margin:0;" +
+            "font-size:23px" +
+        "}" +
+
+        ".patient-id-display{" +
+            "font-size:11px;" +
+            "color:#9ca3af;" +
+            "margin-top:4px;" +
+            "word-break:break-all" +
+        "}" +
+
+        ".profile-section{" +
+            "margin-top:22px;" +
+            "border-top:1px solid #e5e7eb;" +
+            "padding-top:20px" +
+        "}" +
+
+        ".profile-section-title{" +
+            "font-size:15px;" +
+            "font-weight:800;" +
+            "margin-bottom:13px" +
+        "}" +
+
+        ".profile-grid{" +
+            "display:grid;" +
+            "grid-template-columns:repeat(3,1fr);" +
+            "gap:12px" +
+        "}" +
+
+        ".profile-item{" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:9px;" +
+            "padding:12px" +
+        "}" +
+
+        ".profile-item strong{" +
+            "font-size:13px;" +
+            "word-break:break-word" +
+        "}" +
+
+        ".medical-profile-grid{" +
+            "display:grid;" +
+            "grid-template-columns:1fr 1fr;" +
+            "gap:12px" +
+        "}" +
+
+        ".medical-profile-item{" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:9px;" +
+            "padding:13px" +
+        "}" +
+
+        ".medical-profile-label{" +
+            "font-weight:800;" +
+            "font-size:12px;" +
+            "margin-bottom:6px" +
+        "}" +
+
+        ".medical-profile-value{" +
+            "font-size:13px;" +
+            "line-height:1.5;" +
+            "color:#4b5563;" +
+            "white-space:normal" +
+        "}" +
+
+        ".history-list{" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:9px;" +
+            "overflow:hidden" +
+        "}" +
+
+        ".history-row{" +
+            "display:grid;" +
+            "grid-template-columns:150px 70px 110px 1fr;" +
+            "gap:10px;" +
+            "padding:12px;" +
+            "border-bottom:1px solid #f0f2f5;" +
+            "font-size:12px;" +
+            "align-items:center" +
+        "}" +
+
+        ".history-row:last-child{" +
+            "border-bottom:0" +
+        "}" +
+
+        ".history-date{" +
+            "font-weight:700" +
+        "}" +
+
+        ".history-time{" +
+            "font-weight:700;" +
+            "color:#0f766e" +
+        "}" +
+
+        ".history-status{" +
+            "font-weight:700" +
+            "font-size:11px" +
+        "}" +
+
+        ".history-note{" +
+            "color:#6b7280" +
+        "}" +
+
+        ".history-empty{" +
+            "border:1px dashed #d1d5db;" +
+            "border-radius:9px;" +
+            "padding:18px;" +
+            "color:#6b7280;" +
+            "font-size:13px" +
+        "}" +
+
+        ".profile-actions{" +
+            "display:flex;" +
+            "justify-content:flex-end;" +
+            "gap:10px;" +
+            "margin-top:25px" +
+        "}" +
+
+        ".login-page{" +
+            "min-height:100vh;" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:center;" +
+            "background:#f4f7fb;" +
+            "padding:20px" +
+        "}" +
+
+        ".login-box{" +
+            "width:min(420px,100%);" +
+            "background:white;" +
+            "border:1px solid #e5e7eb;" +
+            "border-radius:16px;" +
+            "padding:35px;" +
+            "box-shadow:0 15px 45px rgba(0,0,0,.08)" +
+        "}" +
+
+        ".login-logo{" +
+            "width:60px;" +
+            "height:60px;" +
+            "border-radius:15px;" +
+            "background:#0f766e;" +
+            "color:white;" +
+            "display:flex;" +
+            "align-items:center;" +
+            "justify-content:center;" +
+            "font-weight:800;" +
+            "font-size:20px;" +
+            "margin-bottom:16px" +
+        "}" +
+
+        ".login-box h1{" +
+            "margin:0;" +
+            "font-size:24px" +
+        "}" +
+
+        ".login-subtitle{" +
+            "color:#6b7280;" +
+            "font-size:13px;" +
+            "margin:6px 0 25px" +
+        "}" +
+
+        ".login-box label{" +
+            "margin-top:14px" +
+        "}" +
+
+        ".login-box input{" +
+            "width:100%;" +
+            "padding:11px;" +
+            "border:1px solid #d1d5db;" +
+            "border-radius:8px;" +
+            "outline:none" +
+        "}" +
+
+        ".full-button{" +
+            "width:100%;" +
+            "margin-top:22px" +
+        "}" +
+
+        ".login-message{" +
+            "font-size:13px;" +
+            "margin-top:12px;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".login-message.error{" +
+            "color:#b91c1c" +
+        "}" +
+
+        ".loading-box{" +
+            "padding:50px;" +
+            "text-align:center;" +
+            "color:#6b7280" +
+        "}" +
+
+        ".fatal-error{" +
+            "max-width:700px;" +
+            "margin:80px auto;" +
+            "background:white;" +
+            "padding:30px;" +
+            "border-radius:12px;" +
+            "border:1px solid #fecaca;" +
+            "color:#991b1b" +
+        "}" +
+
+        "@media(max-width:900px){" +
+
+            ".stats-grid{" +
+                "grid-template-columns:1fr 1fr" +
+            "}" +
+
+            ".patients-grid{" +
+                "grid-template-columns:1fr 1fr" +
+            "}" +
+
+            ".selected-patient-grid{" +
+                "grid-template-columns:1fr 1fr" +
+            "}" +
+
+            ".profile-grid{" +
+                "grid-template-columns:1fr 1fr" +
+            "}" +
+
+        "}" +
+
+        "@media(max-width:650px){" +
+
+            ".top-header{" +
+                "padding:0 14px;" +
+                "height:auto;" +
+                "min-height:65px" +
+            "}" +
+
+            ".user-area span{" +
+                "display:none" +
+            "}" +
+
+            ".main-nav{" +
+                "padding:0 10px" +
+            "}" +
+
+            ".main-content{" +
+                "padding:16px" +
+            "}" +
+
+            ".page-header{" +
+                "align-items:flex-start;" +
+                "gap:15px;" +
+                "flex-direction:column" +
+            "}" +
+
+            ".stats-grid{" +
+                "grid-template-columns:1fr 1fr" +
+            "}" +
+
+            ".appointment-row{" +
+                "grid-template-columns:60px 1fr;" +
+                "gap:10px" +
+            "}" +
+
+            ".appointment-status," +
+            ".appointment-actions{" +
+                "grid-column:2" +
+            "}" +
+
+            ".patients-grid{" +
+                "grid-template-columns:1fr" +
+            "}" +
+
+            ".form-grid{" +
+                "grid-template-columns:1fr" +
+            "}" +
+
+            ".form-full{" +
+                "grid-column:auto" +
+            "}" +
+
+            ".profile-grid," +
+            ".medical-profile-grid{" +
+                "grid-template-columns:1fr" +
+            "}" +
+
+            ".history-row{" +
+                "grid-template-columns:1fr 1fr" +
+            "}" +
+
+        "}";
 
     document.head.appendChild(style);
 }
-
-
-/* =========================================================
-   GLOBAL FUNCTIONS
-   Needed by inline action buttons.
-========================================================= */
-
-window.editAppointment =
-    editAppointment;
-
-window.completeAppointment =
-    completeAppointment;
-
-window.deleteAppointment =
-    deleteAppointment;
-
-window.viewPatient =
-    viewPatient;
-
-window.editPatient =
-    editPatient;
-
-window.deletePatient =
-    deletePatient;
-
-window.openPatientModal =
-    openPatientModal;
-
-window.closePatientEditor =
-    closePatientEditor;
-
-window.closePatientView =
-    closePatientView;
-
-window.logout =
-    logout;
-
-console.log(
-    "AMBULATORI GVM JavaScript loaded successfully.",
-    APP_VERSION
-);
