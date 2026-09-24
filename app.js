@@ -1,4 +1,5 @@
-const APP_VERSION = "GVM-20260923-04";
+```javascript
+const APP_VERSION = "GVM-20260924-01";
 
 const SUPABASE_URL = "https://ubpteaqdkxcriqyaxrux.supabase.co";
 
@@ -126,7 +127,11 @@ function showLogin() {
                         >
                     </div>
 
-                    <div id="loginError" class="login-error" style="display:none;"></div>
+                    <div
+                        id="loginError"
+                        class="login-error"
+                        style="display:none;"
+                    ></div>
 
                     <button
                         type="submit"
@@ -624,15 +629,22 @@ function renderAppointments() {
         } else {
             html += `
                 <tr class="schedule-row free">
+
                     <td class="time-cell">
                         ${time}
                     </td>
 
                     <td colspan="3">
-                        <div class="empty-message" style="padding:10px;text-align:left;">
+
+                        <div
+                            class="empty-message"
+                            style="padding:10px;text-align:left;"
+                        >
                             Orari i lirë
                         </div>
+
                     </td>
+
                 </tr>
             `;
         }
@@ -727,389 +739,12 @@ function renderPatient(
         </button>
     `;
 
-    return `
-        <tr class="schedule-row occupied">
-
-            <td class="time-cell">
-                ${time}
-            </td>
-
-            <td colspan="3">
-
-                <div class="patient-card ${status}">
-
-                    <div class="patient-wrapper">
-
-                        <div class="patient-avatar">
-                            ${initials}
-                        </div>
-
-                        <div class="patient-info">
-
-                            <div class="patient-name">
-                                ${safeName}
-                            </div>
-
-                            ${
-                                safePhone
-                                    ? `
-                                        <div class="patient-label">
-                                            ${safePhone}
-                                        </div>
-                                    `
-                                    : ""
-                            }
-
-                        </div>
-
-                    </div>
-
-                    <div class="status-cell">
-
-                        <span class="status ${statusClass(status)}">
-                            ${statusText(status)}
-                        </span>
-
-                    </div>
-
-                    <div class="actions-cell">
-
-                        <div class="action-buttons">
-                            ${actionButtons}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </td>
-
-        </tr>
-    `;
-}
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function statusText(status) {
-    switch (status) {
-        case "arrived":
-            return "Erdhi";
-
-        case "finished":
-            return "Përfundoi";
-
-        case "cancelled":
-            return "Anuluar";
-
-        case "planned":
-        default:
-            return "Planifikuar";
-    }
-}
-
-
-function statusClass(status) {
-    switch (status) {
-        case "arrived":
-            return "status-arrived";
-
-        case "finished":
-            return "status-finished";
-
-        case "cancelled":
-            return "status-cancelled";
-
-        case "planned":
-        default:
-            return "status-planned";
-    }
-}
-
-
-/* =========================================================
-   ADD APPOINTMENT
-========================================================= */
-
-async function addAppointment(event) {
-    event.preventDefault();
-
-    const time =
-        document.getElementById(
-            "appointmentTime"
-        ).value;
-
-    const patientName =
-        document.getElementById(
-            "patientName"
-        ).value.trim();
-
-    const patientPhone =
-        document.getElementById(
-            "patientPhone"
-        ).value.trim();
-
-    if (!patientName) {
-        return;
-    }
-
-    try {
-        const {
-            data: existing,
-            error: checkError
-        } = await supabaseClient
-            .from("appointments")
-            .select("id")
-            .eq(
-                "appointment_date",
-                dateKey(currentDate)
-            )
-            .eq(
-                "appointment_time",
-                time
-            )
-            .limit(1);
-
-        if (checkError) {
-            throw checkError;
-        }
-
-        if (
-            existing &&
-            existing.length > 0
-        ) {
-            alert(
-                "Ky orar është tashmë i zënë."
-            );
-
-            return;
-        }
-
-        const {
-            error
-        } = await supabaseClient
-            .from("appointments")
-            .insert([
-                {
-                    appointment_date:
-                        dateKey(currentDate),
-
-                    appointment_time:
-                        time,
-
-                    patient_name:
-                        patientName,
-
-                    patient_phone:
-                        patientPhone || null,
-
-                    status:
-                        "planned"
-                }
-            ]);
-
-        if (error) {
-            throw error;
-        }
-
-        document
-            .getElementById(
-                "patientName"
-            )
-            .value = "";
-
-        document
-            .getElementById(
-                "patientPhone"
-            )
-            .value = "";
-
-        await loadAppointments();
-
-    } catch (error) {
-        console.error(
-            "addAppointment error:",
-            error
-        );
-
-        alert(
-            error.message ||
-            "Vizita nuk u shtua."
-        );
-    }
-}
-
-
-/* =========================================================
-   CHANGE STATUS
-========================================================= */
-
-async function changeStatus(
-    id,
-    status
-) {
-    try {
-        const {
-            error
-        } = await supabaseClient
-            .from("appointments")
-            .update({
-                status: status
-            })
-            .eq(
-                "id",
-                id
-            );
-
-        if (error) {
-            throw error;
-        }
-
-        await loadAppointments();
-
-    } catch (error) {
-        console.error(
-            "changeStatus error:",
-            error
-        );
-
-        alert(
-            error.message ||
-            "Statusi nuk u ndryshua."
-        );
-    }
-}
-
-
-/* =========================================================
-   DELETE
-========================================================= */
-
-async function deleteAppointment(id) {
-    const confirmed =
-        confirm(
-            "A dëshironi ta fshini këtë vizitë?"
-        );
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-        const {
-            error
-        } = await supabaseClient
-            .from("appointments")
-            .delete()
-            .eq(
-                "id",
-                id
-            );
-
-        if (error) {
-            throw error;
-        }
-
-        await loadAppointments();
-
-    } catch (error) {
-        console.error(
-            "deleteAppointment error:",
-            error
-        );
-
-        alert(
-            error.message ||
-            "Vizita nuk u fshi."
-        );
-    }
-}
-
-
-/* =========================================================
-   REALTIME
-========================================================= */
-
-function setupRealtime() {
-    if (realtimeChannel) {
-        return;
-    }
-
-    realtimeChannel =
-        supabaseClient
-            .channel(
-                "appointments-realtime"
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "appointments"
-                },
-                payload => {
-                    console.log(
-                        "Realtime update:",
-                        payload
-                    );
-
-                    loadAppointments();
-                }
-            )
-            .subscribe(status => {
-                console.log(
-                    "Realtime status:",
-                    status
-                );
-            });
-}
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function normalizeTime(value) {
-    if (!value) {
-        return "";
-    }
-
-    return String(value)
-        .substring(0, 5);
-}
-
-
-function getInitials(name) {
-    const parts =
-        String(name)
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-
-    if (parts.length === 0) {
-        return "P";
-    }
-
-    if (parts.length === 1) {
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-    }
-
-    return (
-        parts[0].charAt(0) +
-        parts[1].charAt(0)
-    ).toUpperCase();
-}
-
-
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
+    /*
+       KËTU ËSHTË NDRYSHIMI KRYESOR:
+
+       patient-card merr klasën e statusit:
+       planned
+       arrived
+       finished
+       cancelled
+```
