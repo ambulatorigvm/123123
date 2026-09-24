@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-24";
+const APP_VERSION = "GVM-20260924-25";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
