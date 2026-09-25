@@ -1192,22 +1192,21 @@ function closePatientModalWindow() {
 
 async function savePatient() {
     const id = document.getElementById("patientId");
-    const name = document.getElementById("patientpatient.emer");
-    const phone = document.getElementById("patientRecordPhone");
-    const birthDate = document.getElementById("patientBirthDate");
-    const personalId = document.getElementById("patientPersonalId");
-    const address = document.getElementById("patientAddress");
-    const notes = document.getElementById("patientNotes");
+   const name = document.getElementById("patientName");
+const phone = document.getElementById("patientRecordPhone");
+const birthDate = document.getElementById("patientBirthDate");
+const personalId = document.getElementById("patientPersonalId");
+const address = document.getElementById("patientAddress");
+const notes = document.getElementById("patientNotes");
 
-    if (!name) return;
+if (!name) return;
 
-    const patient.emer = name.value.trim();
+const patientName = name.value.trim();
 
-    if (!patient.emer) {
-        showMessage("Vendos emrin dhe mbiemrin e pacientit.", "error");
-        return;
-    }
-
+if (!patientName) {
+    showMessage("Vendos emrin dhe mbiemrin e pacientit.", "error");
+    return;
+}
     const payload = {
         full_name: patient.emer,
         phone: phone ? phone.value.trim() : "",
