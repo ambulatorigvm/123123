@@ -1,15 +1,19 @@
+```html
 <!DOCTYPE html>
 <html lang="sq">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>AMBULATORI GVM</title>
+    <title>AMBULATORI GVM</title>
 
-<link rel="stylesheet" href="style.css?v=2026092522">
+    <link
+        rel="stylesheet"
+        href="style.css?v=2026092522"
+    >
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 
@@ -20,9 +24,7 @@
     <h1>AMBULATORI GVM</h1>
 
 
-    <!-- ================================
-         NAVIGIMI I DITËS
-    ================================= -->
+    <!-- NAVIGIMI I DITËS -->
 
     <div class="toolbar">
 
@@ -43,15 +45,11 @@
     </div>
 
 
-
-    <!-- ================================
-         SHTO VIZITË
-    ================================= -->
+    <!-- SHTO VIZITË -->
 
     <div class="card">
 
         <h2>Shto Vizitë</h2>
-
 
         <form id="appointmentForm">
 
@@ -70,7 +68,6 @@
             >
 
 
-
             <!-- LLOJI I VIZITËS -->
 
             <div class="visit-type">
@@ -78,7 +75,6 @@
                 <label>
                     Lloji i vizitës
                 </label>
-
 
                 <div class="radio-group">
 
@@ -117,11 +113,7 @@
             </div>
 
 
-
-            <!-- PAGESA
-                 DO TE SHFAQET VETEM
-                 PER RIKONTROLL
-            -->
+            <!-- PAGESA -->
 
             <div
                 id="paymentOptions"
@@ -133,14 +125,15 @@
                     Rikontrolli
                 </label>
 
-
                 <div class="checkbox-group">
 
                     <label class="choice">
 
                         <input
-                            type="checkbox"
+                            type="radio"
+                            name="paymentStatus"
                             id="paidCheck"
+                            value="Me pagesë"
                         >
 
                         <span>
@@ -153,8 +146,10 @@
                     <label class="choice">
 
                         <input
-                            type="checkbox"
+                            type="radio"
+                            name="paymentStatus"
                             id="unpaidCheck"
+                            value="Pa pagesë"
                         >
 
                         <span>
@@ -166,7 +161,6 @@
                 </div>
 
             </div>
-
 
 
             <!-- NR KARTELËS -->
@@ -185,7 +179,6 @@
             >
 
 
-
             <!-- ORA -->
 
             <label for="appointmentTime">
@@ -199,12 +192,9 @@
             </select>
 
 
-
             <!-- RUAJ -->
 
-            <button
-                type="submit"
-            >
+            <button type="submit">
                 Ruaj Vizitën
             </button>
 
@@ -213,10 +203,7 @@
     </div>
 
 
-
-    <!-- ================================
-         ORARI
-    ================================= -->
+    <!-- ORARI -->
 
     <div class="card">
 
@@ -229,9 +216,9 @@
 </div>
 
 
+<script src="app.js?v=2026092601"></script>
 
-<script src="app.js?v=999999"></script>
-    
 </body>
 
 </html>
+```
