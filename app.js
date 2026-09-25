@@ -1,7 +1,7 @@
 ```javascript
 console.log("APP JS LOADED - AMBULATORI GVM");
 
-const APP_VERSION = "GVM-20260925-02";
+const APP_VERSION = "GVM-20260925-03";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -157,12 +157,13 @@ function generateTimes() {
 
 
 /* ================================
-   LLOJI I VIZITËS
+   RIKONTROLLI
+   ME PAGESË / PA PAGESË
 ================================ */
 
-function setupVisitType() {
+function setupPaymentOptions() {
 
-    const visitTypeRadios =
+    const visitRadios =
         document.querySelectorAll(
             'input[name="visitType"]'
         );
@@ -183,20 +184,17 @@ function setupVisitType() {
         );
 
 
-    if (
-        !visitTypeRadios.length ||
-        !paymentOptions
-    ) {
+    if (!paymentOptions) {
 
         console.error(
-            "Nuk u gjetën elementet e llojit të vizitës."
+            "Nuk u gjet paymentOptions"
         );
 
         return;
     }
 
 
-    function updatePaymentVisibility() {
+    function updatePaymentOptions() {
 
         const selected =
             document.querySelector(
@@ -213,7 +211,7 @@ function setupVisitType() {
                 "block";
 
             console.log(
-                "Rikontroll u zgjodh - shfaqen opsionet e pagesës."
+                "Rikontroll: opsionet e pagesës u shfaqën."
             );
 
         } else {
@@ -229,48 +227,53 @@ function setupVisitType() {
             if (unpaidCheck) {
                 unpaidCheck.checked = false;
             }
-
-            console.log(
-                "Vizitë u zgjodh - opsionet e pagesës u fshehën."
-            );
         }
     }
 
 
-    visitTypeRadios.forEach(
+    visitRadios.forEach(
         radio => {
 
             radio.addEventListener(
                 "change",
-                updatePaymentVisibility
+                updatePaymentOptions
             );
         }
     );
 
 
     /* ================================
-       MOS LEJO DY ZGJEDHJE PAGESASH
+       VETËM NJË NGA DY OPSIONET
     ================================= */
 
-    if (paidCheck && unpaidCheck) {
+    if (paidCheck) {
 
         paidCheck.addEventListener(
             "change",
             function() {
 
                 if (paidCheck.checked) {
-                    unpaidCheck.checked = false;
+
+                    if (unpaidCheck) {
+                        unpaidCheck.checked = false;
+                    }
                 }
             }
         );
+    }
 
+
+    if (unpaidCheck) {
 
         unpaidCheck.addEventListener(
             "change",
             function() {
 
                 if (unpaidCheck.checked) {
-                    paidCheck.checked = false;
+
+                    if (paidCheck) {
+                        paidCheck.checked = false;
+                    }
                 }
             }
         );
@@ -279,60 +282,7 @@ function setupVisitType() {
 
     /* Gjendja fillestare */
 
-    updatePaymentVisibility();
-}
-
-
-/* ================================
-   MERR TË DHËNAT E PAGESËS
-================================ */
-
-function getPaymentStatus() {
-
-    const selectedVisit =
-        document.querySelector(
-            'input[name="visitType"]:checked'
-        );
-
-    const paidCheck =
-        document.getElementById(
-            "paidCheck"
-        );
-
-    const unpaidCheck =
-        document.getElementById(
-            "unpaidCheck"
-        );
-
-
-    if (
-        !selectedVisit ||
-        selectedVisit.value !== "Rikontroll"
-    ) {
-
-        return null;
-    }
-
-
-    if (
-        paidCheck &&
-        paidCheck.checked
-    ) {
-
-        return "Me pagesë";
-    }
-
-
-    if (
-        unpaidCheck &&
-        unpaidCheck.checked
-    ) {
-
-        return "Pa pagesë";
-    }
-
-
-    return null;
+    updatePaymentOptions();
 }
 
 
@@ -451,55 +401,17 @@ async function loadAppointments() {
                 "planned";
 
 
-            const visitType =
-                appointment.visit_type ||
-                "Vizitë";
-
-
-            const paymentStatus =
-                appointment.payment_status ||
-                "";
-
-
-            let paymentHTML = "";
-
-
-            if (
-                visitType === "Rikontroll"
-            ) {
-
-                paymentHTML = `
-                    <br>
-                    Pagesa:
-                    ${paymentStatus || "-"}
-                `;
-            }
-
-
             div.innerHTML = `
                 <strong>
                     ${patientName}
                 </strong>
-
                 <br>
-
                 Ora:
                 ${time}
-
                 <br>
-
                 Kartela:
                 ${cardNumber}
-
                 <br>
-
-                Lloji:
-                ${visitType}
-
-                ${paymentHTML}
-
-                <br>
-
                 Status:
                 ${status}
             `;
@@ -530,41 +442,35 @@ if (appointmentForm) {
             e.preventDefault();
 
 
-            const patientNameElement =
-                document.getElementById(
-                    "patientName"
-                );
-
-
-            const cardNumberElement =
-                document.getElementById(
-                    "cardNumber"
-                );
-
-
-            const appointmentTimeElement =
-                document.getElementById(
-                    "appointmentTime"
-                );
-
-
             const patientName =
-                patientNameElement
-                    ? patientNameElement.value.trim()
-                    : "";
+                document
+                .getElementById(
+                    "patientName"
+                )
+                .value
+                .trim();
 
 
             const cardNumber =
-                cardNumberElement
-                    ? cardNumberElement.value.trim()
-                    : "";
+                document
+                .getElementById(
+                    "cardNumber"
+                )
+                .value
+                .trim();
 
 
             const appointmentTime =
-                appointmentTimeElement
-                    ? appointmentTimeElement.value
-                    : "";
+                document
+                .getElementById(
+                    "appointmentTime"
+                )
+                .value;
 
+
+            /* ================================
+               LLOJI I VIZITËS
+            ================================= */
 
             const selectedVisit =
                 document.querySelector(
@@ -578,8 +484,57 @@ if (appointmentForm) {
                     : "Vizitë";
 
 
-            const paymentStatus =
-                getPaymentStatus();
+            /* ================================
+               PAGESA
+            ================================= */
+
+            const paidCheck =
+                document.getElementById(
+                    "paidCheck"
+                );
+
+
+            const unpaidCheck =
+                document.getElementById(
+                    "unpaidCheck"
+                );
+
+
+            let paymentStatus =
+                null;
+
+
+            if (
+                visitType === "Rikontroll"
+            ) {
+
+                if (
+                    paidCheck &&
+                    paidCheck.checked
+                ) {
+
+                    paymentStatus =
+                        "Me pagesë";
+
+                } else if (
+                    unpaidCheck &&
+                    unpaidCheck.checked
+                ) {
+
+                    paymentStatus =
+                        "Pa pagesë";
+                }
+
+
+                if (!paymentStatus) {
+
+                    alert(
+                        "Për rikontrollin zgjidh Me pagesë ose Pa pagesë."
+                    );
+
+                    return;
+                }
+            }
 
 
             /* ================================
@@ -593,23 +548,6 @@ if (appointmentForm) {
 
                 alert(
                     "Plotëso emrin dhe orën."
-                );
-
-                return;
-            }
-
-
-            /* Rikontroll duhet të ketë
-               zgjedhje pagese */
-
-            if (
-                visitType === "Rikontroll" &&
-                !paymentStatus
-            ) {
-
-                alert(
-                    "Për rikontrollin zgjidh:\n\n" +
-                    "Me pagesë ose Pa pagesë."
                 );
 
                 return;
@@ -646,7 +584,15 @@ if (appointmentForm) {
 
 
             /* ================================
-               RUAJ NË SUPABASE
+               RUAJ VIZITËN
+               
+               KUJDES:
+               Për momentin ruajmë vetëm
+               kolonat që ekzistonin më parë.
+               
+               Pagesa shfaqet në ekran,
+               por nuk dërgohet në Supabase
+               derisa të kontrollojmë kolonën.
             ================================= */
 
             const result =
@@ -671,9 +617,6 @@ if (appointmentForm) {
                         visit_type:
                             visitType,
 
-                        payment_status:
-                            paymentStatus,
-
                         status:
                             "planned"
                     }
@@ -686,7 +629,6 @@ if (appointmentForm) {
                     "Gabim gjatë ruajtjes:",
                     result.error
                 );
-
 
                 alert(
                     "Gabim gjatë ruajtjes së vizitës:\n\n" +
@@ -706,31 +648,25 @@ if (appointmentForm) {
                PASTRO FORMULARIN
             ================================= */
 
-            if (patientNameElement) {
-                patientNameElement.value = "";
-            }
+            document
+            .getElementById(
+                "patientName"
+            )
+            .value = "";
 
 
-            if (cardNumberElement) {
-                cardNumberElement.value = "";
-            }
+            document
+            .getElementById(
+                "cardNumber"
+            )
+            .value = "";
 
 
-            if (appointmentTimeElement) {
-                appointmentTimeElement.value = "";
-            }
-
-
-            const paidCheck =
-                document.getElementById(
-                    "paidCheck"
-                );
-
-
-            const unpaidCheck =
-                document.getElementById(
-                    "unpaidCheck"
-                );
+            document
+            .getElementById(
+                "appointmentTime"
+            )
+            .value = "";
 
 
             if (paidCheck) {
@@ -743,8 +679,6 @@ if (appointmentForm) {
             }
 
 
-            /* Ktheje përsëri në Vizitë */
-
             const visitRadio =
                 document.querySelector(
                     'input[name="visitType"][value="Vizitë"]'
@@ -752,9 +686,7 @@ if (appointmentForm) {
 
 
             if (visitRadio) {
-
-                visitRadio.checked =
-                    true;
+                visitRadio.checked = true;
             }
 
 
@@ -874,7 +806,7 @@ updateDate();
 
 generateTimes();
 
-setupVisitType();
+setupPaymentOptions();
 
 loadAppointments();
 
