@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260925-02";
+const APP_VERSION = "GVM-20260925-03";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -534,7 +534,8 @@ function showApp() {
                     <form id="appointmentForm" class="appointment-form">
                         <div class="form-group">
                             <label for="patientName">Emri dhe mbiemri</label>
-                            <input id="patientName" type="text" placeholder="Emri dhe mbiemri i pacientit" required>
+                            <input id="patientName" type="text" list="patientNameList" placeholder="Shkruaj ose zgjidh pacientin" autocomplete="off" required>
+                            <datalist id="patientNameList"></datalist>
                         </div>
 
                         <div class="form-group">
@@ -792,6 +793,16 @@ function showApp() {
     const appointmentType = document.getElementById("appointmentType");
     const paymentPaid = document.getElementById("paymentPaid");
     const paymentFree = document.getElementById("paymentFree");
+    const patientName = document.getElementById("patientName");
+
+    if (patientName) {
+        patientName.addEventListener("input", function () {
+            fillAppointmentCardFromPatient();
+        });
+        patientName.addEventListener("change", function () {
+            fillAppointmentCardFromPatient();
+        });
+    }
 
     if (appointmentType) {
         appointmentType.addEventListener("change", updateRecheckOptions);
@@ -919,12 +930,58 @@ async function loadPatients() {
         patientPage = 1;
         lastPatientSearch = "";
         console.log("TOTAL PATIENTS LOADED:", patients.length);
+        populatePatientNameList();
         renderPatients();
     } catch (error) {
         console.error("LOAD PATIENTS EXCEPTION:", error);
         body.innerHTML = `<tr><td colspan="6" class="empty-day-cell">Gabim gjatë ngarkimit të pacientëve: ${escapeHtml(error.message || String(error))}</td></tr>`;
     }
 }
+
+function populatePatientNameList() {
+    const list = document.getElementById("patientNameList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    patients.forEach(function (patient) {
+        if (!patient || !patient.full_name) return;
+
+        const option = document.createElement("option");
+        option.value = patient.full_name;
+
+        if (patient.card_number !== null && patient.card_number !== undefined && patient.card_number !== "") {
+            option.label = "Kartela: " + formatCardNumber(patient.card_number);
+        }
+
+        list.appendChild(option);
+    });
+}
+
+function fillAppointmentCardFromPatient() {
+    const nameElement = document.getElementById("patientName");
+    const cardElement = document.getElementById("appointmentCardNumber");
+
+    if (!nameElement || !cardElement) return;
+
+    const typedName = nameElement.value.trim().toLowerCase();
+
+    if (!typedName) {
+        cardElement.value = "";
+        return;
+    }
+
+    const patient = patients.find(function (item) {
+        return String(item.full_name || "").trim().toLowerCase() === typedName;
+    });
+
+    if (patient && patient.card_number !== null && patient.card_number !== undefined && patient.card_number !== "") {
+        cardElement.value = formatCardNumber(patient.card_number);
+    } else if (patient) {
+        cardElement.value = "";
+    }
+}
+
 
 function formatCardNumber(cardNumber) {
     if (cardNumber === null || cardNumber === undefined || cardNumber === "") {
