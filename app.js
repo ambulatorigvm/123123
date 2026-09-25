@@ -665,28 +665,32 @@ function setupForm() {
                 const result =
                     await supabaseClient
                         .from("appointments")
-                        .insert([
-                            {
-                                patient_name:
-                                    patientName,
+.insert([
+    {
+        patient_name:
+            patientName,
 
-                                card_number:
-                                    cardNumber || null,
+        card_number:
+            cardNumber || null,
 
-                                appointment_date:
-                                    dateKey(
-                                        currentDate
-                                    ),
+        appointment_date:
+            dateKey(
+                currentDate
+            ),
 
-                                appointment_time:
-                                    appointmentTime,
+        appointment_time:
+            appointmentTime,
 
-                                visit_type:
-                                    visitType,
+        visit_type:
+            visitType,
 
-                                status:
-                                    "planned"
-                            }
+        payment_status:
+            paymentStatus,
+
+        status:
+            "planned"
+    }
+])
                         ])
                         .select();
 
