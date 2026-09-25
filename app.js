@@ -2,9 +2,9 @@ const SUPABASE_URL =
 "https://ubpteaqdkxcriqyaxrux.supabase.co";
 
 const SUPABASE_KEY =
-"VENDOS_KEY_TENDE";
+"VENDOS_PUBLISHABLE_KEY_TENDE";
 
-const supabase =
+const supabaseClient =
 window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
@@ -15,23 +15,16 @@ let currentDate = new Date();
 function dateKey(date){
 
     const y = date.getFullYear();
-
-    const m = String(
-        date.getMonth()+1
-    ).padStart(2,"0");
-
-    const d = String(
-        date.getDate()
-    ).padStart(2,"0");
+    const m = String(date.getMonth()+1).padStart(2,"0");
+    const d = String(date.getDate()).padStart(2,"0");
 
     return `${y}-${m}-${d}`;
 }
 
 function updateDate(){
 
-    document.getElementById(
-        "currentDate"
-    ).textContent =
+    document.getElementById("currentDate")
+    .textContent =
     currentDate.toLocaleDateString(
         "sq-AL",
         {
@@ -50,33 +43,32 @@ function generateTimes(){
         "appointmentTime"
     );
 
-    select.innerHTML="";
+    select.innerHTML = "";
 
     for(
-        let m=480;
-        m<=1080;
-        m+=15
+        let m = 480;
+        m <= 1080;
+        m += 15
     ){
 
         const h =
-        String(
-            Math.floor(m/60)
-        ).padStart(2,"0");
+        String(Math.floor(m/60))
+        .padStart(2,"0");
 
         const min =
-        String(
-            m%60
-        ).padStart(2,"0");
+        String(m%60)
+        .padStart(2,"0");
 
-        const t=`${h}:${min}`;
+        const time =
+        `${h}:${min}`;
 
         const option =
         document.createElement(
             "option"
         );
 
-        option.value=t;
-        option.textContent=t;
+        option.value = time;
+        option.textContent = time;
 
         select.appendChild(option);
     }
@@ -85,7 +77,7 @@ function generateTimes(){
 async function loadAppointments(){
 
     const result =
-    await supabase
+    await supabaseClient
     .from("appointments")
     .select("*")
     .eq(
@@ -93,7 +85,8 @@ async function loadAppointments(){
         dateKey(currentDate)
     )
     .order(
-        "appointment_time"
+        "appointment_time",
+        { ascending:true }
     );
 
     if(result.error){
@@ -110,9 +103,20 @@ async function loadAppointments(){
         "appointments"
     );
 
-    box.innerHTML="";
+    box.innerHTML = "";
 
-    result.data.forEach(item=>{
+    if(
+        !result.data ||
+        result.data.length === 0
+    ){
+
+        box.innerHTML =
+        "<p>Nuk ka vizita.</p>";
+
+        return;
+    }
+
+    result.data.forEach(item => {
 
         const div =
         document.createElement(
@@ -120,16 +124,22 @@ async function loadAppointments(){
         );
 
         div.className =
-        `appointment ${item.status}`;
+        `appointment ${
+            item.status || "planned"
+        }`;
 
-        div.innerHTML=`
+        div.innerHTML = `
             <strong>
-                ${item.patient_name}
+                ${item.patient_name || ""}
             </strong>
             <br>
-            ${item.appointment_time}
+            Ora:
+            ${String(
+                item.appointment_time
+            ).substring(0,5)}
             <br>
-            ${item.patient_phone||""}
+            Kartela:
+            ${item.card_number || "-"}
         `;
 
         box.appendChild(div);
@@ -149,12 +159,12 @@ document
         const patientName =
         document.getElementById(
             "patientName"
-        ).value;
+        ).value.trim();
 
-        const patientPhone =
+        const cardNumber =
         document.getElementById(
             "patientPhone"
-        ).value;
+        ).value.trim();
 
         const appointmentTime =
         document.getElementById(
@@ -162,26 +172,27 @@ document
         ).value;
 
         const result =
-        await supabase
+        await supabaseClient
         .from("appointments")
         .insert([
             {
                 patient_name:
                 patientName,
 
-                patient_phone:
-                patientPhone,
+                card_number:
+                cardNumber || null,
 
                 appointment_time:
                 appointmentTime,
 
                 appointment_date:
-                dateKey(
-                    currentDate
-                ),
+                dateKey(currentDate),
 
                 status:
-                "planned"
+                "planned",
+
+                is_paid:
+                false
             }
         ]);
 
@@ -194,34 +205,45 @@ document
             return;
         }
 
+        document.getElementById(
+            "appointmentForm"
+        ).reset();
+
         loadAppointments();
     }
 );
 
 document
 .getElementById("prevDay")
-.onclick=()=>{
+.onclick = () => {
+
     currentDate.setDate(
         currentDate.getDate()-1
     );
+
     updateDate();
     loadAppointments();
 };
 
 document
 .getElementById("nextDay")
-.onclick=()=>{
+.onclick = () => {
+
     currentDate.setDate(
         currentDate.getDate()+1
     );
+
     updateDate();
     loadAppointments();
 };
 
 document
 .getElementById("todayBtn")
-.onclick=()=>{
-    currentDate=new Date();
+.onclick = () => {
+
+    currentDate =
+    new Date();
+
     updateDate();
     loadAppointments();
 };
