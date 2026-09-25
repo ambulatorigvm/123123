@@ -1,3 +1,4 @@
+console.log("APP JS LOADED");
 const SUPABASE_URL =
 "https://ubpteaqdkxcriqyaxrux.supabase.co";
 
