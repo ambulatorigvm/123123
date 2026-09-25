@@ -425,4 +425,9 @@ document
 
 updateDate();
 generateTimes();
+for(
+    let minutes = 720;
+    minutes <= 1020;
+    minutes += 15
+)
 loadAppointments();
