@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260925-01";
+const APP_VERSION = "GVM-20260925-02";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -534,12 +534,7 @@ function showApp() {
                     <form id="appointmentForm" class="appointment-form">
                         <div class="form-group">
                             <label for="patientName">Emri dhe mbiemri</label>
-                            <input id="patientName" type="text" placeholder="Emri i pacientit" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="patientPhone">Telefoni</label>
-                            <input id="patientPhone" type="text" placeholder="Numri i telefonit">
+                            <input id="patientName" type="text" placeholder="Emri dhe mbiemri i pacientit" required>
                         </div>
 
                         <div class="form-group">
@@ -548,8 +543,31 @@ function showApp() {
                         </div>
 
                         <div class="form-group">
-                            <label for="appointmentNote">Shënim</label>
-                            <input id="appointmentNote" type="text" placeholder="Shënim për vizitën">
+                            <label for="appointmentType">Lloji i vizitës</label>
+                            <select id="appointmentType" required>
+                                <option value="">Zgjidh llojin</option>
+                                <option value="visit">Vizitë</option>
+                                <option value="recheck">Rikontroll</option>
+                            </select>
+                        </div>
+
+                        <div id="recheckOptions" class="form-group" style="display:none;">
+                            <label>Rikontrolli</label>
+                            <div style="display:flex;gap:18px;align-items:center;min-height:44px;">
+                                <label style="display:flex;align-items:center;gap:7px;font-weight:600;cursor:pointer;">
+                                    <input id="paymentPaid" type="checkbox">
+                                    Me pagesë
+                                </label>
+                                <label style="display:flex;align-items:center;gap:7px;font-weight:600;cursor:pointer;">
+                                    <input id="paymentFree" type="checkbox">
+                                    Pa pagesë
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appointmentCardNumber">Nr. i kartelës <span style="font-weight:400;color:#8a979d;">(opsionale)</span></label>
+                            <input id="appointmentCardNumber" type="text" inputmode="numeric" placeholder="Nr. i kartelës">
                         </div>
 
                         <button class="add-button" type="submit">
@@ -567,7 +585,7 @@ function showApp() {
                         </div>
 
                         <div class="schedule-header-right">
-                            <div class="working-hours">🕐 08:00 — 18:00</div>
+                            <div class="working-hours">🕐 12:00 — 17:00</div>
                             <div id="scheduleInfo" class="schedule-info">0 vizita</div>
                         </div>
                     </div>
@@ -578,8 +596,8 @@ function showApp() {
                                 <tr>
                                     <th>Ora</th>
                                     <th>Pacienti</th>
-                                    <th>Telefoni</th>
-                                    <th>Shënimi</th>
+                                    <th>Lloji</th>
+                                    <th>Pagesa / Kartela</th>
                                     <th>Statusi</th>
                                     <th>Veprime</th>
                                 </tr>
@@ -771,6 +789,26 @@ function showApp() {
         });
     }
 
+    const appointmentType = document.getElementById("appointmentType");
+    const paymentPaid = document.getElementById("paymentPaid");
+    const paymentFree = document.getElementById("paymentFree");
+
+    if (appointmentType) {
+        appointmentType.addEventListener("change", updateRecheckOptions);
+    }
+
+    if (paymentPaid) {
+        paymentPaid.addEventListener("change", function () {
+            if (paymentPaid.checked && paymentFree) paymentFree.checked = false;
+        });
+    }
+
+    if (paymentFree) {
+        paymentFree.addEventListener("change", function () {
+            if (paymentFree.checked && paymentPaid) paymentPaid.checked = false;
+        });
+    }
+
     const newPatientButton = document.getElementById("newPatientButton");
     if (newPatientButton) {
         newPatientButton.addEventListener("click", function () {
@@ -807,6 +845,7 @@ function showApp() {
 
     updateDateDisplay();
     populateTimeSelect();
+    updateRecheckOptions();
     loadAppointments();
     setupRealtime();
     setupPatientsRealtime();
@@ -1876,10 +1915,10 @@ function generateTimes() {
     const times = [];
 
     const startMinutes =
-        8 * 60;
+        12 * 60;
 
     const endMinutes =
-        18 * 60;
+        17 * 60;
 
     for (
         let minutes = startMinutes;
@@ -2228,237 +2267,110 @@ function renderAppointmentRow(
     index
 ) {
 
-    const tr =
-        document.createElement(
-            "tr"
-        );
+    const tr = document.createElement("tr");
+    tr.className = "appointment-row";
 
-    tr.className =
-        "appointment-row";
+    const name = appointment.patient_name || "Pa emër";
+    const status = appointment.status || "planned";
+    const details = parseAppointmentDetails(appointment.note);
+    const initials = getInitials(name);
 
-    const name =
-        appointment.patient_name ||
-        "Pa emër";
-
-    const phone =
-        appointment.patient_phone ||
-        "—";
-
-    const note =
-        appointment.note ||
-        "—";
-
-    const status =
-        appointment.status ||
-        "planned";
-
-    const initials =
-        getInitials(name);
+    const typeText = details.type === "recheck" ? "Rikontroll" : "Vizitë";
+    const paymentText = details.type === "recheck"
+        ? (details.payment === "paid" ? "Me pagesë" : details.payment === "free" ? "Pa pagesë" : "—")
+        : "—";
+    const cardText = details.card || "—";
 
     tr.innerHTML = `
-
         <td class="time-cell">
-
             <div class="time-badge">
-
-                <span class="time-icon">
-                    ◷
-                </span>
-
-                <strong>
-                    ${escapeHtml(time)}
-                </strong>
-
+                <span class="time-icon">◷</span>
+                <strong>${escapeHtml(time)}</strong>
             </div>
-
         </td>
 
         <td class="patient-cell">
-
             <div class="patient-main">
-
-                <div class="patient-avatar">
-                    ${escapeHtml(initials)}
-                </div>
-
+                <div class="patient-avatar">${escapeHtml(initials)}</div>
                 <div class="patient-details">
-
-                    <strong>
-                        ${escapeHtml(name)}
-                    </strong>
-
-                    <span>
-                        Pacient
-                    </span>
-
+                    <strong>${escapeHtml(name)}</strong>
+                    <span>Pacient</span>
                 </div>
-
             </div>
-
-        </td>
-
-        <td class="phone-cell">
-
-            ${
-                phone !== "—"
-                    ? `
-                        <a
-                            href="tel:${escapeHtml(phone)}"
-                            class="phone-link"
-                        >
-                            <span>☎</span>
-                            ${escapeHtml(phone)}
-                        </a>
-                    `
-                    : `
-                        <span class="muted-text">
-                            —
-                        </span>
-                    `
-            }
-
         </td>
 
         <td class="note-cell">
+            <strong>${escapeHtml(typeText)}</strong>
+        </td>
 
-            ${
-                note !== "—"
-                    ? `
-                        <span
-                            class="note-text"
-                            title="${escapeHtml(note)}"
-                        >
-                            📝 ${escapeHtml(note)}
-                        </span>
-                    `
-                    : `
-                        <span class="muted-text">
-                            Pa shënim
-                        </span>
-                    `
-            }
-
+        <td class="note-cell">
+            <div><strong>${escapeHtml(paymentText)}</strong></div>
+            <div class="muted-text" style="margin-top:4px;">Kartelë: ${escapeHtml(cardText)}</div>
         </td>
 
         <td class="status-cell">
-
-            <span
-                class="status ${statusClass(status)}"
-            >
-
+            <span class="status ${statusClass(status)}">
                 <span class="status-dot"></span>
-
-                ${escapeHtml(
-                    statusText(status)
-                )}
-
+                ${escapeHtml(statusText(status))}
             </span>
-
         </td>
 
         <td class="actions-cell">
-
             <div class="appointment-actions">
-
-                ${
-                    status !== "arrived"
-                        ? `
-                            <button
-                                type="button"
-                                class="action-button action-arrived"
-                                data-action="arrived"
-                                title="Shëno si të mbërritur"
-                            >
-                                ✓ Mbërriti
-                            </button>
-                        `
-                        : ""
-                }
-
-                ${
-                    status !== "finished"
-                        ? `
-                            <button
-                                type="button"
-                                class="action-button action-finished"
-                                data-action="finished"
-                                title="Përfundo vizitën"
-                            >
-                                ✓ Përfundoi
-                            </button>
-                        `
-                        : ""
-                }
-
-                ${
-                    status !== "cancelled"
-                        ? `
-                            <button
-                                type="button"
-                                class="action-button action-cancel"
-                                data-action="cancelled"
-                                title="Anulo vizitën"
-                            >
-                                × Anulo
-                            </button>
-                        `
-                        : ""
-                }
-
-                <button
-                    type="button"
-                    class="action-button action-delete"
-                    data-action="delete"
-                    title="Fshi vizitën"
-                >
-                    🗑 Fshi
-                </button>
-
+                ${status !== "arrived" ? `
+                    <button type="button" class="action-button action-arrived" data-action="arrived" title="Shëno si të mbërritur">✓ Mbërriti</button>
+                ` : ""}
+                ${status !== "finished" ? `
+                    <button type="button" class="action-button action-finished" data-action="finished" title="Përfundo vizitën">✓ Përfundoi</button>
+                ` : ""}
+                ${status !== "cancelled" ? `
+                    <button type="button" class="action-button action-cancel" data-action="cancelled" title="Anulo vizitën">× Anulo</button>
+                ` : ""}
+                <button type="button" class="action-button action-delete" data-action="delete" title="Fshi vizitën">🗑 Fshi</button>
             </div>
-
         </td>
-
     `;
 
-    const buttons =
-        tr.querySelectorAll(
-            "[data-action]"
-        );
-
-    buttons.forEach(
-        function (button) {
-
-            button.addEventListener(
-                "click",
-                async function () {
-
-                    const action =
-                        button.dataset.action;
-
-                    if (
-                        action === "delete"
-                    ) {
-
-                        await deleteAppointment(
-                            appointment.id
-                        );
-
-                        return;
-
-                    }
-
-                    await changeStatus(
-                        appointment.id,
-                        action
-                    );
-
-                }
-            );
-
-        }
-    );
+    tr.querySelectorAll("[data-action]").forEach(function (button) {
+        button.addEventListener("click", async function () {
+            const action = button.dataset.action;
+            if (action === "delete") {
+                await deleteAppointment(appointment.id);
+                return;
+            }
+            await changeStatus(appointment.id, action);
+        });
+    });
 
     return tr;
+}
+
+function encodeAppointmentDetails(type, payment, cardNumber) {
+    return "GVM_APPOINTMENT_DETAILS:" + JSON.stringify({
+        type: type || "visit",
+        payment: payment || "",
+        card: cardNumber || ""
+    });
+}
+
+function parseAppointmentDetails(note) {
+    if (!note) return { type: "visit", payment: "", card: "" };
+
+    const prefix = "GVM_APPOINTMENT_DETAILS:";
+    if (String(note).startsWith(prefix)) {
+        try {
+            const data = JSON.parse(String(note).slice(prefix.length));
+            return {
+                type: data.type || "visit",
+                payment: data.payment || "",
+                card: data.card || ""
+            };
+        } catch (error) {
+            console.warn("APPOINTMENT DETAILS PARSE ERROR:", error);
+        }
+    }
+
+    return { type: "visit", payment: "", card: "" };
 }
 
 
@@ -2608,28 +2520,25 @@ function statusClass(status) {
 
 async function addAppointment() {
 
-    console.log("=================================");
-    console.log("ADD APPOINTMENT START");
-    console.log("=================================");
-
     const nameElement = document.getElementById("patientName");
-    const phoneElement = document.getElementById("patientPhone");
     const timeElement = document.getElementById("appointmentTime");
-    const noteElement = document.getElementById("appointmentNote");
+    const typeElement = document.getElementById("appointmentType");
+    const paidElement = document.getElementById("paymentPaid");
+    const freeElement = document.getElementById("paymentFree");
+    const cardElement = document.getElementById("appointmentCardNumber");
 
-    if (!nameElement || !timeElement) {
-        console.error("APPOINTMENT FORM ELEMENTS MISSING");
+    if (!nameElement || !timeElement || !typeElement) {
         showMessage("Formulari i vizitës nuk u gjet.", "error");
         return;
     }
 
     const patientName = nameElement.value.trim();
-    const patientPhone = phoneElement ? phoneElement.value.trim() : "";
     const appointmentTime = timeElement.value;
-    const note = noteElement ? noteElement.value.trim() : "";
+    const appointmentType = typeElement.value;
+    const cardNumber = cardElement ? cardElement.value.trim() : "";
 
     if (!patientName) {
-        showMessage("Vendos emrin e pacientit.", "error");
+        showMessage("Vendos emrin dhe mbiemrin e pacientit.", "error");
         return;
     }
 
@@ -2638,14 +2547,41 @@ async function addAppointment() {
         return;
     }
 
+    if (!appointmentType) {
+        showMessage("Zgjidh Vizitë ose Rikontroll.", "error");
+        return;
+    }
+
+    let payment = "";
+
+    if (appointmentType === "recheck") {
+        if (paidElement && paidElement.checked) payment = "paid";
+        if (freeElement && freeElement.checked) payment = "free";
+
+        if (!payment) {
+            showMessage("Për rikontrollin zgjidh Me pagesë ose Pa pagesë.", "error");
+            return;
+        }
+    }
+
     const selectedDate = dateKey(currentDate);
+
+    const occupied = appointments.some(function (appointment) {
+        return normalizeTime(appointment.appointment_time) === normalizeTime(appointmentTime)
+            && appointment.status !== "cancelled";
+    });
+
+    if (occupied) {
+        showMessage("Kjo orë është tashmë e zënë.", "error");
+        return;
+    }
 
     const appointmentData = {
         patient_name: patientName,
-        patient_phone: patientPhone || null,
+        patient_phone: null,
         appointment_date: selectedDate,
         appointment_time: appointmentTime,
-        note: note || null,
+        note: encodeAppointmentDetails(appointmentType, payment, cardNumber),
         status: "planned"
     };
 
@@ -2659,15 +2595,7 @@ async function addAppointment() {
         console.log("FULL INSERT RESULT:", result);
 
         if (result.error) {
-            console.error("=================================");
-            console.error("APPOINTMENT INSERT FAILED");
-            console.error("CODE:", result.error.code);
-            console.error("MESSAGE:", result.error.message);
-            console.error("DETAILS:", result.error.details);
-            console.error("HINT:", result.error.hint);
-            console.error("FULL ERROR:", JSON.stringify(result.error));
-            console.error("=================================");
-
+            console.error("ADD APPOINTMENT ERROR:", result.error);
             showMessage(
                 "Vizita nuk u shtua: " +
                 result.error.message +
@@ -2678,25 +2606,36 @@ async function addAppointment() {
         }
 
         nameElement.value = "";
-        if (phoneElement) phoneElement.value = "";
-        if (noteElement) noteElement.value = "";
         timeElement.selectedIndex = 0;
+        typeElement.selectedIndex = 0;
+        if (paidElement) paidElement.checked = false;
+        if (freeElement) freeElement.checked = false;
+        if (cardElement) cardElement.value = "";
 
+        updateRecheckOptions();
         await loadAppointments();
-
         showMessage("Vizita u shtua me sukses.", "success");
 
     } catch (error) {
-        console.error("=================================");
-        console.error("APPOINTMENT EXCEPTION");
-        console.error("MESSAGE:", error.message);
-        console.error("FULL ERROR:", error);
-        console.error("=================================");
+        console.error("ADD APPOINTMENT EXCEPTION:", error);
+        showMessage("Gabim gjatë shtimit: " + (error.message || error), "error");
+    }
+}
 
-        showMessage(
-            "Gabim gjatë shtimit: " + (error.message || error),
-            "error"
-        );
+function updateRecheckOptions() {
+    const typeElement = document.getElementById("appointmentType");
+    const options = document.getElementById("recheckOptions");
+    const paidElement = document.getElementById("paymentPaid");
+    const freeElement = document.getElementById("paymentFree");
+
+    if (!typeElement || !options) return;
+
+    const isRecheck = typeElement.value === "recheck";
+    options.style.display = isRecheck ? "" : "none";
+
+    if (!isRecheck) {
+        if (paidElement) paidElement.checked = false;
+        if (freeElement) freeElement.checked = false;
     }
 }
 
