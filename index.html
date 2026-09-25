@@ -1,73 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="sq">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>AMBULATORI GVM</title>
-
 <link rel="stylesheet" href="style.css">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
-
 <div class="container">
-
-    <h1>AMBULATORI GVM</h1>
-
-    <div class="toolbar">
-        <button id="prevDay">◀</button>
-
-        <span id="currentDate"></span>
-
-        <button id="nextDay">▶</button>
-
-        <button id="todayBtn">Sot</button>
-    </div>
-
-    <div class="card">
-
-        <h2>Shto Vizitë</h2>
-
-        <form id="appointmentForm">
-
-            <input
-                type="text"
-                id="patientName"
-                placeholder="Emri dhe Mbiemri"
-                required
-            >
-
-            <input
-                type="text"
-                id="patientPhone"
-                placeholder="Telefoni"
-            >
-
-            <select id="appointmentTime" required>
-            </select>
-
-            <button type="submit">
-                Ruaj Vizitën
-            </button>
-
-        </form>
-
-    </div>
-
-    <div class="card">
-
-        <h2>Orari</h2>
-
-        <div id="appointments"></div>
-
-    </div>
-
+<h1>AMBULATORI GVM</h1>
+<div class="toolbar">
+<button id="prevDay">◀</button>
+<span id="currentDate"></span>
+<button id="nextDay">▶</button>
+<button id="todayBtn">Sot</button>
 </div>
-
+<div class="card">
+<h2>Shto Vizitë</h2>
+<form id="appointmentForm">
+<input type="text" id="patientName" placeholder="Emri dhe Mbiemri" required>
+<input type="text" id="cardNumber" placeholder="Nr. Kartelës">
+<select id="appointmentTime" required></select>
+<button type="submit">Ruaj Vizitën</button>
+</form>
+</div>
+<div class="card">
+<h2>Orari</h2>
+<div id="appointments"></div>
+</div>
+</div>
 <script src="app.js"></script>
-
 </body>
 </html>
