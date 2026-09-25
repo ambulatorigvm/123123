@@ -1,6 +1,4 @@
 ```javascript
-console.log("APP JS LOADED - AMBULATORI GVM");
-
 const APP_VERSION = "GVM-20260925-04";
 
 const SUPABASE_URL =
@@ -9,84 +7,199 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
 
-
-/* ================================
-   SUPABASE
-================================ */
-
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-console.log("Supabase OK");
-console.log("APP VERSION:", APP_VERSION);
-
-
-/* ================================
-   DATA AKTUALE
-================================ */
-
+let supabaseClient = null;
+let currentUser = null;
 let currentDate = new Date();
 
 
-/* ================================
-   DATA -> YYYY-MM-DD
-================================ */
+// =====================================================
+// INITIALIZIMI
+// =====================================================
+
+document.addEventListener("DOMContentLoaded", async function () {
+
+    console.log("P JS LOADED - AMBULATORI GVM");
+    console.log("APP VERSION:", APP_VERSION);
+
+    const status = document.getElementById("systemStatus");
+
+    try {
+
+        if (typeof window.supabase === "undefined") {
+
+            console.error("Supabase library nuk u gjet.");
+
+            if (status) {
+                status.textContent =
+                    "Gabim: Supabase nuk u ngarkua.";
+            }
+
+            return;
+        }
+
+        supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        console.log("Supabase OK");
+
+        if (status) {
+            status.textContent =
+                "Sistemi u ngarkua.";
+        }
+
+        await checkAuth();
+
+        updateDate();
+
+        generateTimes();
+
+        setupNavigation();
+
+        setupPaymentOptions();
+
+        setupForm();
+
+        await loadAppointments();
+
+        console.log(
+            "AMBULATORI GVM u inicializua."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Gabim gjatë inicializimit:",
+            error
+        );
+
+        if (status) {
+            status.textContent =
+                "Gabim gjatë ngarkimit të sistemit.";
+        }
+    }
+});
+
+
+// =====================================================
+// AUTH
+// =====================================================
+
+async function checkAuth() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient.auth.getSession();
+
+        if (error) {
+
+            console.error(
+                "Gabim Auth:",
+                error
+            );
+
+            return;
+        }
+
+        currentUser =
+            data?.session?.user || null;
+
+        console.log(
+            "User:",
+            currentUser
+        );
+
+        supabaseClient.auth.onAuthStateChange(
+            function (event, session) {
+
+                console.log(
+                    "Auth event:",
+                    event
+                );
+
+                currentUser =
+                    session?.user || null;
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Gabim gjatë kontrollit të Auth:",
+            error
+        );
+    }
+}
+
+
+// =====================================================
+// DATA
+// =====================================================
 
 function dateKey(date) {
 
-    const y =
+    const year =
         date.getFullYear();
 
-    const m =
+    const month =
         String(
             date.getMonth() + 1
         ).padStart(2, "0");
 
-    const d =
+    const day =
         String(
             date.getDate()
         ).padStart(2, "0");
 
-    return `${y}-${m}-${d}`;
+    return `${year}-${month}-${day}`;
 }
 
 
-/* ================================
-   SHFAQ DATËN
-================================ */
+// =====================================================
+// SHFAQ DATA
+// =====================================================
 
 function updateDate() {
 
-    const el =
+    const dateElement =
         document.getElementById(
             "currentDate"
         );
 
-    if (!el) {
+    if (!dateElement) {
         return;
     }
 
-    el.textContent =
-        currentDate.toLocaleDateString(
-            "sq-AL",
-            {
-                weekday: "long",
-                day: "2-digit",
-                month: "long",
-                year: "numeric"
-            }
-        );
+    const day =
+        String(
+            currentDate.getDate()
+        ).padStart(2, "0");
+
+    const month =
+        String(
+            currentDate.getMonth() + 1
+        ).padStart(2, "0");
+
+    const year =
+        currentDate.getFullYear();
+
+    dateElement.textContent =
+        `${day}/${month}/${year}`;
 }
 
 
-/* ================================
-   ORARET
-   12:00 - 17:00
-   ÇDO 15 MINUTA
-================================ */
+// =====================================================
+// ORARET
+// 12:00 - 17:00 çdo 15 minuta
+// =====================================================
 
 function generateTimes() {
 
@@ -96,81 +209,49 @@ function generateTimes() {
         );
 
     if (!select) {
-
-        console.error(
-            "Nuk u gjet appointmentTime"
-        );
-
         return;
     }
 
-    select.innerHTML = "";
+    select.innerHTML =
+        '<option value="">Zgjidh orën</option>';
 
+    const startHour = 12;
+    const startMinute = 0;
 
-    const first =
-        document.createElement(
-            "option"
-        );
-
-    first.value = "";
-
-    first.textContent =
-        "Zgjidh orën";
-
-    select.appendChild(
-        first
-    );
-
+    const endHour = 17;
+    const endMinute = 0;
 
     for (
-        let minutes = 720;
-        minutes <= 1020;
-        minutes += 15
+        let hour = startHour;
+        hour <= endHour;
+        hour++
     ) {
 
-        const hours =
-            String(
-                Math.floor(
-                    minutes / 60
-                )
-            ).padStart(
-                2,
-                "0"
-            );
+        for (
+            let minute = 0;
+            minute < 60;
+            minute += 15
+        ) {
 
+            if (
+                hour === endHour &&
+                minute > endMinute
+            ) {
+                continue;
+            }
 
-        const mins =
-            String(
-                minutes % 60
-            ).padStart(
-                2,
-                "0"
-            );
+            const time =
+                `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
+            const option =
+                document.createElement("option");
 
-        const time =
-            `${hours}:${mins}`;
+            option.value = time;
+            option.textContent = time;
 
-
-        const option =
-            document.createElement(
-                "option"
-            );
-
-
-        option.value =
-            time;
-
-
-        option.textContent =
-            time;
-
-
-        select.appendChild(
-            option
-        );
+            select.appendChild(option);
+        }
     }
-
 
     console.log(
         "Oraret u krijuan: 12:00 - 17:00"
@@ -178,30 +259,102 @@ function generateTimes() {
 }
 
 
-/* ================================
-   RIKONTROLL
-   ME PAGESË / PA PAGESË
-================================ */
+// =====================================================
+// NAVIGIMI I DATAVE
+// =====================================================
 
-function setupPaymentOptions() {
+function setupNavigation() {
 
-    const visitRadios =
-        document.querySelectorAll(
-            'input[name="visitType"]'
+    const prevButton =
+        document.getElementById(
+            "prevDay"
         );
 
+    const nextButton =
+        document.getElementById(
+            "nextDay"
+        );
+
+    const todayButton =
+        document.getElementById(
+            "today"
+        );
+
+
+    if (prevButton) {
+
+        prevButton.addEventListener(
+            "click",
+            async function () {
+
+                currentDate.setDate(
+                    currentDate.getDate() - 1
+                );
+
+                updateDate();
+
+                await loadAppointments();
+            }
+        );
+    }
+
+
+    if (nextButton) {
+
+        nextButton.addEventListener(
+            "click",
+            async function () {
+
+                currentDate.setDate(
+                    currentDate.getDate() + 1
+                );
+
+                updateDate();
+
+                await loadAppointments();
+            }
+        );
+    }
+
+
+    if (todayButton) {
+
+        todayButton.addEventListener(
+            "click",
+            async function () {
+
+                currentDate =
+                    new Date();
+
+                updateDate();
+
+                await loadAppointments();
+            }
+        );
+    }
+}
+
+
+// =====================================================
+// ME PAGESË / PA PAGESË
+// =====================================================
+
+function setupPaymentOptions() {
 
     const paymentOptions =
         document.getElementById(
             "paymentOptions"
         );
 
+    const visitTypeInputs =
+        document.querySelectorAll(
+            'input[name="visitType"]'
+        );
 
     const paidCheck =
         document.getElementById(
             "paidCheck"
         );
-
 
     const unpaidCheck =
         document.getElementById(
@@ -209,20 +362,13 @@ function setupPaymentOptions() {
         );
 
 
-    if (!paymentOptions) {
+    if (
+        !paymentOptions ||
+        !visitTypeInputs.length
+    ) {
 
         console.error(
-            "Nuk u gjet paymentOptions"
-        );
-
-        return;
-    }
-
-
-    if (!visitRadios.length) {
-
-        console.error(
-            "Nuk u gjetën visitType radio buttons"
+            "Elementet e pagesës nuk u gjetën."
         );
 
         return;
@@ -236,44 +382,38 @@ function setupPaymentOptions() {
                 'input[name="visitType"]:checked'
             );
 
+        if (!selected) {
+            return;
+        }
+
 
         if (
-            selected &&
             selected.value === "Rikontroll"
         ) {
 
             paymentOptions.style.display =
                 "block";
 
-
-            console.log(
-                "Rikontroll u zgjodh."
-            );
-
         } else {
 
             paymentOptions.style.display =
                 "none";
 
-
             if (paidCheck) {
-                paidCheck.checked =
-                    false;
+                paidCheck.checked = false;
             }
 
-
             if (unpaidCheck) {
-                unpaidCheck.checked =
-                    false;
+                unpaidCheck.checked = false;
             }
         }
     }
 
 
-    visitRadios.forEach(
-        function(radio) {
+    visitTypeInputs.forEach(
+        function (input) {
 
-            radio.addEventListener(
+            input.addEventListener(
                 "change",
                 updatePaymentVisibility
             );
@@ -281,22 +421,17 @@ function setupPaymentOptions() {
     );
 
 
-    /*
-       Mos lejo njëkohësisht
-       Me pagesë dhe Pa pagesë.
-    */
-
+    // Vetëm njëra mund të jetë e zgjedhur
     if (paidCheck) {
 
         paidCheck.addEventListener(
             "change",
-            function() {
+            function () {
 
                 if (
                     paidCheck.checked &&
                     unpaidCheck
                 ) {
-
                     unpaidCheck.checked =
                         false;
                 }
@@ -309,13 +444,12 @@ function setupPaymentOptions() {
 
         unpaidCheck.addEventListener(
             "change",
-            function() {
+            function () {
 
                 if (
                     unpaidCheck.checked &&
                     paidCheck
                 ) {
-
                     paidCheck.checked =
                         false;
                 }
@@ -324,252 +458,60 @@ function setupPaymentOptions() {
     }
 
 
-    /*
-       Kontrolli fillestar.
-    */
-
     updatePaymentVisibility();
 }
 
 
-/* ================================
-   NGARKO VIZITAT
-================================ */
+// =====================================================
+// FORMULARI
+// =====================================================
 
-async function loadAppointments() {
+function setupForm() {
 
-    const box =
+    const form =
         document.getElementById(
-            "appointments"
+            "appointmentForm"
         );
 
-
-    if (!box) {
-
+    if (!form) {
         console.error(
-            "Nuk u gjet elementi appointments"
+            "appointmentForm nuk u gjet."
         );
 
         return;
     }
 
 
-    box.innerHTML =
-        "<p>Po ngarkohet...</p>";
-
-
-    console.log(
-        "Po ngarkohen vizitat për:",
-        dateKey(currentDate)
-    );
-
-
-    const result =
-        await supabaseClient
-        .from("appointments")
-        .select("*")
-        .eq(
-            "appointment_date",
-            dateKey(currentDate)
-        )
-        .order(
-            "appointment_time",
-            {
-                ascending: true
-            }
-        );
-
-
-    if (result.error) {
-
-        console.error(
-            "Gabim në ngarkimin e vizitave:",
-            result.error
-        );
-
-
-        box.innerHTML =
-            `<p>Gabim: ${result.error.message}</p>`;
-
-
-        return;
-    }
-
-
-    if (
-        !result.data ||
-        result.data.length === 0
-    ) {
-
-        box.innerHTML =
-            "<p>Nuk ka vizita për këtë ditë.</p>";
-
-
-        return;
-    }
-
-
-    box.innerHTML = "";
-
-
-    result.data.forEach(
-        function(appointment) {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.className =
-                `appointment ${
-                    appointment.status ||
-                    "planned"
-                }`;
-
-
-            const patientName =
-                appointment.patient_name ||
-                "";
-
-
-            const cardNumber =
-                appointment.card_number ||
-                "-";
-
-
-            const time =
-                appointment.appointment_time
-                    ? String(
-                        appointment.appointment_time
-                    ).substring(
-                        0,
-                        5
-                    )
-                    : "-";
-
-
-            const status =
-                appointment.status ||
-                "planned";
-
-
-            const visitType =
-                appointment.visit_type ||
-                "Vizitë";
-
-
-            div.innerHTML = `
-                <strong>
-                    ${patientName}
-                </strong>
-
-                <br>
-
-                Ora:
-                ${time}
-
-                <br>
-
-                Kartela:
-                ${cardNumber}
-
-                <br>
-
-                Lloji:
-                ${visitType}
-
-                <br>
-
-                Status:
-                ${status}
-            `;
-
-
-            box.appendChild(
-                div
-            );
-        }
-    );
-}
-
-
-/* ================================
-   FORMULARI
-================================ */
-
-const appointmentForm =
-    document.getElementById(
-        "appointmentForm"
-    );
-
-
-if (appointmentForm) {
-
-    appointmentForm.addEventListener(
+    form.addEventListener(
         "submit",
-        async function(e) {
+        async function (event) {
 
-            e.preventDefault();
+            event.preventDefault();
 
-
-            /* ================================
-               EMRI
-            ================================= */
 
             const patientName =
-                document
-                .getElementById(
+                document.getElementById(
                     "patientName"
-                )
-                .value
-                .trim();
+                )?.value.trim();
 
-
-            /* ================================
-               KARTELA
-            ================================= */
 
             const cardNumber =
-                document
-                .getElementById(
+                document.getElementById(
                     "cardNumber"
-                )
-                .value
-                .trim();
+                )?.value.trim();
 
-
-            /* ================================
-               ORA
-            ================================= */
 
             const appointmentTime =
-                document
-                .getElementById(
+                document.getElementById(
                     "appointmentTime"
-                )
-                .value;
+                )?.value;
 
-
-            /* ================================
-               LLOJI I VIZITËS
-            ================================= */
 
             const selectedVisit =
                 document.querySelector(
                     'input[name="visitType"]:checked'
                 );
 
-
-            const visitType =
-                selectedVisit
-                    ? selectedVisit.value
-                    : "Vizitë";
-
-
-            /* ================================
-               PAGESA
-            ================================= */
 
             const paidCheck =
                 document.getElementById(
@@ -583,8 +525,33 @@ if (appointmentForm) {
                 );
 
 
-            let paymentStatus =
-                null;
+            if (!patientName) {
+
+                alert(
+                    "Vendos emër dhe mbiemër."
+                );
+
+                return;
+            }
+
+
+            if (!appointmentTime) {
+
+                alert(
+                    "Zgjidh orën."
+                );
+
+                return;
+            }
+
+
+            const visitType =
+                selectedVisit
+                    ? selectedVisit.value
+                    : "Vizitë";
+
+
+            let paymentStatus = null;
 
 
             if (
@@ -592,316 +559,364 @@ if (appointmentForm) {
             ) {
 
                 if (
-                    paidCheck &&
-                    paidCheck.checked
+                    !paidCheck?.checked &&
+                    !unpaidCheck?.checked
                 ) {
-
-                    paymentStatus =
-                        "Me pagesë";
-
-                } else if (
-                    unpaidCheck &&
-                    unpaidCheck.checked
-                ) {
-
-                    paymentStatus =
-                        "Pa pagesë";
-
-                } else {
 
                     alert(
-                        "Për rikontrollin zgjidh Me pagesë ose Pa pagesë."
+                        "Zgjidh Me pagesë ose Pa pagesë."
                     );
 
                     return;
                 }
-            }
 
 
-            /* ================================
-               VALIDIMI
-            ================================= */
+                if (
+                    paidCheck?.checked
+                ) {
 
-            if (
-                !patientName ||
-                !appointmentTime
-            ) {
-
-                alert(
-                    "Plotëso emrin dhe orën."
-                );
+                    paymentStatus =
+                        "Me pagesë";
+                }
 
 
-                return;
+                if (
+                    unpaidCheck?.checked
+                ) {
+
+                    paymentStatus =
+                        "Pa pagesë";
+                }
             }
 
 
             console.log(
                 "Po ruhet vizita:",
                 {
-                    patient_name:
-                        patientName,
-
-                    card_number:
-                        cardNumber,
-
-                    appointment_date:
-                        dateKey(
-                            currentDate
-                        ),
-
-                    appointment_time:
-                        appointmentTime,
-
-                    visit_type:
-                        visitType,
-
-                    payment_status:
-                        paymentStatus,
-
-                    status:
-                        "planned"
+                    patientName,
+                    cardNumber,
+                    appointmentDate:
+                        dateKey(currentDate),
+                    appointmentTime,
+                    visitType,
+                    paymentStatus
                 }
             );
 
 
-            /* ================================
-               RUAJTJA
-               
-               Për momentin nuk dërgojmë
-               payment_status në Supabase,
-               që të mos kërkojmë kolonë
-               që mund të mos ekzistojë.
-            ================================= */
-
-            const result =
-                await supabaseClient
-                .from("appointments")
-                .insert([
-                    {
-                        patient_name:
-                            patientName,
-
-                        card_number:
-                            cardNumber || null,
-
-                        appointment_date:
-                            dateKey(
-                                currentDate
-                            ),
-
-                        appointment_time:
-                            appointmentTime,
-
-                        visit_type:
-                            visitType,
-
-                        status:
-                            "planned"
-                    }
-                ]);
-
-
-            if (result.error) {
-
-                console.error(
-                    "Gabim gjatë ruajtjes:",
-                    result.error
-                );
-
+            if (!supabaseClient) {
 
                 alert(
-                    "Gabim gjatë ruajtjes së vizitës:\n\n" +
-                    result.error.message
+                    "Supabase nuk është inicializuar."
                 );
-
 
                 return;
             }
 
 
-            console.log(
-                "Vizita u ruajt me sukses."
-            );
+            try {
+
+                /*
+                 * KUJDES:
+                 * Nuk po dërgojmë payment_status
+                 * në Supabase sepse nuk kemi konfirmuar
+                 * që kolona ekziston në tabelën appointments.
+                 */
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .from("appointments")
+                        .insert([
+                            {
+                                patient_name:
+                                    patientName,
+
+                                card_number:
+                                    cardNumber || null,
+
+                                appointment_date:
+                                    dateKey(
+                                        currentDate
+                                    ),
+
+                                appointment_time:
+                                    appointmentTime,
+
+                                visit_type:
+                                    visitType,
+
+                                status:
+                                    "planned"
+                            }
+                        ])
+                        .select();
 
 
-            /* ================================
-               PASTRO FORMULARIN
-            ================================= */
+                if (error) {
 
-            document
-            .getElementById(
-                "patientName"
-            )
-            .value = "";
+                    console.error(
+                        "Gabim Supabase:",
+                        error
+                    );
 
+                    alert(
+                        "Gabim gjatë ruajtjes:\n" +
+                        error.message
+                    );
 
-            document
-            .getElementById(
-                "cardNumber"
-            )
-            .value = "";
+                    return;
+                }
 
 
-            document
-            .getElementById(
-                "appointmentTime"
-            )
-            .value = "";
-
-
-            if (paidCheck) {
-
-                paidCheck.checked =
-                    false;
-            }
-
-
-            if (unpaidCheck) {
-
-                unpaidCheck.checked =
-                    false;
-            }
-
-
-            const visitRadio =
-                document.querySelector(
-                    'input[name="visitType"][value="Vizitë"]'
+                console.log(
+                    "Vizita u ruajt:",
+                    data
                 );
 
 
-            if (visitRadio) {
-
-                visitRadio.checked =
-                    true;
-            }
-
-
-            const paymentOptions =
-                document.getElementById(
-                    "paymentOptions"
+                alert(
+                    "Vizita u ruajt me sukses."
                 );
 
 
-            if (paymentOptions) {
+                form.reset();
 
-                paymentOptions.style.display =
-                    "none";
+
+                const defaultVisit =
+                    document.querySelector(
+                        'input[name="visitType"][value="Vizitë"]'
+                    );
+
+
+                if (defaultVisit) {
+                    defaultVisit.checked =
+                        true;
+                }
+
+
+                const paymentOptions =
+                    document.getElementById(
+                        "paymentOptions"
+                    );
+
+
+                if (paymentOptions) {
+
+                    paymentOptions.style.display =
+                        "none";
+                }
+
+
+                generateTimes();
+
+                await loadAppointments();
+
+            } catch (error) {
+
+                console.error(
+                    "Gabim:",
+                    error
+                );
+
+                alert(
+                    "Ndodhi një gabim gjatë ruajtjes."
+                );
             }
-
-
-            await loadAppointments();
         }
-    );
-
-} else {
-
-    console.error(
-        "Nuk u gjet appointmentForm"
     );
 }
 
 
-/* ================================
-   DITA PARA
-================================ */
+// =====================================================
+// NGARKO VIZITAT
+// =====================================================
 
-const prevDay =
-    document.getElementById(
-        "prevDay"
+async function loadAppointments() {
+
+    const container =
+        document.getElementById(
+            "appointments"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!supabaseClient) {
+
+        container.textContent =
+            "Supabase nuk është inicializuar.";
+
+        return;
+    }
+
+
+    const selectedDate =
+        dateKey(currentDate);
+
+
+    console.log(
+        "Po ngarkohen vizitat për:",
+        selectedDate
     );
 
 
-if (prevDay) {
+    container.innerHTML =
+        "Po ngarkohen vizitat...";
 
-    prevDay.addEventListener(
-        "click",
-        function() {
 
-            currentDate.setDate(
-                currentDate.getDate() - 1
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("appointments")
+                .select("*")
+                .eq(
+                    "appointment_date",
+                    selectedDate
+                )
+                .order(
+                    "appointment_time",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "Gabim gjatë ngarkimit:",
+                error
             );
 
+            container.innerHTML =
+                `<p>Gabim: ${escapeHtml(error.message)}</p>`;
 
-            updateDate();
-
-            loadAppointments();
+            return;
         }
-    );
+
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
+            container.innerHTML =
+                "<p>Nuk ka vizita për këtë datë.</p>";
+
+            return;
+        }
+
+
+        container.innerHTML = "";
+
+
+        data.forEach(
+            function (appointment) {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "appointment-item";
+
+
+                const name =
+                    appointment.patient_name ||
+                    "";
+
+
+                const card =
+                    appointment.card_number ||
+                    "";
+
+
+                const time =
+                    appointment.appointment_time ||
+                    "";
+
+
+                const visitType =
+                    appointment.visit_type ||
+                    "";
+
+
+                item.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(time)}</strong>
+                    </div>
+
+                    <div>
+                        ${escapeHtml(name)}
+                    </div>
+
+                    <div>
+                        Kartela:
+                        ${escapeHtml(card)}
+                    </div>
+
+                    <div>
+                        ${escapeHtml(visitType)}
+                    </div>
+                `;
+
+
+                container.appendChild(
+                    item
+                );
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Gabim:",
+            error
+        );
+
+        container.innerHTML =
+            "<p>Gabim gjatë ngarkimit të vizitave.</p>";
+    }
 }
 
 
-/* ================================
-   DITA PAS
-================================ */
+// =====================================================
+// SIGURIA E TEKSTIT HTML
+// =====================================================
 
-const nextDay =
-    document.getElementById(
-        "nextDay"
-    );
+function escapeHtml(value) {
 
-
-if (nextDay) {
-
-    nextDay.addEventListener(
-        "click",
-        function() {
-
-            currentDate.setDate(
-                currentDate.getDate() + 1
-            );
-
-
-            updateDate();
-
-            loadAppointments();
-        }
-    );
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
-
-
-/* ================================
-   SOT
-================================ */
-
-const todayBtn =
-    document.getElementById(
-        "todayBtn"
-    );
-
-
-if (todayBtn) {
-
-    todayBtn.addEventListener(
-        "click",
-        function() {
-
-            currentDate =
-                new Date();
-
-
-            updateDate();
-
-            loadAppointments();
-        }
-    );
-}
-
-
-/* ================================
-   NISJA
-================================ */
-
-updateDate();
-
-generateTimes();
-
-setupPaymentOptions();
-
-loadAppointments();
-
-
-console.log(
-    "AMBULATORI GVM u inicializua."
-);
 ```
