@@ -693,8 +693,8 @@ function showApp() {
                     <input id="patientId" type="hidden">
 
                     <div class="form-group">
-                        <label for="patientFullName">Emri dhe mbiemri *</label>
-                        <input id="patientFullName" type="text" required placeholder="Emri dhe mbiemri">
+                        <label for="patientpatient.emer">Emri dhe mbiemri *</label>
+                        <input id="patientpatient.emer" type="text" required placeholder="Emri dhe mbiemri">
                     </div>
 
                     <div class="form-group">
@@ -1145,7 +1145,7 @@ function openPatientModal(patient = null) {
     const modal = document.getElementById("patientModal");
     const title = document.getElementById("patientModalTitle");
     const id = document.getElementById("patientId");
-    const name = document.getElementById("patientFullName");
+    const name = document.getElementById("patientpatient.emer");
     const phone = document.getElementById("patientRecordPhone");
     const birthDate = document.getElementById("patientBirthDate");
     const personalId = document.getElementById("patientPersonalId");
@@ -1192,7 +1192,7 @@ function closePatientModalWindow() {
 
 async function savePatient() {
     const id = document.getElementById("patientId");
-    const name = document.getElementById("patientFullName");
+    const name = document.getElementById("patientpatient.emer");
     const phone = document.getElementById("patientRecordPhone");
     const birthDate = document.getElementById("patientBirthDate");
     const personalId = document.getElementById("patientPersonalId");
@@ -1201,15 +1201,15 @@ async function savePatient() {
 
     if (!name) return;
 
-    const fullName = name.value.trim();
+    const patient.emer = name.value.trim();
 
-    if (!fullName) {
+    if (!patient.emer) {
         showMessage("Vendos emrin dhe mbiemrin e pacientit.", "error");
         return;
     }
 
     const payload = {
-        full_name: fullName,
+        full_name: patient.emer,
         phone: phone ? phone.value.trim() : "",
         birth_date: birthDate && birthDate.value ? birthDate.value : null,
         personal_id: personalId ? personalId.value.trim() : "",
