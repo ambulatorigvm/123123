@@ -1,6 +1,7 @@
+```javascript
 console.log("APP JS LOADED - AMBULATORI GVM");
 
-const APP_VERSION = "GVM-20260925-01";
+const APP_VERSION = "GVM-20260925-02";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -95,9 +96,11 @@ function generateTimes() {
         );
 
     if (!select) {
+
         console.error(
             "Nuk u gjet appointmentTime"
         );
+
         return;
     }
 
@@ -150,6 +153,186 @@ function generateTimes() {
     console.log(
         "Oraret u krijuan: 12:00 - 17:00"
     );
+}
+
+
+/* ================================
+   LLOJI I VIZITËS
+================================ */
+
+function setupVisitType() {
+
+    const visitTypeRadios =
+        document.querySelectorAll(
+            'input[name="visitType"]'
+        );
+
+    const paymentOptions =
+        document.getElementById(
+            "paymentOptions"
+        );
+
+    const paidCheck =
+        document.getElementById(
+            "paidCheck"
+        );
+
+    const unpaidCheck =
+        document.getElementById(
+            "unpaidCheck"
+        );
+
+
+    if (
+        !visitTypeRadios.length ||
+        !paymentOptions
+    ) {
+
+        console.error(
+            "Nuk u gjetën elementet e llojit të vizitës."
+        );
+
+        return;
+    }
+
+
+    function updatePaymentVisibility() {
+
+        const selected =
+            document.querySelector(
+                'input[name="visitType"]:checked'
+            );
+
+
+        if (
+            selected &&
+            selected.value === "Rikontroll"
+        ) {
+
+            paymentOptions.style.display =
+                "block";
+
+            console.log(
+                "Rikontroll u zgjodh - shfaqen opsionet e pagesës."
+            );
+
+        } else {
+
+            paymentOptions.style.display =
+                "none";
+
+
+            if (paidCheck) {
+                paidCheck.checked = false;
+            }
+
+            if (unpaidCheck) {
+                unpaidCheck.checked = false;
+            }
+
+            console.log(
+                "Vizitë u zgjodh - opsionet e pagesës u fshehën."
+            );
+        }
+    }
+
+
+    visitTypeRadios.forEach(
+        radio => {
+
+            radio.addEventListener(
+                "change",
+                updatePaymentVisibility
+            );
+        }
+    );
+
+
+    /* ================================
+       MOS LEJO DY ZGJEDHJE PAGESASH
+    ================================= */
+
+    if (paidCheck && unpaidCheck) {
+
+        paidCheck.addEventListener(
+            "change",
+            function() {
+
+                if (paidCheck.checked) {
+                    unpaidCheck.checked = false;
+                }
+            }
+        );
+
+
+        unpaidCheck.addEventListener(
+            "change",
+            function() {
+
+                if (unpaidCheck.checked) {
+                    paidCheck.checked = false;
+                }
+            }
+        );
+    }
+
+
+    /* Gjendja fillestare */
+
+    updatePaymentVisibility();
+}
+
+
+/* ================================
+   MERR TË DHËNAT E PAGESËS
+================================ */
+
+function getPaymentStatus() {
+
+    const selectedVisit =
+        document.querySelector(
+            'input[name="visitType"]:checked'
+        );
+
+    const paidCheck =
+        document.getElementById(
+            "paidCheck"
+        );
+
+    const unpaidCheck =
+        document.getElementById(
+            "unpaidCheck"
+        );
+
+
+    if (
+        !selectedVisit ||
+        selectedVisit.value !== "Rikontroll"
+    ) {
+
+        return null;
+    }
+
+
+    if (
+        paidCheck &&
+        paidCheck.checked
+    ) {
+
+        return "Me pagesë";
+    }
+
+
+    if (
+        unpaidCheck &&
+        unpaidCheck.checked
+    ) {
+
+        return "Pa pagesë";
+    }
+
+
+    return null;
 }
 
 
@@ -268,17 +451,55 @@ async function loadAppointments() {
                 "planned";
 
 
+            const visitType =
+                appointment.visit_type ||
+                "Vizitë";
+
+
+            const paymentStatus =
+                appointment.payment_status ||
+                "";
+
+
+            let paymentHTML = "";
+
+
+            if (
+                visitType === "Rikontroll"
+            ) {
+
+                paymentHTML = `
+                    <br>
+                    Pagesa:
+                    ${paymentStatus || "-"}
+                `;
+            }
+
+
             div.innerHTML = `
                 <strong>
                     ${patientName}
                 </strong>
+
                 <br>
+
                 Ora:
                 ${time}
+
                 <br>
+
                 Kartela:
                 ${cardNumber}
+
                 <br>
+
+                Lloji:
+                ${visitType}
+
+                ${paymentHTML}
+
+                <br>
+
                 Status:
                 ${status}
             `;
@@ -309,31 +530,61 @@ if (appointmentForm) {
             e.preventDefault();
 
 
-            const patientName =
-                document
-                .getElementById(
+            const patientNameElement =
+                document.getElementById(
                     "patientName"
-                )
-                .value
-                .trim();
+                );
+
+
+            const cardNumberElement =
+                document.getElementById(
+                    "cardNumber"
+                );
+
+
+            const appointmentTimeElement =
+                document.getElementById(
+                    "appointmentTime"
+                );
+
+
+            const patientName =
+                patientNameElement
+                    ? patientNameElement.value.trim()
+                    : "";
 
 
             const cardNumber =
-                document
-                .getElementById(
-                    "cardNumber"
-                )
-                .value
-                .trim();
+                cardNumberElement
+                    ? cardNumberElement.value.trim()
+                    : "";
 
 
             const appointmentTime =
-                document
-                .getElementById(
-                    "appointmentTime"
-                )
-                .value;
+                appointmentTimeElement
+                    ? appointmentTimeElement.value
+                    : "";
 
+
+            const selectedVisit =
+                document.querySelector(
+                    'input[name="visitType"]:checked'
+                );
+
+
+            const visitType =
+                selectedVisit
+                    ? selectedVisit.value
+                    : "Vizitë";
+
+
+            const paymentStatus =
+                getPaymentStatus();
+
+
+            /* ================================
+               VALIDIMI
+            ================================= */
 
             if (
                 !patientName ||
@@ -342,6 +593,23 @@ if (appointmentForm) {
 
                 alert(
                     "Plotëso emrin dhe orën."
+                );
+
+                return;
+            }
+
+
+            /* Rikontroll duhet të ketë
+               zgjedhje pagese */
+
+            if (
+                visitType === "Rikontroll" &&
+                !paymentStatus
+            ) {
+
+                alert(
+                    "Për rikontrollin zgjidh:\n\n" +
+                    "Me pagesë ose Pa pagesë."
                 );
 
                 return;
@@ -366,13 +634,20 @@ if (appointmentForm) {
                         appointmentTime,
 
                     visit_type:
-                        "Ambulator",
+                        visitType,
+
+                    payment_status:
+                        paymentStatus,
 
                     status:
                         "planned"
                 }
             );
 
+
+            /* ================================
+               RUAJ NË SUPABASE
+            ================================= */
 
             const result =
                 await supabaseClient
@@ -394,7 +669,10 @@ if (appointmentForm) {
                             appointmentTime,
 
                         visit_type:
-                            "Ambulator",
+                            visitType,
+
+                        payment_status:
+                            paymentStatus,
 
                         status:
                             "planned"
@@ -408,6 +686,7 @@ if (appointmentForm) {
                     "Gabim gjatë ruajtjes:",
                     result.error
                 );
+
 
                 alert(
                     "Gabim gjatë ruajtjes së vizitës:\n\n" +
@@ -423,25 +702,73 @@ if (appointmentForm) {
             );
 
 
-            document
-            .getElementById(
-                "patientName"
-            )
-            .value = "";
+            /* ================================
+               PASTRO FORMULARIN
+            ================================= */
+
+            if (patientNameElement) {
+                patientNameElement.value = "";
+            }
 
 
-            document
-            .getElementById(
-                "cardNumber"
-            )
-            .value = "";
+            if (cardNumberElement) {
+                cardNumberElement.value = "";
+            }
 
 
-            document
-            .getElementById(
-                "appointmentTime"
-            )
-            .value = "";
+            if (appointmentTimeElement) {
+                appointmentTimeElement.value = "";
+            }
+
+
+            const paidCheck =
+                document.getElementById(
+                    "paidCheck"
+                );
+
+
+            const unpaidCheck =
+                document.getElementById(
+                    "unpaidCheck"
+                );
+
+
+            if (paidCheck) {
+                paidCheck.checked = false;
+            }
+
+
+            if (unpaidCheck) {
+                unpaidCheck.checked = false;
+            }
+
+
+            /* Ktheje përsëri në Vizitë */
+
+            const visitRadio =
+                document.querySelector(
+                    'input[name="visitType"][value="Vizitë"]'
+                );
+
+
+            if (visitRadio) {
+
+                visitRadio.checked =
+                    true;
+            }
+
+
+            const paymentOptions =
+                document.getElementById(
+                    "paymentOptions"
+                );
+
+
+            if (paymentOptions) {
+
+                paymentOptions.style.display =
+                    "none";
+            }
 
 
             await loadAppointments();
@@ -547,9 +874,12 @@ updateDate();
 
 generateTimes();
 
+setupVisitType();
+
 loadAppointments();
 
 
 console.log(
     "AMBULATORI GVM u inicializua."
 );
+```
