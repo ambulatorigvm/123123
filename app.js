@@ -1,27 +1,40 @@
-console.log("APP JS LOADED");
+console.log("APP JS LOADED - AMBULATORI GVM");
+
+const APP_VERSION = "GVM-20260925-01";
 
 const SUPABASE_URL =
-"https://ubpteaqdkxcriqyaxrux.supabase.co";
+    "https://ubpteaqdkxcriqyaxrux.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
+    "sb_publishable_dirq3uo9Qy1ez37JkEnciA_sSmYleDZ";
+
+
+/* ================================
+   SUPABASE
+================================ */
 
 const supabaseClient =
-window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
 console.log("Supabase OK");
+console.log("APP VERSION:", APP_VERSION);
+
+
+/* ================================
+   DATA AKTUALE
+================================ */
 
 let currentDate = new Date();
 
 
-// ======================================
-// DATA
-// ======================================
+/* ================================
+   DATA -> YYYY-MM-DD
+================================ */
 
-function dateKey(date){
+function dateKey(date) {
 
     const y =
         date.getFullYear();
@@ -40,18 +53,20 @@ function dateKey(date){
 }
 
 
-// ======================================
-// DATE DISPLAY
-// ======================================
+/* ================================
+   SHFAQ DATËN
+================================ */
 
-function updateDate(){
+function updateDate() {
 
     const el =
         document.getElementById(
             "currentDate"
         );
 
-    if(!el) return;
+    if (!el) {
+        return;
+    }
 
     el.textContent =
         currentDate.toLocaleDateString(
@@ -66,20 +81,25 @@ function updateDate(){
 }
 
 
-// ======================================
-// TIME OPTIONS
-// 12:00 - 17:00
-// EVERY 15 MINUTES
-// ======================================
+/* ================================
+   ORARET
+   12:00 - 17:00
+   çdo 15 minuta
+================================ */
 
-function generateTimes(){
+function generateTimes() {
 
     const select =
         document.getElementById(
             "appointmentTime"
         );
 
-    if(!select) return;
+    if (!select) {
+        console.error(
+            "Nuk u gjet appointmentTime"
+        );
+        return;
+    }
 
     select.innerHTML = "";
 
@@ -89,77 +109,77 @@ function generateTimes(){
         );
 
     first.value = "";
-
     first.textContent =
         "Zgjidh orën";
-
-    first.disabled = false;
-
-    first.selected = true;
 
     select.appendChild(first);
 
 
-    // 12:00 = 720 minutes
-    // 17:00 = 1020 minutes
-
-    for(
+    for (
         let minutes = 720;
         minutes <= 1020;
         minutes += 15
-    ){
+    ) {
 
         const hours =
-            Math.floor(
-                minutes / 60
-            );
+            String(
+                Math.floor(
+                    minutes / 60
+                )
+            ).padStart(2, "0");
 
         const mins =
-            minutes % 60;
+            String(
+                minutes % 60
+            ).padStart(2, "0");
 
         const time =
-            String(hours).padStart(2, "0")
-            + ":" +
-            String(mins).padStart(2, "0");
-
+            `${hours}:${mins}`;
 
         const option =
             document.createElement(
                 "option"
             );
 
-        option.value =
-            time;
+        option.value = time;
+        option.textContent = time;
 
-        option.textContent =
-            time;
-
-        select.appendChild(
-            option
-        );
+        select.appendChild(option);
     }
+
+    console.log(
+        "Oraret u krijuan: 12:00 - 17:00"
+    );
 }
 
 
-// ======================================
-// LOAD APPOINTMENTS
-// ======================================
+/* ================================
+   NGARKO VIZITAT
+================================ */
 
-async function loadAppointments(){
+async function loadAppointments() {
 
     const box =
         document.getElementById(
             "appointments"
         );
 
-    if(!box) return;
+    if (!box) {
+
+        console.error(
+            "Nuk u gjet elementi appointments"
+        );
+
+        return;
+    }
+
 
     box.innerHTML =
         "<p>Po ngarkohet...</p>";
 
 
     console.log(
-        "Duke ngarkuar vizitat për:",
+        "Po ngarkohen vizitat për:",
         dateKey(currentDate)
     );
 
@@ -180,7 +200,7 @@ async function loadAppointments(){
         );
 
 
-    if(result.error){
+    if (result.error) {
 
         console.error(
             "Gabim në ngarkimin e vizitave:",
@@ -194,13 +214,13 @@ async function loadAppointments(){
     }
 
 
-    if(
+    if (
         !result.data ||
         result.data.length === 0
-    ){
+    ) {
 
         box.innerHTML =
-            "<p>Nuk ka vizita për këtë datë.</p>";
+            "<p>Nuk ka vizita për këtë ditë.</p>";
 
         return;
     }
@@ -225,55 +245,54 @@ async function loadAppointments(){
                 }`;
 
 
+            const patientName =
+                appointment.patient_name ||
+                "";
+
+
+            const cardNumber =
+                appointment.card_number ||
+                "-";
+
+
             const time =
                 appointment.appointment_time
                     ? String(
                         appointment.appointment_time
                     ).substring(0, 5)
-                    : "";
+                    : "-";
+
+
+            const status =
+                appointment.status ||
+                "planned";
 
 
             div.innerHTML = `
-
                 <strong>
-                    ${appointment.patient_name || ""}
+                    ${patientName}
                 </strong>
-
                 <br>
-
-                <span>
-                    Ora:
-                    ${time}
-                </span>
-
+                Ora:
+                ${time}
                 <br>
-
-                <span>
-                    Kartela:
-                    ${appointment.card_number || "-"}
-                </span>
-
+                Kartela:
+                ${cardNumber}
                 <br>
-
-                <span>
-                    Status:
-                    ${appointment.status || "planned"}
-                </span>
-
+                Status:
+                ${status}
             `;
 
 
-            box.appendChild(
-                div
-            );
+            box.appendChild(div);
         }
     );
 }
 
 
-// ======================================
-// ADD APPOINTMENT
-// ======================================
+/* ================================
+   FORMULARI
+================================ */
 
 const appointmentForm =
     document.getElementById(
@@ -281,44 +300,78 @@ const appointmentForm =
     );
 
 
-if(appointmentForm){
+if (appointmentForm) {
 
     appointmentForm.addEventListener(
         "submit",
-        async function(e){
+        async function(e) {
 
             e.preventDefault();
 
 
             const patientName =
-                document.getElementById(
+                document
+                .getElementById(
                     "patientName"
-                ).value.trim();
+                )
+                .value
+                .trim();
 
 
             const cardNumber =
-                document.getElementById(
+                document
+                .getElementById(
                     "cardNumber"
-                ).value.trim();
+                )
+                .value
+                .trim();
 
 
             const appointmentTime =
-                document.getElementById(
+                document
+                .getElementById(
                     "appointmentTime"
-                ).value;
+                )
+                .value;
 
 
-            if(
+            if (
                 !patientName ||
                 !appointmentTime
-            ){
+            ) {
 
                 alert(
-                    "Plotëso emrin dhe zgjidh orën."
+                    "Plotëso emrin dhe orën."
                 );
 
                 return;
             }
+
+
+            console.log(
+                "Po ruhet vizita:",
+                {
+                    patient_name:
+                        patientName,
+
+                    card_number:
+                        cardNumber,
+
+                    appointment_date:
+                        dateKey(
+                            currentDate
+                        ),
+
+                    appointment_time:
+                        appointmentTime,
+
+                    visit_type:
+                        "Ambulator",
+
+                    status:
+                        "planned"
+                }
+            );
 
 
             const result =
@@ -326,7 +379,6 @@ if(appointmentForm){
                 .from("appointments")
                 .insert([
                     {
-
                         patient_name:
                             patientName,
 
@@ -341,7 +393,6 @@ if(appointmentForm){
                         appointment_time:
                             appointmentTime,
 
-                        // REQUIRED DATABASE FIELD
                         visit_type:
                             "Ambulator",
 
@@ -351,7 +402,7 @@ if(appointmentForm){
                 ]);
 
 
-            if(result.error){
+            if (result.error) {
 
                 console.error(
                     "Gabim gjatë ruajtjes:",
@@ -359,6 +410,7 @@ if(appointmentForm){
                 );
 
                 alert(
+                    "Gabim gjatë ruajtjes së vizitës:\n\n" +
                     result.error.message
                 );
 
@@ -366,37 +418,47 @@ if(appointmentForm){
             }
 
 
-            alert(
+            console.log(
                 "Vizita u ruajt me sukses."
             );
 
 
-            document.getElementById(
+            document
+            .getElementById(
                 "patientName"
-            ).value = "";
+            )
+            .value = "";
 
 
-            document.getElementById(
+            document
+            .getElementById(
                 "cardNumber"
-            ).value = "";
+            )
+            .value = "";
 
 
-            document.getElementById(
+            document
+            .getElementById(
                 "appointmentTime"
-            ).value = "";
+            )
+            .value = "";
 
 
             await loadAppointments();
-
         }
     );
 
+} else {
+
+    console.error(
+        "Nuk u gjet appointmentForm"
+    );
 }
 
 
-// ======================================
-// PREVIOUS DAY
-// ======================================
+/* ================================
+   DITA PARA
+================================ */
 
 const prevDay =
     document.getElementById(
@@ -404,11 +466,11 @@ const prevDay =
     );
 
 
-if(prevDay){
+if (prevDay) {
 
     prevDay.addEventListener(
         "click",
-        function(){
+        function() {
 
             currentDate.setDate(
                 currentDate.getDate() - 1
@@ -417,16 +479,14 @@ if(prevDay){
             updateDate();
 
             loadAppointments();
-
         }
     );
-
 }
 
 
-// ======================================
-// NEXT DAY
-// ======================================
+/* ================================
+   DITA PAS
+================================ */
 
 const nextDay =
     document.getElementById(
@@ -434,11 +494,11 @@ const nextDay =
     );
 
 
-if(nextDay){
+if (nextDay) {
 
     nextDay.addEventListener(
         "click",
-        function(){
+        function() {
 
             currentDate.setDate(
                 currentDate.getDate() + 1
@@ -447,16 +507,14 @@ if(nextDay){
             updateDate();
 
             loadAppointments();
-
         }
     );
-
 }
 
 
-// ======================================
-// TODAY
-// ======================================
+/* ================================
+   SOT
+================================ */
 
 const todayBtn =
     document.getElementById(
@@ -464,11 +522,11 @@ const todayBtn =
     );
 
 
-if(todayBtn){
+if (todayBtn) {
 
     todayBtn.addEventListener(
         "click",
-        function(){
+        function() {
 
             currentDate =
                 new Date();
@@ -476,19 +534,22 @@ if(todayBtn){
             updateDate();
 
             loadAppointments();
-
         }
     );
-
 }
 
 
-// ======================================
-// START APPLICATION
-// ======================================
+/* ================================
+   NISJA
+================================ */
 
 updateDate();
 
 generateTimes();
 
 loadAppointments();
+
+
+console.log(
+    "AMBULATORI GVM u inicializua."
+);
