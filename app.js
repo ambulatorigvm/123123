@@ -12,3 +12,6 @@ window.supabase.createClient(
 );
 
 console.log("Supabase OK");
+updateDate();
+generateTimes();
+loadAppointments();
