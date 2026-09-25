@@ -1,4 +1,4 @@
-const APP_VERSION = "GVM-20260924-25";
+const APP_VERSION = "GVM-20260925-01";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -2608,341 +2608,97 @@ function statusClass(status) {
 
 async function addAppointment() {
 
-    const nameElement =
-        document.getElementById(
-            "patientName"
-        );
+    console.log("=================================");
+    console.log("ADD APPOINTMENT START");
+    console.log("=================================");
 
-    const phoneElement =
-        document.getElementById(
-            "patientPhone"
-        );
+    const nameElement = document.getElementById("patientName");
+    const phoneElement = document.getElementById("patientPhone");
+    const timeElement = document.getElementById("appointmentTime");
+    const noteElement = document.getElementById("appointmentNote");
 
-    const timeElement =
-        document.getElementById(
-            "appointmentTime"
-        );
-
-    const noteElement =
-        document.getElementById(
-            "appointmentNote"
-        );
-
-    if (
-        !nameElement ||
-        !timeElement
-    ) {
+    if (!nameElement || !timeElement) {
+        console.error("APPOINTMENT FORM ELEMENTS MISSING");
+        showMessage("Formulari i vizitës nuk u gjet.", "error");
         return;
     }
 
-    const patientName =
-        nameElement.value.trim();
-
-    const patientPhone =
-        phoneElement
-            ? phoneElement.value.trim()
-            : "";
-
-    const appointmentTime =
-        timeElement.value;
-
-    const note =
-        noteElement
-            ? noteElement.value.trim()
-            : "";
+    const patientName = nameElement.value.trim();
+    const patientPhone = phoneElement ? phoneElement.value.trim() : "";
+    const appointmentTime = timeElement.value;
+    const note = noteElement ? noteElement.value.trim() : "";
 
     if (!patientName) {
-
-        showMessage(
-            "Vendos emrin e pacientit.",
-            "error"
-        );
-
+        showMessage("Vendos emrin e pacientit.", "error");
         return;
     }
 
     if (!appointmentTime) {
-
-        showMessage(
-            "Zgjidh orën.",
-            "error"
-        );
-
+        showMessage("Zgjidh orën.", "error");
         return;
     }
 
-    const selectedDate =
-        dateKey(currentDate);
+    const selectedDate = dateKey(currentDate);
+
+    const appointmentData = {
+        patient_name: patientName,
+        patient_phone: patientPhone || null,
+        appointment_date: selectedDate,
+        appointment_time: appointmentTime,
+        note: note || null,
+        status: "planned"
+    };
+
+    console.log("ADDING APPOINTMENT:", appointmentData);
 
     try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
+        const result = await supabaseClient
             .from("appointments")
-            .insert([
-                {
-                    patient_name:
-                        patientName,
+            .insert([appointmentData]);
 
-                    patient_phone:
-                        patientPhone,
+        console.log("FULL INSERT RESULT:", result);
 
-                    appointment_date:
-                        selectedDate,
-
-                    appointment_time:
-                        appointmentTime,
-
-                    note:
-                        note,
-
-                    status:
-                        "planned"
-                }
-            ])
-            .select();
-
-        if (error) {
-
-            console.error(
-                "ADD APPOINTMENT ERROR:",
-                error
-            );
+        if (result.error) {
+            console.error("=================================");
+            console.error("APPOINTMENT INSERT FAILED");
+            console.error("CODE:", result.error.code);
+            console.error("MESSAGE:", result.error.message);
+            console.error("DETAILS:", result.error.details);
+            console.error("HINT:", result.error.hint);
+            console.error("FULL ERROR:", JSON.stringify(result.error));
+            console.error("=================================");
 
             showMessage(
                 "Vizita nuk u shtua: " +
-                error.message,
+                result.error.message +
+                (result.error.details ? " | " + result.error.details : ""),
                 "error"
             );
-
             return;
-        }
-
-        if (
-            data &&
-            data.length > 0
-        ) {
-
-            appointments.push(
-                data[0]
-            );
-
         }
 
         nameElement.value = "";
-
-        if (phoneElement) {
-            phoneElement.value = "";
-        }
-
-        if (noteElement) {
-            noteElement.value = "";
-        }
-
+        if (phoneElement) phoneElement.value = "";
+        if (noteElement) noteElement.value = "";
         timeElement.selectedIndex = 0;
 
-        appointments.sort(
-            function (a, b) {
+        await loadAppointments();
 
-                return normalizeTime(
-                    a.appointment_time
-                ).localeCompare(
-                    normalizeTime(
-                        b.appointment_time
-                    )
-                );
-
-            }
-        );
-
-        renderAppointments();
-
-        showMessage(
-            "Vizita u shtua me sukses.",
-            "success"
-        );
+        showMessage("Vizita u shtua me sukses.", "success");
 
     } catch (error) {
-
-        console.error(
-            "ADD APPOINTMENT EXCEPTION:",
-            error
-        );
+        console.error("=================================");
+        console.error("APPOINTMENT EXCEPTION");
+        console.error("MESSAGE:", error.message);
+        console.error("FULL ERROR:", error);
+        console.error("=================================");
 
         showMessage(
-            "Gabim gjatë shtimit të vizitës.",
+            "Gabim gjatë shtimit: " + (error.message || error),
             "error"
         );
-
     }
-
 }
-
-
-/* =========================================================
-   CHANGE STATUS
-========================================================= */
-
-async function changeStatus(
-    id,
-    newStatus
-) {
-
-    try {
-
-        const {
-            error
-        } = await supabaseClient
-            .from("appointments")
-            .update({
-                status: newStatus
-            })
-            .eq(
-                "id",
-                id
-            );
-
-        if (error) {
-
-            console.error(
-                "CHANGE STATUS ERROR:",
-                error
-            );
-
-            showMessage(
-                "Statusi nuk u ndryshua: " +
-                error.message,
-                "error"
-            );
-
-            return;
-        }
-
-        appointments =
-            appointments.map(
-                function (appointment) {
-
-                    if (
-                        appointment.id === id
-                    ) {
-
-                        return {
-                            ...appointment,
-                            status: newStatus
-                        };
-
-                    }
-
-                    return appointment;
-
-                }
-            );
-
-        renderAppointments();
-
-        showMessage(
-            "Statusi u ndryshua.",
-            "success"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "CHANGE STATUS EXCEPTION:",
-            error
-        );
-
-        showMessage(
-            "Gabim gjatë ndryshimit të statusit.",
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   DELETE
-========================================================= */
-
-async function deleteAppointment(id) {
-
-    const confirmed =
-        window.confirm(
-            "A je i sigurt që dëshiron ta fshish këtë vizitë?"
-        );
-
-    if (!confirmed) return;
-
-    try {
-
-        const {
-            error
-        } = await supabaseClient
-            .from("appointments")
-            .delete()
-            .eq(
-                "id",
-                id
-            );
-
-        if (error) {
-
-            console.error(
-                "DELETE APPOINTMENT ERROR:",
-                error
-            );
-
-            showMessage(
-                "Vizita nuk u fshi: " +
-                error.message,
-                "error"
-            );
-
-            return;
-        }
-
-        appointments =
-            appointments.filter(
-                function (appointment) {
-
-                    return (
-                        appointment.id !== id
-                    );
-
-                }
-            );
-
-        renderAppointments();
-
-        showMessage(
-            "Vizita u fshi.",
-            "success"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "DELETE EXCEPTION:",
-            error
-        );
-
-        showMessage(
-            "Gabim gjatë fshirjes.",
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   REALTIME
-========================================================= */
 
 function setupRealtime() {
 
