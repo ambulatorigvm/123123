@@ -1,7 +1,7 @@
 ```javascript
-console.log("TEST I RI - APP.JS PO NGARKOHET");
+console.log("APP JS LOADED - AMBULATORI GVM");
 
-const APP_VERSION = "GVM-20260925-03";
+const APP_VERSION = "GVM-20260926-01";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -25,7 +25,7 @@ console.log("APP VERSION:", APP_VERSION);
 
 
 /* ================================
-   DATA AKTUALE
+   DATA
 ================================ */
 
 let currentDate = new Date();
@@ -85,7 +85,7 @@ function updateDate() {
 /* ================================
    ORARET
    12:00 - 17:00
-   çdo 15 minuta
+   ÇDO 15 MINUTA
 ================================ */
 
 function generateTimes() {
@@ -139,15 +139,21 @@ function generateTimes() {
         const time =
             `${hours}:${mins}`;
 
+
         const option =
             document.createElement(
                 "option"
             );
 
-        option.value = time;
-        option.textContent = time;
+        option.value =
+            time;
 
-        select.appendChild(option);
+        option.textContent =
+            time;
+
+        select.appendChild(
+            option
+        );
     }
 
     console.log(
@@ -157,7 +163,7 @@ function generateTimes() {
 
 
 /* ================================
-   RIKONTROLLI
+   RIKONTROLL
    ME PAGESË / PA PAGESË
 ================================ */
 
@@ -173,61 +179,16 @@ function setupPaymentOptions() {
             "paymentOptions"
         );
 
-    const paidCheck =
-        document.getElementById(
-            "paidCheck"
-        );
-
-    const unpaidCheck =
-        document.getElementById(
-            "unpaidCheck"
-        );
-
-
-    if (!paymentOptions) {
+    if (
+        !visitRadios.length ||
+        !paymentOptions
+    ) {
 
         console.error(
-            "Nuk u gjet paymentOptions"
+            "Elementet e pagesës nuk u gjetën."
         );
 
         return;
-    }
-
-
-    function updatePaymentOptions() {
-
-        const selected =
-            document.querySelector(
-                'input[name="visitType"]:checked'
-            );
-
-
-        if (
-            selected &&
-            selected.value === "Rikontroll"
-        ) {
-
-            paymentOptions.style.display =
-                "block";
-
-            console.log(
-                "Rikontroll: opsionet e pagesës u shfaqën."
-            );
-
-        } else {
-
-            paymentOptions.style.display =
-                "none";
-
-
-            if (paidCheck) {
-                paidCheck.checked = false;
-            }
-
-            if (unpaidCheck) {
-                unpaidCheck.checked = false;
-            }
-        }
     }
 
 
@@ -236,53 +197,43 @@ function setupPaymentOptions() {
 
             radio.addEventListener(
                 "change",
-                updatePaymentOptions
+                function() {
+
+                    if (
+                        radio.value === "Rikontroll" &&
+                        radio.checked
+                    ) {
+
+                        paymentOptions.style.display =
+                            "block";
+
+                    } else if (
+                        radio.value === "Vizitë" &&
+                        radio.checked
+                    ) {
+
+                        paymentOptions.style.display =
+                            "none";
+
+
+                        const paymentRadios =
+                            document.querySelectorAll(
+                                'input[name="paymentStatus"]'
+                            );
+
+
+                        paymentRadios.forEach(
+                            payment => {
+
+                                payment.checked =
+                                    false;
+                            }
+                        );
+                    }
+                }
             );
         }
     );
-
-
-    /* ================================
-       VETËM NJË NGA DY OPSIONET
-    ================================= */
-
-    if (paidCheck) {
-
-        paidCheck.addEventListener(
-            "change",
-            function() {
-
-                if (paidCheck.checked) {
-
-                    if (unpaidCheck) {
-                        unpaidCheck.checked = false;
-                    }
-                }
-            }
-        );
-    }
-
-
-    if (unpaidCheck) {
-
-        unpaidCheck.addEventListener(
-            "change",
-            function() {
-
-                if (unpaidCheck.checked) {
-
-                    if (paidCheck) {
-                        paidCheck.checked = false;
-                    }
-                }
-            }
-        );
-    }
-
-
-    /* Gjendja fillestare */
-
-    updatePaymentOptions();
 }
 
 
@@ -300,7 +251,7 @@ async function loadAppointments() {
     if (!box) {
 
         console.error(
-            "Nuk u gjet elementi appointments"
+            "Nuk u gjet appointments"
         );
 
         return;
@@ -401,23 +352,64 @@ async function loadAppointments() {
                 "planned";
 
 
+            const visitType =
+                appointment.visit_type ||
+                "Vizitë";
+
+
+            let paymentText =
+                "";
+
+
+            /*
+             * Lexo payment_status vetëm
+             * nëse ekziston në të dhëna.
+             */
+
+            if (
+                appointment.payment_status
+            ) {
+
+                paymentText = `
+                    <br>
+                    Pagesa:
+                    ${appointment.payment_status}
+                `;
+            }
+
+
             div.innerHTML = `
                 <strong>
                     ${patientName}
                 </strong>
+
                 <br>
+
                 Ora:
                 ${time}
+
                 <br>
+
                 Kartela:
                 ${cardNumber}
+
                 <br>
+
+                Lloji:
+                ${visitType}
+
+                ${paymentText}
+
+                <br>
+
                 Status:
                 ${status}
             `;
 
 
-            box.appendChild(div);
+            box.appendChild(
+                div
+            );
         }
     );
 }
@@ -488,15 +480,9 @@ if (appointmentForm) {
                PAGESA
             ================================= */
 
-            const paidCheck =
-                document.getElementById(
-                    "paidCheck"
-                );
-
-
-            const unpaidCheck =
-                document.getElementById(
-                    "unpaidCheck"
+            const selectedPayment =
+                document.querySelector(
+                    'input[name="paymentStatus"]:checked'
                 );
 
 
@@ -508,25 +494,7 @@ if (appointmentForm) {
                 visitType === "Rikontroll"
             ) {
 
-                if (
-                    paidCheck &&
-                    paidCheck.checked
-                ) {
-
-                    paymentStatus =
-                        "Me pagesë";
-
-                } else if (
-                    unpaidCheck &&
-                    unpaidCheck.checked
-                ) {
-
-                    paymentStatus =
-                        "Pa pagesë";
-                }
-
-
-                if (!paymentStatus) {
+                if (!selectedPayment) {
 
                     alert(
                         "Për rikontrollin zgjidh Me pagesë ose Pa pagesë."
@@ -534,6 +502,10 @@ if (appointmentForm) {
 
                     return;
                 }
+
+
+                paymentStatus =
+                    selectedPayment.value;
             }
 
 
@@ -583,43 +555,54 @@ if (appointmentForm) {
             );
 
 
-            /* ================================
-               RUAJ VIZITËN
-               
-               KUJDES:
-               Për momentin ruajmë vetëm
-               kolonat që ekzistonin më parë.
-               
-               Pagesa shfaqet në ekran,
-               por nuk dërgohet në Supabase
-               derisa të kontrollojmë kolonën.
-            ================================= */
+            /*
+             * Këtu ruajmë vetëm kolonat
+             * që kemi konfirmuar se ekzistojnë
+             * në tabelën appointments.
+             *
+             * Nuk shtojmë payment_status
+             * në INSERT pa konfirmuar
+             * kolonën në Supabase.
+             */
+
+            const insertData = {
+
+                patient_name:
+                    patientName,
+
+                card_number:
+                    cardNumber || null,
+
+                appointment_date:
+                    dateKey(
+                        currentDate
+                    ),
+
+                appointment_time:
+                    appointmentTime,
+
+                visit_type:
+                    visitType,
+
+                status:
+                    "planned"
+            };
+
+
+            /*
+             * Nëse kolona payment_status
+             * ekziston në Supabase,
+             * përdore.
+             *
+             * Për momentin nuk e fusim
+             * automatikisht në INSERT.
+             */
 
             const result =
                 await supabaseClient
                 .from("appointments")
                 .insert([
-                    {
-                        patient_name:
-                            patientName,
-
-                        card_number:
-                            cardNumber || null,
-
-                        appointment_date:
-                            dateKey(
-                                currentDate
-                            ),
-
-                        appointment_time:
-                            appointmentTime,
-
-                        visit_type:
-                            visitType,
-
-                        status:
-                            "planned"
-                    }
+                    insertData
                 ]);
 
 
@@ -669,14 +652,19 @@ if (appointmentForm) {
             .value = "";
 
 
-            if (paidCheck) {
-                paidCheck.checked = false;
-            }
+            const paymentRadios =
+                document.querySelectorAll(
+                    'input[name="paymentStatus"]'
+                );
 
 
-            if (unpaidCheck) {
-                unpaidCheck.checked = false;
-            }
+            paymentRadios.forEach(
+                payment => {
+
+                    payment.checked =
+                        false;
+                }
+            );
 
 
             const visitRadio =
@@ -686,7 +674,9 @@ if (appointmentForm) {
 
 
             if (visitRadio) {
-                visitRadio.checked = true;
+
+                visitRadio.checked =
+                    true;
             }
 
 
