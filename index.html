@@ -1,36 +1,237 @@
-
 <!DOCTYPE html>
 <html lang="sq">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>AMBULATORI GVM</title>
+
 <link rel="stylesheet" href="style.css?v=2026092522">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
+
 <body>
+
 <div class="container">
-<h1>AMBULATORI GVM</h1>
-<div class="toolbar">
-<button id="prevDay">◀</button>
-<span id="currentDate"></span>
-<button id="nextDay">▶</button>
-<button id="todayBtn">Sot</button>
+
+    <h1>AMBULATORI GVM</h1>
+
+
+    <!-- ================================
+         NAVIGIMI I DITËS
+    ================================= -->
+
+    <div class="toolbar">
+
+        <button id="prevDay">
+            ◀
+        </button>
+
+        <span id="currentDate"></span>
+
+        <button id="nextDay">
+            ▶
+        </button>
+
+        <button id="todayBtn">
+            Sot
+        </button>
+
+    </div>
+
+
+
+    <!-- ================================
+         SHTO VIZITË
+    ================================= -->
+
+    <div class="card">
+
+        <h2>Shto Vizitë</h2>
+
+
+        <form id="appointmentForm">
+
+
+            <!-- EMRI -->
+
+            <label for="patientName">
+                Emri dhe Mbiemri
+            </label>
+
+            <input
+                type="text"
+                id="patientName"
+                placeholder="Emri dhe Mbiemri"
+                required
+            >
+
+
+
+            <!-- LLOJI I VIZITËS -->
+
+            <div class="visit-type">
+
+                <label>
+                    Lloji i vizitës
+                </label>
+
+
+                <div class="radio-group">
+
+                    <label class="choice">
+
+                        <input
+                            type="radio"
+                            name="visitType"
+                            value="Vizitë"
+                            checked
+                        >
+
+                        <span>
+                            Vizitë
+                        </span>
+
+                    </label>
+
+
+                    <label class="choice">
+
+                        <input
+                            type="radio"
+                            name="visitType"
+                            value="Rikontroll"
+                        >
+
+                        <span>
+                            Rikontroll
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PAGESA
+                 DO TE SHFAQET VETEM
+                 PER RIKONTROLL
+            -->
+
+            <div
+                id="paymentOptions"
+                class="payment-options"
+                style="display:none;"
+            >
+
+                <label>
+                    Rikontrolli
+                </label>
+
+
+                <div class="checkbox-group">
+
+                    <label class="choice">
+
+                        <input
+                            type="checkbox"
+                            id="paidCheck"
+                        >
+
+                        <span>
+                            Me pagesë
+                        </span>
+
+                    </label>
+
+
+                    <label class="choice">
+
+                        <input
+                            type="checkbox"
+                            id="unpaidCheck"
+                        >
+
+                        <span>
+                            Pa pagesë
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- NR KARTELËS -->
+
+            <label for="cardNumber">
+                Nr. Kartelës
+                <span class="optional">
+                    (opsionale)
+                </span>
+            </label>
+
+            <input
+                type="text"
+                id="cardNumber"
+                placeholder="Nr. Kartelës"
+            >
+
+
+
+            <!-- ORA -->
+
+            <label for="appointmentTime">
+                Ora
+            </label>
+
+            <select
+                id="appointmentTime"
+                required
+            >
+            </select>
+
+
+
+            <!-- RUAJ -->
+
+            <button
+                type="submit"
+            >
+                Ruaj Vizitën
+            </button>
+
+        </form>
+
+    </div>
+
+
+
+    <!-- ================================
+         ORARI
+    ================================= -->
+
+    <div class="card">
+
+        <h2>Orari</h2>
+
+        <div id="appointments"></div>
+
+    </div>
+
 </div>
-<div class="card">
-<h2>Shto Vizitë</h2>
-<form id="appointmentForm">
-<input type="text" id="patientName" placeholder="Emri dhe Mbiemri" required>
-<input type="text" id="cardNumber" placeholder="Nr. Kartelës">
-<select id="appointmentTime" required></select>
-<button type="submit">Ruaj Vizitën</button>
-</form>
-</div>
-<div class="card">
-<h2>Orari</h2>
-<div id="appointments"></div>
-</div>
-</div>
+
+
+
 <script src="app.js?v=2026092521"></script>
+
 </body>
+
 </html>
