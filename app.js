@@ -691,8 +691,7 @@ function setupForm() {
             "planned"
     }
 ])
-                        ])
-                        .select();
+                                        .select();
 
 
                 const data =
