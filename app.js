@@ -1,5 +1,5 @@
 ```javascript
-console.log("APP JS LOADED - AMBULATORI GVM");
+console.log("TEST I RI - APP.JS PO NGARKOHET");
 
 const APP_VERSION = "GVM-20260925-03";
 
