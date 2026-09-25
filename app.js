@@ -330,21 +330,93 @@ document
 
         updateDate();
 
-        loadAppointments();
+       async function loadAppointments(){
+
+    const box =
+    document.getElementById("appointments");
+
+    if(!box) return;
+
+    box.innerHTML = "Po ngarkohet...";
+
+    console.log("=== LOAD APPOINTMENTS ===");
+    console.log("Date:", dateKey(currentDate));
+
+    const {
+        data,
+        error,
+        status,
+        statusText
+    } = await supabaseClient
+        .from("appointments")
+        .select("*")
+        .eq(
+            "appointment_date",
+            dateKey(currentDate)
+        )
+        .order(
+            "appointment_time",
+            {
+                ascending: true
+            }
+        );
+
+    console.log("HTTP status:", status);
+    console.log("HTTP status text:", statusText);
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
+
+    if(error){
+
+        box.innerHTML =
+            "Gabim: " +
+            error.message;
+
+        return;
     }
-);
 
-document
-.getElementById(
-    "todayBtn"
-)
-.addEventListener(
-    "click",
-    function(){
+    if(!data || data.length === 0){
 
-        currentDate =
-        new Date();
+        box.innerHTML =
+            "<p>Nuk ka vizita.</p>";
 
+        return;
+    }
+
+    box.innerHTML = "";
+
+    data.forEach(
+        appointment => {
+
+            const div =
+            document.createElement("div");
+
+            div.className =
+            `appointment ${
+                appointment.status || "planned"
+            }`;
+
+            div.innerHTML = `
+                <strong>
+                    ${appointment.patient_name || ""}
+                </strong>
+                <br>
+                Ora:
+                ${String(
+                    appointment.appointment_time
+                ).substring(0,5)}
+                <br>
+                Kartela:
+                ${appointment.card_number || "-"}
+                <br>
+                Status:
+                ${appointment.status || "planned"}
+            `;
+
+            box.appendChild(div);
+        }
+    );
+}
         updateDate();
 
         loadAppointments();
