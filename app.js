@@ -986,4 +986,75 @@ async function loadAppointments() {
             "Gabim gjatë ngarkimit të vizitave.";
     }
 }
+// =====================================================
+// NDRYSHO STATUSIN
+// =====================================================
+
+async function updateStatus(id, status) {
+
+    try {
+
+        const { error } =
+            await supabaseClient
+                .from("appointments")
+                .update({
+                    status: status
+                })
+                .eq("id", id);
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        await loadAppointments();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Gabim gjatë ndryshimit të statusit.");
+    }
+}
+
+
+// =====================================================
+// FSHI VIZITEN
+// =====================================================
+
+async function deleteAppointment(id) {
+
+    const ok =
+        confirm(
+            "A dëshiron ta fshish këtë vizitë?"
+        );
+
+    if (!ok) {
+        return;
+    }
+
+    try {
+
+        const { error } =
+            await supabaseClient
+                .from("appointments")
+                .delete()
+                .eq("id", id);
+
+        if (error) {
+
+            alert(error.message);
+
+            return;
+        }
+
+        await loadAppointments();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Gabim gjatë fshirjes.");
+    }
+}
 ```
