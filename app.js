@@ -1,5 +1,5 @@
 ```javascript
-const APP_VERSION = "GVM-20260925-04";
+const APP_VERSION = "GVM-20260925-05";
 
 const SUPABASE_URL =
     "https://ubpteaqdkxcriqyaxrux.supabase.co";
@@ -21,13 +21,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     console.log("P JS LOADED - AMBULATORI GVM");
     console.log("APP VERSION:", APP_VERSION);
 
-    const status = document.getElementById("systemStatus");
+    const status =
+        document.getElementById("systemStatus");
 
     try {
 
-        if (typeof window.supabase === "undefined") {
+        if (
+            typeof window.supabase === "undefined"
+        ) {
 
-            console.error("Supabase library nuk u gjet.");
+            console.error(
+                "Supabase library nuk u gjet."
+            );
 
             if (status) {
                 status.textContent =
@@ -37,10 +42,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
 
-        supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
+        supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
 
         console.log("Supabase OK");
 
@@ -94,10 +100,14 @@ async function checkAuth() {
 
     try {
 
-        const {
-            data,
-            error
-        } = await supabaseClient.auth.getSession();
+        const result =
+            await supabaseClient.auth.getSession();
+
+        const data =
+            result.data;
+
+        const error =
+            result.error;
 
         if (error) {
 
@@ -110,7 +120,10 @@ async function checkAuth() {
         }
 
         currentUser =
-            data?.session?.user || null;
+            data &&
+            data.session
+                ? data.session.user
+                : null;
 
         console.log(
             "User:",
@@ -126,7 +139,9 @@ async function checkAuth() {
                 );
 
                 currentUser =
-                    session?.user || null;
+                    session
+                        ? session.user
+                        : null;
             }
         );
 
@@ -159,7 +174,13 @@ function dateKey(date) {
             date.getDate()
         ).padStart(2, "0");
 
-    return `${year}-${month}-${day}`;
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
 }
 
 
@@ -192,7 +213,11 @@ function updateDate() {
         currentDate.getFullYear();
 
     dateElement.textContent =
-        `${day}/${month}/${year}`;
+        day +
+        "/" +
+        month +
+        "/" +
+        year;
 }
 
 
@@ -216,10 +241,7 @@ function generateTimes() {
         '<option value="">Zgjidh orën</option>';
 
     const startHour = 12;
-    const startMinute = 0;
-
     const endHour = 17;
-    const endMinute = 0;
 
     for (
         let hour = startHour;
@@ -235,16 +257,20 @@ function generateTimes() {
 
             if (
                 hour === endHour &&
-                minute > endMinute
+                minute > 0
             ) {
                 continue;
             }
 
             const time =
-                `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+                String(hour).padStart(2, "0") +
+                ":" +
+                String(minute).padStart(2, "0");
 
             const option =
-                document.createElement("option");
+                document.createElement(
+                    "option"
+                );
 
             option.value = time;
             option.textContent = time;
@@ -346,11 +372,6 @@ function setupPaymentOptions() {
             "paymentOptions"
         );
 
-    const visitTypeInputs =
-        document.querySelectorAll(
-            'input[name="visitType"]'
-        );
-
     const paidCheck =
         document.getElementById(
             "paidCheck"
@@ -361,14 +382,16 @@ function setupPaymentOptions() {
             "unpaidCheck"
         );
 
+    const visitTypeInputs =
+        document.querySelectorAll(
+            'input[name="visitType"]'
+        );
 
-    if (
-        !paymentOptions ||
-        !visitTypeInputs.length
-    ) {
+
+    if (!paymentOptions) {
 
         console.error(
-            "Elementet e pagesës nuk u gjetën."
+            "paymentOptions nuk u gjet."
         );
 
         return;
@@ -421,7 +444,6 @@ function setupPaymentOptions() {
     );
 
 
-    // Vetëm njëra mund të jetë e zgjedhur
     if (paidCheck) {
 
         paidCheck.addEventListener(
@@ -432,6 +454,7 @@ function setupPaymentOptions() {
                     paidCheck.checked &&
                     unpaidCheck
                 ) {
+
                     unpaidCheck.checked =
                         false;
                 }
@@ -450,6 +473,7 @@ function setupPaymentOptions() {
                     unpaidCheck.checked &&
                     paidCheck
                 ) {
+
                     paidCheck.checked =
                         false;
                 }
@@ -474,6 +498,7 @@ function setupForm() {
         );
 
     if (!form) {
+
         console.error(
             "appointmentForm nuk u gjet."
         );
@@ -489,39 +514,53 @@ function setupForm() {
             event.preventDefault();
 
 
-            const patientName =
+            const patientNameElement =
                 document.getElementById(
                     "patientName"
-                )?.value.trim();
-
-
-            const cardNumber =
-                document.getElementById(
-                    "cardNumber"
-                )?.value.trim();
-
-
-            const appointmentTime =
-                document.getElementById(
-                    "appointmentTime"
-                )?.value;
-
-
-            const selectedVisit =
-                document.querySelector(
-                    'input[name="visitType"]:checked'
                 );
 
+            const cardNumberElement =
+                document.getElementById(
+                    "cardNumber"
+                );
+
+            const appointmentTimeElement =
+                document.getElementById(
+                    "appointmentTime"
+                );
 
             const paidCheck =
                 document.getElementById(
                     "paidCheck"
                 );
 
-
             const unpaidCheck =
                 document.getElementById(
                     "unpaidCheck"
+                );
+
+
+            const patientName =
+                patientNameElement
+                    ? patientNameElement.value.trim()
+                    : "";
+
+
+            const cardNumber =
+                cardNumberElement
+                    ? cardNumberElement.value.trim()
+                    : "";
+
+
+            const appointmentTime =
+                appointmentTimeElement
+                    ? appointmentTimeElement.value
+                    : "";
+
+
+            const selectedVisit =
+                document.querySelector(
+                    'input[name="visitType"]:checked'
                 );
 
 
@@ -559,8 +598,12 @@ function setupForm() {
             ) {
 
                 if (
-                    !paidCheck?.checked &&
-                    !unpaidCheck?.checked
+                    !paidCheck ||
+                    !unpaidCheck ||
+                    (
+                        !paidCheck.checked &&
+                        !unpaidCheck.checked
+                    )
                 ) {
 
                     alert(
@@ -572,7 +615,7 @@ function setupForm() {
 
 
                 if (
-                    paidCheck?.checked
+                    paidCheck.checked
                 ) {
 
                     paymentStatus =
@@ -581,7 +624,7 @@ function setupForm() {
 
 
                 if (
-                    unpaidCheck?.checked
+                    unpaidCheck.checked
                 ) {
 
                     paymentStatus =
@@ -592,15 +635,12 @@ function setupForm() {
 
             console.log(
                 "Po ruhet vizita:",
-                {
-                    patientName,
-                    cardNumber,
-                    appointmentDate:
-                        dateKey(currentDate),
-                    appointmentTime,
-                    visitType,
-                    paymentStatus
-                }
+                patientName,
+                cardNumber,
+                dateKey(currentDate),
+                appointmentTime,
+                visitType,
+                paymentStatus
             );
 
 
@@ -617,16 +657,12 @@ function setupForm() {
             try {
 
                 /*
-                 * KUJDES:
-                 * Nuk po dërgojmë payment_status
-                 * në Supabase sepse nuk kemi konfirmuar
-                 * që kolona ekziston në tabelën appointments.
+                 * paymentStatus përdoret për kontrollin
+                 * në formular, por NUK dërgohet në Supabase
+                 * derisa të konfirmojmë se kolona ekziston.
                  */
 
-                const {
-                    data,
-                    error
-                } =
+                const result =
                     await supabaseClient
                         .from("appointments")
                         .insert([
@@ -655,6 +691,13 @@ function setupForm() {
                         .select();
 
 
+                const data =
+                    result.data;
+
+                const error =
+                    result.error;
+
+
                 if (error) {
 
                     console.error(
@@ -663,7 +706,7 @@ function setupForm() {
                     );
 
                     alert(
-                        "Gabim gjatë ruajtjes:\n" +
+                        "Gabim gjatë ruajtjes: " +
                         error.message
                     );
 
@@ -692,8 +735,21 @@ function setupForm() {
 
 
                 if (defaultVisit) {
+
                     defaultVisit.checked =
                         true;
+                }
+
+
+                if (paidCheck) {
+                    paidCheck.checked =
+                        false;
+                }
+
+
+                if (unpaidCheck) {
+                    unpaidCheck.checked =
+                        false;
                 }
 
 
@@ -765,16 +821,13 @@ async function loadAppointments() {
     );
 
 
-    container.innerHTML =
+    container.textContent =
         "Po ngarkohen vizitat...";
 
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const result =
             await supabaseClient
                 .from("appointments")
                 .select("*")
@@ -790,6 +843,13 @@ async function loadAppointments() {
                 );
 
 
+        const data =
+            result.data;
+
+        const error =
+            result.error;
+
+
         if (error) {
 
             console.error(
@@ -797,8 +857,9 @@ async function loadAppointments() {
                 error
             );
 
-            container.innerHTML =
-                `<p>Gabim: ${escapeHtml(error.message)}</p>`;
+            container.textContent =
+                "Gabim: " +
+                error.message;
 
             return;
         }
@@ -809,14 +870,15 @@ async function loadAppointments() {
             data.length === 0
         ) {
 
-            container.innerHTML =
-                "<p>Nuk ka vizita për këtë datë.</p>";
+            container.textContent =
+                "Nuk ka vizita për këtë datë.";
 
             return;
         }
 
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
 
         data.forEach(
@@ -832,44 +894,79 @@ async function loadAppointments() {
                     "appointment-item";
 
 
-                const name =
-                    appointment.patient_name ||
-                    "";
+                const timeDiv =
+                    document.createElement(
+                        "div"
+                    );
 
 
-                const card =
-                    appointment.card_number ||
-                    "";
+                const nameDiv =
+                    document.createElement(
+                        "div"
+                    );
 
 
-                const time =
+                const cardDiv =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                const visitDiv =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                const strong =
+                    document.createElement(
+                        "strong"
+                    );
+
+
+                strong.textContent =
                     appointment.appointment_time ||
                     "";
 
 
-                const visitType =
+                timeDiv.appendChild(
+                    strong
+                );
+
+
+                nameDiv.textContent =
+                    appointment.patient_name ||
+                    "";
+
+
+                cardDiv.textContent =
+                    "Kartela: " +
+                    (
+                        appointment.card_number ||
+                        ""
+                    );
+
+
+                visitDiv.textContent =
                     appointment.visit_type ||
                     "";
 
 
-                item.innerHTML = `
-                    <div>
-                        <strong>${escapeHtml(time)}</strong>
-                    </div>
+                item.appendChild(
+                    timeDiv
+                );
 
-                    <div>
-                        ${escapeHtml(name)}
-                    </div>
+                item.appendChild(
+                    nameDiv
+                );
 
-                    <div>
-                        Kartela:
-                        ${escapeHtml(card)}
-                    </div>
+                item.appendChild(
+                    cardDiv
+                );
 
-                    <div>
-                        ${escapeHtml(visitType)}
-                    </div>
-                `;
+                item.appendChild(
+                    visitDiv
+                );
 
 
                 container.appendChild(
@@ -885,38 +982,8 @@ async function loadAppointments() {
             error
         );
 
-        container.innerHTML =
-            "<p>Gabim gjatë ngarkimit të vizitave.</p>";
+        container.textContent =
+            "Gabim gjatë ngarkimit të vizitave.";
     }
-}
-
-
-// =====================================================
-// SIGURIA E TEKSTIT HTML
-// =====================================================
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
 }
 ```
